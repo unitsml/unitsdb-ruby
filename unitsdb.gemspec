@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require_relative "lib/unitsdb/ruby/version"
+require_relative "lib/unitsdb/version"
 
 Gem::Specification.new do |spec|
-  spec.name = "unitsdb-ruby"
+  spec.name = "unitsdb"
   spec.version = Unitsdb::VERSION
   spec.authors = ["Ribose Inc."]
   spec.email = ["open.source@ribose.com"]

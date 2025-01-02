@@ -2,10 +2,10 @@
 
 RSpec.describe Unitsdb::Unit do
   file_path = File.join(__dir__, "../fixtures/units.yaml")
-  units_yaml = YAML.load(IO.read(file_path))
+  units_yaml = YAML.safe_load(IO.read(file_path))
 
   it "parses a unit" do
-    key, unit_yaml = units_yaml.first
+    _, unit_yaml = units_yaml.first
 
     unit = Unitsdb::Unit.from_yaml(unit_yaml.to_yaml)
 

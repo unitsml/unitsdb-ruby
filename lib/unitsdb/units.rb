@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative "unit"
 
 module Unitsdb
@@ -6,8 +8,8 @@ module Unitsdb
 
     key_value do
       map :units, :units, child_mappings: {
-                        id: :key,
-                      }
+        id: :key
+      }
     end
   end
 end

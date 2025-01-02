@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Unitsdb
   class Symbol < Lutaml::Model::Serializable
     attribute :ascii, :string

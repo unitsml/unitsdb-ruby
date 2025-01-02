@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # - id: NISTu1
 #   prefix:
 #   power: 1

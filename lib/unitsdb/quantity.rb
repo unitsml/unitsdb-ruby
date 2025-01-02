@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # # Quantities
 # NISTq156:
 #   dimension_url: "#NISTd68"

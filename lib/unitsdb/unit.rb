@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative "unit_system"
 require_relative "unit_symbol"
 require_relative "root_units"

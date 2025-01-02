@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #   symbol:
 #     ascii: R
 #     html: R

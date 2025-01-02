@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Unitsdb
   class RootUnit < Lutaml::Model::Serializable
     attribute :unit, :string

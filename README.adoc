@@ -1,0 +1,35 @@
+= UnitsDB in Ruby (UnitsML)
+
+== Purpose
+
+UnitsML is a standard for units of measure, and UnitsDB is the database
+that contains enumerative elements used by UnitsML.
+
+UnitsDB includes the following content:
+
+* Unit systems
+* Units of measure
+* Prefixes
+* Constants
+* Quantities
+
+Such content is hosted at the official UnitsDB repository at
+https://github.com/unitsml/unitsdb.
+
+This repository contains the Ruby codebase for UnitsDB, which is used
+to access and manipulate the UnitsDB content.
+
+== Install
+
+[source,sh]
+----
+$ gem install unitsdb
+----
+
+== Usage
+
+
+
+== License
+
+Copyright Ribose. BSD 2-clause license.

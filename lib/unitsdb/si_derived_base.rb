@@ -14,7 +14,7 @@ class SiDerivedBase < Lutaml::Model::Serializable
 
   key_value do
     map :id, to: :id
-    map :prefix, to: :prefix
+    map :prefix, to: :prefix, render_nil: true
     map :power, to: :power
   end
 end

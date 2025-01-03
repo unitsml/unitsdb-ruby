@@ -4,6 +4,7 @@ require_relative "unit_system"
 require_relative "unit_symbol"
 require_relative "root_units"
 require_relative "si_derived_base"
+require_relative "quantity_reference"
 
 # "NISTu10":
 #   dimension_url: "#NISTd9"
@@ -47,17 +48,17 @@ module Unitsdb
     attribute :unit_name, :string, collection: true
     attribute :unit_symbol, UnitSymbol, collection: true
     attribute :root_units, RootUnits, collection: true
-    attribute :quantity_reference, :string, collection: true
+    attribute :quantity_reference, QuantityReference, collection: true
     attribute :si_derived_bases, SiDerivedBase, collection: true
 
     key_value do
       map :id, to: :id
-      map :short, to: :short
-      map :root, to: :root
       map :dimension_url, to: :dimension_url
+      map :short, to: :short, render_nil: true
+      map :root, to: :root
       map :unit_system, to: :unit_system
       map :unit_name, to: :unit_name
-      map :unit_symbol, to: :unit_symbol
+      map :unit_symbols, to: :unit_symbol
       map :root_units, to: :root_units
       map :quantity_reference, to: :quantity_reference
       map :si_derived_bases, to: :si_derived_bases

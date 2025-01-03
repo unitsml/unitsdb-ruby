@@ -8,7 +8,7 @@ RSpec.describe Unitsdb::Unit do
     unit_hash = value
     it "parses the unit #{key}" do
       unit_yaml = unit_hash.to_yaml
-      unit = Unitsdb::Unit.from_yaml(unit_yaml)
+      unit = described_class.from_yaml(unit_yaml)
       expect(unit.to_yaml).to be_yaml_equivalent_to(unit_yaml)
     end
   end

@@ -20,16 +20,13 @@
 #     - name: inch to the fourth power
 #       url: "#NISTu208"
 
+require_relative "unit_reference"
+
 module Unitsdb
   class Quantity < Lutaml::Model::Serializable
     attribute :dimension_url, :string
     attribute :quantity_type, :string
     attribute :quantity_name, :string, collection: true
     attribute :unit_reference, UnitReference, collection: true
-  end
-
-  class UnitReference < Lutaml::Model::Serializable
-    attribute :name, :string
-    attribute :url, :string
   end
 end

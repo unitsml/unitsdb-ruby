@@ -13,3 +13,6 @@ end
 
 require_relative "unitsdb/version"
 require_relative "unitsdb/unit"
+require_relative "unitsdb/dimension"
+require_relative "unitsdb/prefix"
+require_relative "unitsdb/quantity"

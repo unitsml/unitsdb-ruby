@@ -12,7 +12,7 @@ module Unitsdb
 end
 
 require_relative "unitsdb/version"
-require_relative "unitsdb/unit"
-require_relative "unitsdb/dimension"
-require_relative "unitsdb/prefix"
-require_relative "unitsdb/quantity"
+require_relative "unitsdb/units"
+require_relative "unitsdb/dimensions"
+require_relative "unitsdb/prefixes"
+require_relative "unitsdb/quantities"

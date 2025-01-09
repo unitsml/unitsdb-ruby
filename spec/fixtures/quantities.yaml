@@ -4,10 +4,10 @@ NISTq156:
   dimension_url: "#NISTd68"
   quantity_type: derived
   quantity_name:
-      - linear expansion coefficient
+    - linear expansion coefficient
   unit_reference:
-      - name: kelvin to the power minus one
-        url: "#NISTu5e-1/1"
+    - name: kelvin to the power minus one
+      url: "#NISTu5e-1/1"
 
 NISTq155:
   dimension_url: "#NISTd57"

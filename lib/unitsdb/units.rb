@@ -7,9 +7,9 @@ module Unitsdb
     attribute :units, Unit, collection: true
 
     key_value do
-      map :units, :units, child_mappings: {
-        id: :key
-      }
+      map to: :units, root_mappings: {
+            id: :key,
+          }
     end
   end
 end

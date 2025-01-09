@@ -24,6 +24,7 @@ require_relative "unit_reference"
 
 module Unitsdb
   class Quantity < Lutaml::Model::Serializable
+    attribute :id, :string
     attribute :dimension_url, :string
     attribute :quantity_type, :string
     attribute :quantity_name, :string, collection: true

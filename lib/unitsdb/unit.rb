@@ -43,6 +43,7 @@ module Unitsdb
     attribute :id, :string
     attribute :short, :string
     attribute :root, :boolean
+    attribute :prefixed, :boolean
     attribute :dimension_url, :string
     attribute :unit_system, UnitSystem, collection: true
     attribute :unit_name, :string, collection: true
@@ -56,6 +57,7 @@ module Unitsdb
       map :dimension_url, to: :dimension_url
       map :short, to: :short, render_nil: true
       map :root, to: :root
+      map :prefixed, to: :prefixed
       map :unit_system, to: :unit_system
       map :unit_name, to: :unit_name
       map :unit_symbols, to: :unit_symbol

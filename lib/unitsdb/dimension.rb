@@ -28,6 +28,7 @@ require_relative "dimension_quantity"
 
 module Unitsdb
   class Dimension < Lutaml::Model::Serializable
+    attribute :id, :string
     attribute :dimensionless, :boolean
     attribute :length, DimensionQuantity
     attribute :mass, DimensionQuantity
@@ -39,6 +40,7 @@ module Unitsdb
     attribute :plane_angle, DimensionQuantity
 
     key_value do
+      map :id, to: :id
       map :dimensionless, to: :dimensionless
       map :length, to: :length
       map :mass, to: :mass

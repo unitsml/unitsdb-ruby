@@ -10,6 +10,6 @@ RSpec.describe Unitsdb::Dimensions do
 
     # puts generated
     # puts raw_string
-    expect(generated).to eq(raw_string)
+    expect(generated).to be_yaml_equivalent_to(raw_string)
   end
 end

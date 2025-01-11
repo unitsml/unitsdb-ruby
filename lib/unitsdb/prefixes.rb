@@ -18,8 +18,8 @@ module Unitsdb
 
     key_value do
       map to: :prefix, root_mappings: {
-            id: :key,
-          }
+        id: :key
+      }
     end
   end
 end

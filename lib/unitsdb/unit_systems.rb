@@ -18,7 +18,7 @@ module Unitsdb
 
     key_value do
       map to: :unit_system, root_mappings: {
-        id: :key,
+        id: :key
       }
     end
   end

@@ -36,14 +36,14 @@ RSpec::Matchers.define :be_yaml_equivalent_to do |expected|
     end
   end
 
-  failure_message do |actual|
+  failure_message do |_actual|
     diff = Diffy::Diff.new(@expected_sorted, @actual_sorted,
                            include_diff_info: false,
                            include_plus_and_minus_in_html: true,
                            diff_options: "-u")
 
-    "expected YAML to be equivalent\n\n" +
-    "Diff:\n" +
-    diff.to_s(:color)
+    "expected YAML to be equivalent\n\n" \
+      "Diff:\n" +
+      diff.to_s(:color)
   end
 end

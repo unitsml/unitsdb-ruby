@@ -8,8 +8,8 @@ module Unitsdb
 
     key_value do
       map to: :dimension, root_mappings: {
-            id: :key,
-          }
+        id: :key
+      }
     end
   end
 end

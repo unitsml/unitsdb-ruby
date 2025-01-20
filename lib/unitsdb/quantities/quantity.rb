@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "unit_reference"
+
 # # Quantities
 # NISTq156:
 #   dimension_url: "#NISTd68"
@@ -20,14 +22,16 @@
 #     - name: inch to the fourth power
 #       url: "#NISTu208"
 
-require_relative "unit_reference"
-
 module Unitsdb
-  class Quantity < Lutaml::Model::Serializable
-    attribute :id, :string
-    attribute :dimension_url, :string
-    attribute :quantity_type, :string
-    attribute :quantity_name, :string, collection: true
-    attribute :unit_reference, UnitReference, collection: true
+  class Quantities
+    class Quantity < Lutaml::Model::Serializable
+      model Config.model_for(:quantity)
+
+      attribute :id, :string
+      attribute :dimension_url, :string
+      attribute :quantity_type, :string
+      attribute :quantity_name, :string, collection: true
+      attribute :unit_reference, UnitReference, collection: true
+    end
   end
 end

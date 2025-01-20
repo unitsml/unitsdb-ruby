@@ -1,23 +1,16 @@
 # frozen_string_literal: true
 
-require_relative "unit_system"
+require_relative "unit_systems/unit_system"
 
 module Unitsdb
-  class UnitSystems < Lutaml::Model::Serializable
-    attribute :unit_system, UnitSystem, collection: true
+  class UnitSystems
+    include Lutaml::Model::Serialize
+    model Config.model_for(:unit_systems)
 
-    # TODO: How do I parse this?
-    # ---
-    # - id: SI_base
-    #   name: SI
-    #   acceptable: true
-    # - id: SI_derived_special
-    #   name: SI
-    #   acceptable: true
-    # - id: SI_derived_non-special
+    attribute :unit_systems, UnitSystem, collection: true
 
     key_value do
-      map to: :unit_system, root_mappings: {
+      map to: :unit_systems, root_mappings: {
         id: :key
       }
     end

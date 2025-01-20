@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Unitsdb::Quantity do
+RSpec.describe Unitsdb::Quantities::Quantity do
   file_path = File.join(__dir__, "../fixtures/quantities.yaml")
   quantities_yaml = YAML.safe_load(IO.read(file_path))
 

@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 module Unitsdb
-  class Symbol < Lutaml::Model::Serializable
+  class SymbolPresentations < Lutaml::Model::Serializable
+    model Config.model_for(:symbol_presentations)
+
     attribute :ascii, :string
     attribute :html, :string
     attribute :latex, :string

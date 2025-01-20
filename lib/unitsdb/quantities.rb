@@ -20,14 +20,17 @@
 #     - name: inch to the fourth power
 #       url: "#NISTu208"
 
-require_relative "quantity"
+require_relative "quantities/quantity"
 
 module Unitsdb
-  class Quantities < Lutaml::Model::Serializable
-    attribute :quantity, Quantity, collection: true
+  class Quantities
+    include Lutaml::Model::Serialize
+    model Config.model_for(:quantities)
+
+    attribute :quantities, Quantity, collection: true
 
     key_value do
-      map to: :quantity, root_mappings: {
+      map to: :quantities, root_mappings: {
         id: :key
       }
     end

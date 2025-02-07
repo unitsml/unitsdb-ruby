@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
-require_relative "unit"
+require "unitsdb/units/unit"
 
 module Unitsdb
-  class Units < Lutaml::Model::Serializable
+  class Units
+    include Lutaml::Model::Serialize
+    model Config.model_for(:units)
+
     attribute :units, Unit, collection: true
 
     key_value do

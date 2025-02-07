@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Unitsdb::UnitSystem do
+RSpec.describe Unitsdb::UnitSystems::UnitSystem do
   file_path = File.join(__dir__, "../fixtures/unit_systems.yaml")
   unit_systems_yaml = YAML.safe_load(IO.read(file_path))
 

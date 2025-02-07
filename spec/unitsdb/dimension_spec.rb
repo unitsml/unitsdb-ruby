@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Unitsdb::Dimension do
+RSpec.describe Unitsdb::Dimensions::Dimension do
   file_path = File.join(__dir__, "../fixtures/dimensions.yaml")
   dimensions_yaml = YAML.safe_load(IO.read(file_path))
 

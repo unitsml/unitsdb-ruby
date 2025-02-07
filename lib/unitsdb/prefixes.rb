@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "prefix"
+require_relative "prefixes/prefix"
 # ---
 # NISTp10_30:
 #   name: quetta
@@ -13,11 +13,15 @@ require_relative "prefix"
 #   power: 30
 
 module Unitsdb
-  class Prefixes < Lutaml::Model::Serializable
-    attribute :prefix, Prefix, collection: true
+  class Prefixes
+    include Lutaml::Model::Serialize
+
+    model Config.model_for(:prefixes)
+
+    attribute :prefixes, Prefix, collection: true
 
     key_value do
-      map to: :prefix, root_mappings: {
+      map to: :prefixes, root_mappings: {
         id: :key
       }
     end

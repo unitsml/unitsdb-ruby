@@ -2,18 +2,13 @@
 
 module Unitsdb
   class SymbolPresentations < Lutaml::Model::Serializable
-    model Config.model_for(:symbol_presentations)
+    # model Config.model_for(:symbol_presentations)
 
+    attribute :id, :string
     attribute :ascii, :string
     attribute :html, :string
     attribute :latex, :string
+    attribute :mathml, :string
     attribute :unicode, :string
-
-    key_value do
-      map :ascii, to: :ascii
-      map :html, to: :html
-      map :latex, to: :latex
-      map :unicode, to: :unicode
-    end
   end
 end

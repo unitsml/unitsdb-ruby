@@ -33,5 +33,5 @@ Gem::Specification.new do |spec|
   spec.test_files = `git ls-files -- {spec}/*`.split("\n")
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "lutaml-model"
+  spec.add_dependency "lutaml-model", "~>0.7"
 end

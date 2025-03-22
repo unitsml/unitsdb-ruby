@@ -23,7 +23,7 @@ module Unitsdb
     # @return [Object, nil] the first entity with matching identifier or nil if not found
     def search(id:, type:)
       collection = send(type.to_s)
-      collection.find { |entity| entity.identifiers&.any? { |identifier| identifier.value == id } }
+      collection.find { |entity| entity.identifiers&.any? { |identifier| identifier.id == id } }
     end
 
     # Search for entities containing the given text in identifiers, names, or short description
@@ -42,7 +42,7 @@ module Unitsdb
         collection = send(collection_name)
         collection.each do |entity|
           # Search in identifiers
-          if entity.identifiers&.any? { |identifier| identifier.value.to_s.downcase.include?(text.downcase) }
+          if entity.identifiers&.any? { |identifier| identifier.id.to_s.downcase.include?(text.downcase) }
             results << entity
             next
           end

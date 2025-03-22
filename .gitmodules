@@ -1,0 +1,3 @@
+[submodule "spec/fixtures/unitsdb"]
+	path = spec/fixtures/unitsdb
+	url = https://github.com/unitsml/unitsdb/

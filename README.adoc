@@ -26,7 +26,98 @@ to access and manipulate the UnitsDB content.
 $ gem install unitsdb
 ----
 
-== Usage
+== Usage: CLI
+
+The UnitsDB gem includes a command-line utility for working with UnitsDB data.
+This tool provides several commands for validating and normalizing UnitsDB
+content.
+
+=== Installation
+
+The `unitsdb` command is automatically installed when you install the gem.
+
+=== Available commands
+
+==== Check uniqueness
+
+Checks for uniqueness of 'short' and 'id' fields in YAML files.
+
+[source,sh]
+----
+$ unitsdb check_uniqueness [INPUT]
+$ unitsdb check_uniqueness --all --dir=/path/to/unitsdb/data
+----
+
+Options:
+
+`--all`, `-a`:: Check all YAML files in the repository
+`--dir`, `-d`:: Directory containing the YAML files (default: current directory)
+
+==== Normalize YAML
+
+Normalizes YAML file format:
+
+[source,sh]
+----
+$ unitsdb normalize [INPUT] [OUTPUT]
+$ unitsdb normalize --all --dir=/path/to/unitsdb/data
+----
+
+Options:
+
+`--all`, `-a`:: Normalize all YAML files in the repository
+`--dir`, `-d`:: Directory containing the YAML files (default: current directory)
+`--sort`:: Sort keys alphabetically (default: true)
+
+==== Validate
+
+Validates UnitsDB data for different conditions:
+
+[source,sh]
+----
+# Validate references between entities
+$ unitsdb validate references check --all --dir=/path/to/unitsdb/data
+
+# Check for uniqueness of 'short' and 'id' fields
+$ unitsdb validate uniqueness check --all --dir=/path/to/unitsdb/data
+----
+
+Options for both subcommands:
+
+`--all`, `-a`:: Process all YAML files in the repository
+`--dir`, `-d`:: Directory containing the YAML files (default: current directory)
+
+The references validator also supports:
+
+`--debug_registry`:: Show registry contents for debugging
+`--print_valid`:: Print valid references too
+
+=== Examples
+
+Check uniqueness in a directory:
+
+[source,sh]
+----
+$ unitsdb check_uniqueness --all --dir=/path/to/unitsdb/data
+----
+
+Normalize all files in a directory:
+
+[source,sh]
+----
+$ unitsdb normalize --all --dir=/path/to/unitsdb/data
+----
+
+Validate references in a specific directory:
+
+[source,sh]
+----
+$ unitsdb validate references check --all --dir=/path/to/unitsdb/data
+----
+
+
+
+== Usage: Ruby
 
 === Loading the database
 

@@ -10,6 +10,11 @@ require_relative "unitsdb/prefixes"
 require_relative "unitsdb/quantities"
 require_relative "unitsdb/unit_systems"
 require_relative "unitsdb/units"
+require_relative "unitsdb/utils"
+
+# CLI-related requires
+require_relative "unitsdb/cli" if defined?(Thor)
+
 module Unitsdb
   class Error < StandardError; end
 end

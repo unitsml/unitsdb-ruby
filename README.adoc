@@ -92,19 +92,26 @@ The references validator also supports:
 `--debug_registry`:: Show registry contents for debugging
 `--print_valid`:: Print valid references too
 
-==== Search Text
+==== Search
 
-Searches for entities containing specific text across the database:
+Searches for entities in the database:
 
 [source,sh]
 ----
-$ unitsdb search_text QUERY
-$ unitsdb search_text meter --type=units --dir=/path/to/unitsdb/data
+# Search by text content
+$ unitsdb search meter
+$ unitsdb search meter --type=units --dir=/path/to/unitsdb/data
+
+# Search by ID
+$ unitsdb search any-query --id=NISTu1
+$ unitsdb search any-query --id=NISTu1 --id_type=nist
 ----
 
 Options:
 
 `--type`, `-t`:: Entity type to search (units, prefixes, quantities, dimensions, unit_systems)
+`--id`, `-i`:: Search for an entity with a specific identifier
+`--id_type`:: Filter the ID search by identifier type
 `--dir`, `-d`:: Directory containing the YAML files (default: current directory)
 
 === Examples
@@ -153,9 +160,49 @@ quantities = db.quantities
 unit_systems = db.unit_systems
 ----
 
+=== Database search methods
+
+The UnitsDB Ruby gem provides several methods for searching and retrieving entities.
+
+==== Search by text content
+
+The `search` method allows you to find entities containing specific text in their identifiers, names, or descriptions:
+
+[source,ruby]
+----
+# Search across all entity types
+results = db.search(text: "meter")
+
+# Search within a specific entity type
+units_with_meter = db.search(text: "meter", type: "units")
+----
+
+==== Find entity by ID
+
+The `get_by_id` method finds an entity with a specific identifier across all entity types:
+
+[source,ruby]
+----
+# Find by ID across all entity types
+meter_entity = db.get_by_id(id: "NISTu1")
+
+# Find by ID with specific identifier type
+meter_entity = db.get_by_id(id: "NISTu1", type: "nist")
+----
+
+==== Find entity by ID within a specific type collection
+
+The `find_by_type` method searches for an entity by ID within a specific entity type collection:
+
+[source,ruby]
+----
+# Find unit with specific ID
+meter_unit = db.find_by_type(id: "NISTu1", type: "units")
+----
+
 === Main Classes
 
-The UnitsDB Ruby gem provides the following main classes:
+The UnitsDB Ruby gem provides the following main classes.
 
 ==== Database
 

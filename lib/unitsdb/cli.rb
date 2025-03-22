@@ -58,14 +58,18 @@ module Unitsdb
       Commands::CheckSiReferencesSimple.new.check(options)
     end
 
-    desc "search_text QUERY", "Search for entities containing the given text"
+    desc "search QUERY", "Search for entities in the database"
     method_option :type, type: :string, aliases: "-t",
                          desc: "Entity type to search (units, prefixes, quantities, dimensions, unit_systems)"
+    method_option :id, type: :string, aliases: "-i",
+                       desc: "Search for an entity with a specific identifier"
+    method_option :id_type, type: :string,
+                            desc: "Filter get_by_id search by identifier type"
     method_option :dir, type: :string, default: ".", aliases: "-d",
                         desc: "Directory containing the YAML files"
 
-    def search_text(query)
-      Commands::Search.new.text(query, options)
+    def search(query)
+      Commands::Search.new.search(query, options)
     end
   end
 end

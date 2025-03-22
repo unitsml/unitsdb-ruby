@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "unitsdb"
+require "stringio"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
@@ -16,6 +17,19 @@ end
 
 require "yaml"
 require "diffy"
+
+# Define a helper method for capturing standard output/error
+def capture_output
+  original_stdout = $stdout
+  original_stderr = $stderr
+  $stdout = StringIO.new
+  $stderr = StringIO.new
+  yield
+  { output: $stdout.string, error: $stderr.string }
+ensure
+  $stdout = original_stdout
+  $stderr = original_stderr
+end
 
 RSpec::Matchers.define :be_yaml_equivalent_to do |expected|
   match do |actual|

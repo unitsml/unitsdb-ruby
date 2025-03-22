@@ -4,6 +4,7 @@ require "thor"
 require_relative "commands/uniqueness"
 require_relative "commands/normalize"
 require_relative "commands/validate"
+require_relative "commands/check_si_references"
 
 module Unitsdb
   class CLI < Thor
@@ -27,5 +28,33 @@ module Unitsdb
 
     desc "validate SUBCOMMAND", "Validate YAML files for different conditions"
     subcommand "validate", Commands::ValidateCommand
+
+    desc "check_si_references",
+         "Check entities in SI digital framework against entities in the database (original implementation)"
+    method_option :entity_type, type: :string, aliases: "-e",
+                                desc: "Entity type to check (units, quantities, or prefixes). If not specified, all types are checked"
+    method_option :output, type: :string, aliases: "-o",
+                           desc: "Output file path for updated YAML file(s)"
+    method_option :update, type: :boolean, default: false,
+                           desc: "Update references in output file(s)"
+    method_option :dir, type: :string, default: ".", aliases: "-d",
+                        desc: "Directory containing the YAML files"
+
+    def check_si_references
+      Commands::CheckSiReferences.new.check
+    end
+
+    desc "check_si_refs", "Check units in SI digital framework and add missing references (simplified implementation)"
+    method_option :entity_type, type: :string, aliases: "-e",
+                                desc: "Entity type to check (units, quantities, or prefixes). Defaults to units."
+    method_option :output, type: :string, aliases: "-o",
+                           desc: "Output file path for updated YAML file"
+    method_option :update, type: :boolean, default: false,
+                           desc: "Update references in output file"
+
+    def check_si_refs
+      require_relative "commands/check_si_references_simple"
+      Commands::CheckSiReferencesSimple.new.check(options)
+    end
   end
 end

@@ -11,7 +11,6 @@
 #   unicode: "\U0001D5AC"
 
 require_relative "symbol_presentations"
-
 module Unitsdb
   class DimensionDetails < Lutaml::Model::Serializable
     attribute :power, :integer

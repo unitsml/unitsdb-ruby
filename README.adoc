@@ -28,6 +28,107 @@ $ gem install unitsdb
 
 == Usage
 
+=== Loading the database
+
+The primary way to load the UnitsDB data is through the `Database.from_db` method, which reads data from YAML files:
+
+[source,ruby]
+----
+require 'unitsdb'
+
+# Load from the UnitsDB data directory
+db = Unitsdb::Database.from_db('/path/to/unitsdb/data')
+
+# Access different collections
+units = db.units
+prefixes = db.prefixes
+dimensions = db.dimensions
+quantities = db.quantities
+unit_systems = db.unit_systems
+----
+
+=== Main Classes
+
+The UnitsDB Ruby gem provides the following main classes:
+
+==== Database
+
+The `Database` class is the main container that holds all UnitsML components. It loads and provides access to units, prefixes, dimensions, quantities, and unit systems.
+
+[source,ruby]
+----
+# Access database collections
+db.units       # => Array of Unit objects
+db.prefixes    # => Array of Prefix objects
+db.dimensions  # => Array of Dimension objects
+db.quantities  # => Array of Quantity objects
+db.unit_systems # => Array of UnitSystem objects
+----
+
+==== Unit
+
+The `Unit` class represents units of measure with their properties and relationships:
+
+* Identifiers
+* Short name
+* Whether it's a root unit or can be prefixed
+* Dimension reference
+* Unit system references
+* Unit names
+* Symbol presentations
+* Quantity references
+* SI derived bases
+* Root unit references
+
+==== Prefix
+
+The `Prefix` class represents prefixes for units (like kilo-, mega-, etc.):
+
+* Identifiers
+* Name
+* Symbol presentations
+* Base (e.g., 10)
+* Power (e.g., 3 for kilo)
+
+==== Dimension
+
+The `Dimension` class represents physical dimensions (like length, mass, etc.):
+
+* Identifiers
+* Whether it's dimensionless
+* Basic dimensions (length, mass, time, etc.)
+* Dimension details (power, symbol, dimension symbols)
+* Short name
+
+==== UnitSystem
+
+The `UnitSystem` class represents systems of units (like SI, Imperial, etc.):
+
+* Identifiers
+* Name
+* Short name
+* Whether it's acceptable
+
+==== Quantity
+
+The `Quantity` class represents physical quantities that can be measured:
+
+* Identifiers
+* Quantity type
+* Quantity names
+* Short name
+* Unit references
+* Dimension reference
+
+=== Database files
+
+The `Database.from_db` method reads the following YAML files:
+
+* `prefixes.yaml` - Contains prefix definitions (e.g., kilo-, mega-)
+* `dimensions.yaml` - Contains dimension definitions (e.g., length, mass)
+* `units.yaml` - Contains unit definitions (e.g., meter, kilogram)
+* `quantities.yaml` - Contains quantity definitions (e.g., length, mass)
+* `unit_systems.yaml` - Contains unit system definitions (e.g., SI, Imperial)
 
 
 == License

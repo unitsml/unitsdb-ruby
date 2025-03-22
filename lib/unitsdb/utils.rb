@@ -8,8 +8,8 @@ module Unitsdb
       m = s.length
       n = t.length
 
-      return m if n == 0
-      return n if m == 0
+      return m if n.zero?
+      return n if m.zero?
 
       d = Array.new(m + 1) { Array.new(n + 1) }
 

@@ -10,6 +10,7 @@ module Unitsdb
   class Database < Lutaml::Model::Serializable
     # model Config.model_for(:units)
 
+    attribute :_version, :string
     attribute :units, Unit, collection: true
     attribute :prefixes, Prefix, collection: true
     attribute :quantities, Quantity, collection: true
@@ -23,7 +24,36 @@ module Unitsdb
       quantities_hash = YAML.safe_load(IO.read(File.join(dir_path, "quantities.yaml")))
       unit_systems_hash = YAML.safe_load(IO.read(File.join(dir_path, "unit_systems.yaml")))
 
+      # Extract versions from each file
+      prefixes_version = prefixes_hash["_version"]
+      dimensions_version = dimensions_hash["_version"]
+      units_version = units_hash["_version"]
+      quantities_version = quantities_hash["_version"]
+      unit_systems_version = unit_systems_hash["_version"]
+
+      # Check if all versions match
+      versions = [
+        prefixes_version,
+        dimensions_version,
+        units_version,
+        quantities_version,
+        unit_systems_version
+      ]
+
+      unless versions.uniq.size == 1
+        version_info = {
+          "prefixes.yaml" => prefixes_version,
+          "dimensions.yaml" => dimensions_version,
+          "units.yaml" => units_version,
+          "quantities.yaml" => quantities_version,
+          "unit_systems.yaml" => unit_systems_version
+        }
+        # Define custom error class for version mismatches
+        raise Unitsdb::VersionMismatchError, "Version mismatch in database files: #{version_info.inspect}"
+      end
+
       combined_yaml = {
+        "_version" => prefixes_version,
         "prefixes" => prefixes_hash["prefixes"],
         "dimensions" => dimensions_hash["dimensions"],
         "units" => units_hash["units"],

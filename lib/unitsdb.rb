@@ -17,4 +17,5 @@ require_relative "unitsdb/cli" if defined?(Thor)
 
 module Unitsdb
   class Error < StandardError; end
+  class VersionMismatchError < StandardError; end
 end

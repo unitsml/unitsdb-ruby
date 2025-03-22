@@ -17,20 +17,47 @@ module Unitsdb
     attribute :dimensions, Dimension, collection: true
     attribute :unit_systems, UnitSystem, collection: true
 
-    # Find an entity by its identifier and type
+    # Find an entity by its specific identifier and type
     # @param id [String] the identifier value to search for
     # @param type [String, Symbol] the entity type (units, prefixes, quantities, etc.)
     # @return [Object, nil] the first entity with matching identifier or nil if not found
-    def search(id:, type:)
+    def find_by_type(id:, type:)
       collection = send(type.to_s)
       collection.find { |entity| entity.identifiers&.any? { |identifier| identifier.id == id } }
     end
 
+    # Find an entity by its identifier id across all entity types
+    # @param id [String] the identifier value to search for
+    # @param type [String, nil] optional identifier type to match
+    # @return [Object, nil] the first entity with matching identifier or nil if not found
+    def get_by_id(id:, type: nil)
+      %w[units prefixes quantities dimensions unit_systems].each do |collection_name|
+        next unless respond_to?(collection_name)
+
+        collection = send(collection_name)
+        entity = collection.find do |e|
+          e.identifiers&.any? do |identifier|
+            identifier.id == id && (type.nil? || identifier.type == type)
+          end
+        end
+
+        return entity if entity
+      end
+
+      nil
+    end
+
     # Search for entities containing the given text in identifiers, names, or short description
-    # @param text [String] the text to search for
-    # @param type [String, Symbol, nil] optional entity type to limit search scope
+    # @param params [Hash] search parameters
+    # @option params [String] :text The text to search for
+    # @option params [String, Symbol, nil] :type Optional entity type to limit search scope
     # @return [Array] all entities matching the search criteria
-    def search_text(text, type: nil)
+    def search(params = {})
+      text = params[:text]
+      type = params[:type]
+
+      return [] unless text
+
       results = []
 
       # Define which collections to search based on type parameter

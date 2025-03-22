@@ -4,7 +4,7 @@ RSpec.describe Unitsdb::Dimension do
   file_path = File.join(__dir__, "../fixtures/unitsdb/dimensions.yaml")
   dimensions_yaml = YAML.safe_load(IO.read(file_path))
 
-  dimensions_yaml.each do |value|
+  dimensions_yaml["dimensions"].each do |value|
     it "parses the dimension #{value[:id]}" do
       dimension_yaml = value.to_yaml
       dimension = described_class.from_yaml(dimension_yaml)

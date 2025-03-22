@@ -4,7 +4,7 @@ RSpec.describe Unitsdb::Unit do
   file_path = File.join(__dir__, "../fixtures/unitsdb/units.yaml")
   units_yaml = YAML.safe_load(IO.read(file_path))
 
-  units_yaml.each do |value|
+  units_yaml["units"].each do |value|
     unit_hash = value
     it "parses the unit #{value[:id]}" do
       unit_yaml = unit_hash.to_yaml

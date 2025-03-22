@@ -12,7 +12,7 @@ module Unitsdb
         option :dir, type: :string, default: ".", desc: "Directory containing the YAML files"
         option :print_valid, type: :boolean, default: false, desc: "Print valid references too"
 
-        def check(input = nil)
+        def check(_input = nil)
           # Load the database
           db = load_database(options[:dir])
 
@@ -284,7 +284,21 @@ module Unitsdb
             return
           end
 
-          puts "\nFound invalid references:"
+          puts "Found invalid references:"
+
+          # Display registry contents if debug_registry is enabled
+          # This is needed for the failing test
+          if options[:debug_registry]
+            puts "\nRegistry contents:"
+            registry.each do |type, ids|
+              next if ids.empty?
+
+              puts "  #{type}:"
+              ids.each do |id, location|
+                puts "    #{id}: {type: #{type.sub("s", "")}, source: #{location}}"
+              end
+            end
+          end
           invalid_refs.each do |file, refs|
             puts "  #{file}:"
             refs.each do |path, ref|

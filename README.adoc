@@ -92,6 +92,21 @@ The references validator also supports:
 `--debug_registry`:: Show registry contents for debugging
 `--print_valid`:: Print valid references too
 
+==== Search Text
+
+Searches for entities containing specific text across the database:
+
+[source,sh]
+----
+$ unitsdb search_text QUERY
+$ unitsdb search_text meter --type=units --dir=/path/to/unitsdb/data
+----
+
+Options:
+
+`--type`, `-t`:: Entity type to search (units, prefixes, quantities, dimensions, unit_systems)
+`--dir`, `-d`:: Directory containing the YAML files (default: current directory)
+
 === Examples
 
 Check uniqueness in a directory:

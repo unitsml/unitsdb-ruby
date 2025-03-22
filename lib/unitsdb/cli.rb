@@ -5,6 +5,7 @@ require_relative "commands/uniqueness"
 require_relative "commands/normalize"
 require_relative "commands/validate"
 require_relative "commands/check_si_references"
+require_relative "commands/search"
 
 module Unitsdb
   class CLI < Thor
@@ -55,6 +56,16 @@ module Unitsdb
     def check_si_refs
       require_relative "commands/check_si_references_simple"
       Commands::CheckSiReferencesSimple.new.check(options)
+    end
+
+    desc "search_text QUERY", "Search for entities containing the given text"
+    method_option :type, type: :string, aliases: "-t",
+                         desc: "Entity type to search (units, prefixes, quantities, dimensions, unit_systems)"
+    method_option :dir, type: :string, default: ".", aliases: "-d",
+                        desc: "Directory containing the YAML files"
+
+    def search_text(query)
+      Commands::Search.new.text(query, options)
     end
   end
 end

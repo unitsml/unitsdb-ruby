@@ -24,11 +24,11 @@ module Unitsdb
       unit_systems_hash = YAML.safe_load(IO.read(File.join(dir_path, "unit_systems.yaml")))
 
       combined_yaml = {
-        "prefixes" => prefixes_hash,
-        "dimensions" => dimensions_hash,
-        "units" => units_hash,
-        "quantities" => quantities_hash,
-        "unit_systems" => unit_systems_hash
+        "prefixes" => prefixes_hash["prefixes"],
+        "dimensions" => dimensions_hash["dimensions"],
+        "units" => units_hash["units"],
+        "quantities" => quantities_hash["quantities"],
+        "unit_systems" => unit_systems_hash["unit_systems"]
       }.to_yaml
 
       from_yaml(combined_yaml)

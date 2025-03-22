@@ -7,11 +7,9 @@ RSpec.describe Unitsdb::Units do
 
   it "parses the unit collection" do
     raw_string = IO.read(file_path)
-    yaml_hash = { "units" => YAML.safe_load(raw_string) }
-    new_yaml = yaml_hash.to_yaml
-    parsed = described_class.from_yaml(new_yaml)
+    parsed = described_class.from_yaml(raw_string)
     generated = parsed.to_yaml
 
-    expect(generated).to be_yaml_equivalent_to(new_yaml)
+    expect(generated).to be_yaml_equivalent_to(raw_string)
   end
 end

@@ -16,6 +16,7 @@ module Unitsdb
   class Prefixes < Lutaml::Model::Serializable
     # model Config.model_for(:prefixes)
 
+    attribute :_version, :string
     attribute :prefixes, Prefix, collection: true
   end
 end

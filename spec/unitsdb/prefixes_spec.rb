@@ -7,13 +7,11 @@ RSpec.describe Unitsdb::Prefixes do
 
   it "parses the prefix collection" do
     raw_string = IO.read(file_path)
-    yaml_hash = { "prefixes" => YAML.safe_load(raw_string) }
-    new_yaml = yaml_hash.to_yaml
-    parsed = described_class.from_yaml(new_yaml)
+    parsed = described_class.from_yaml(raw_string)
     generated = parsed.to_yaml
 
     # puts generated
     # puts raw_string
-    expect(generated).to be_yaml_equivalent_to(new_yaml)
+    expect(generated).to be_yaml_equivalent_to(raw_string)
   end
 end

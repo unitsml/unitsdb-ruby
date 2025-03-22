@@ -17,18 +17,18 @@ module Unitsdb
     attribute :unit_systems, UnitSystem, collection: true
 
     def self.from_db(dir_path)
-      prefixes_hash = YAML.load(IO.read(File.join(dir_path, "prefixes.yaml")))
-      dimensions_hash = YAML.load(IO.read(File.join(dir_path, "dimensions.yaml")))
-      units_hash = YAML.load(IO.read(File.join(dir_path, "units.yaml")))
-      quantities_hash = YAML.load(IO.read(File.join(dir_path, "quantities.yaml")))
-      unit_systems_hash = YAML.load(IO.read(File.join(dir_path, "unit_systems.yaml")))
+      prefixes_hash = YAML.safe_load(IO.read(File.join(dir_path, "prefixes.yaml")))
+      dimensions_hash = YAML.safe_load(IO.read(File.join(dir_path, "dimensions.yaml")))
+      units_hash = YAML.safe_load(IO.read(File.join(dir_path, "units.yaml")))
+      quantities_hash = YAML.safe_load(IO.read(File.join(dir_path, "quantities.yaml")))
+      unit_systems_hash = YAML.safe_load(IO.read(File.join(dir_path, "unit_systems.yaml")))
 
       combined_yaml = {
-        prefixes: prefixes_yaml,
-        dimensions: dimensions_yaml,
-        units: units_yaml,
-        quantities: quantities_yaml,
-        unit_systems: unit_systems_yaml
+        "prefixes" => prefixes_hash,
+        "dimensions" => dimensions_hash,
+        "units" => units_hash,
+        "quantities" => quantities_hash,
+        "unit_systems" => unit_systems_hash
       }.to_yaml
 
       from_yaml(combined_yaml)

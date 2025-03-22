@@ -10,7 +10,7 @@ module Unitsdb
   class Database < Lutaml::Model::Serializable
     # model Config.model_for(:units)
 
-    attribute :_version, :string
+    attribute :schema_version, :string
     attribute :units, Unit, collection: true
     attribute :prefixes, Prefix, collection: true
     attribute :quantities, Quantity, collection: true
@@ -25,11 +25,11 @@ module Unitsdb
       unit_systems_hash = YAML.safe_load(IO.read(File.join(dir_path, "unit_systems.yaml")))
 
       # Extract versions from each file
-      prefixes_version = prefixes_hash["_version"]
-      dimensions_version = dimensions_hash["_version"]
-      units_version = units_hash["_version"]
-      quantities_version = quantities_hash["_version"]
-      unit_systems_version = unit_systems_hash["_version"]
+      prefixes_version = prefixes_hash["schema_version"]
+      dimensions_version = dimensions_hash["schema_version"]
+      units_version = units_hash["schema_version"]
+      quantities_version = quantities_hash["schema_version"]
+      unit_systems_version = unit_systems_hash["schema_version"]
 
       # Check if all versions match
       versions = [
@@ -53,7 +53,7 @@ module Unitsdb
       end
 
       combined_yaml = {
-        "_version" => prefixes_version,
+        "schema_version" => prefixes_version,
         "prefixes" => prefixes_hash["prefixes"],
         "dimensions" => dimensions_hash["dimensions"],
         "units" => units_hash["units"],

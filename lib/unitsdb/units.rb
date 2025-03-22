@@ -6,7 +6,7 @@ module Unitsdb
   class Units < Lutaml::Model::Serializable
     # model Config.model_for(:units)
 
-    attribute :_version, :string
+    attribute :schema_version, :string
     attribute :units, Unit, collection: true
   end
 end

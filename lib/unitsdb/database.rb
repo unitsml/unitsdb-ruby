@@ -17,12 +17,85 @@ module Unitsdb
     attribute :dimensions, Dimension, collection: true
     attribute :unit_systems, UnitSystem, collection: true
 
+    # Find an entity by its identifier and type
+    # @param id [String] the identifier value to search for
+    # @param type [String, Symbol] the entity type (units, prefixes, quantities, etc.)
+    # @return [Object, nil] the first entity with matching identifier or nil if not found
+    def search(id:, type:)
+      collection = send(type.to_s)
+      collection.find { |entity| entity.identifiers&.any? { |identifier| identifier.value == id } }
+    end
+
+    # Search for entities containing the given text in identifiers, names, or short description
+    # @param text [String] the text to search for
+    # @param type [String, Symbol, nil] optional entity type to limit search scope
+    # @return [Array] all entities matching the search criteria
+    def search_text(text, type: nil)
+      results = []
+
+      # Define which collections to search based on type parameter
+      collections = type ? [type.to_s] : %w[units prefixes quantities dimensions unit_systems]
+
+      collections.each do |collection_name|
+        next unless respond_to?(collection_name)
+
+        collection = send(collection_name)
+        collection.each do |entity|
+          # Search in identifiers
+          if entity.identifiers&.any? { |identifier| identifier.value.to_s.downcase.include?(text.downcase) }
+            results << entity
+            next
+          end
+
+          # Search in names (if the entity has names)
+          if entity.respond_to?(:names) && entity.names &&
+             entity.names.any? { |name| name.to_s.downcase.include?(text.downcase) }
+            results << entity
+            next
+          end
+
+          # Search in short description
+          if entity.respond_to?(:short) && entity.short &&
+             entity.short.to_s.downcase.include?(text.downcase)
+            results << entity
+            next
+          end
+
+          # Special case for prefix name (prefixes don't have names array)
+          next unless collection_name == "prefixes" && entity.respond_to?(:name) &&
+                      entity.name.to_s.downcase.include?(text.downcase)
+
+          results << entity
+          next
+        end
+      end
+
+      results
+    end
+
     def self.from_db(dir_path)
-      prefixes_hash = YAML.safe_load(IO.read(File.join(dir_path, "prefixes.yaml")))
-      dimensions_hash = YAML.safe_load(IO.read(File.join(dir_path, "dimensions.yaml")))
-      units_hash = YAML.safe_load(IO.read(File.join(dir_path, "units.yaml")))
-      quantities_hash = YAML.safe_load(IO.read(File.join(dir_path, "quantities.yaml")))
-      unit_systems_hash = YAML.safe_load(IO.read(File.join(dir_path, "unit_systems.yaml")))
+      # Ensure we have path properly joined with filenames
+      prefixes_yaml = File.join(dir_path, "prefixes.yaml")
+      dimensions_yaml = File.join(dir_path, "dimensions.yaml")
+      units_yaml = File.join(dir_path, "units.yaml")
+      quantities_yaml = File.join(dir_path, "quantities.yaml")
+      unit_systems_yaml = File.join(dir_path, "unit_systems.yaml")
+
+      # Debug paths
+      if ENV["DEBUG"]
+        puts "[UnitsDB] Loading YAML files from directory: #{dir_path}"
+        puts "  - #{prefixes_yaml}"
+        puts "  - #{dimensions_yaml}"
+        puts "  - #{units_yaml}"
+        puts "  - #{quantities_yaml}"
+        puts "  - #{unit_systems_yaml}"
+      end
+
+      prefixes_hash = YAML.safe_load(File.read(prefixes_yaml))
+      dimensions_hash = YAML.safe_load(File.read(dimensions_yaml))
+      units_hash = YAML.safe_load(File.read(units_yaml))
+      quantities_hash = YAML.safe_load(File.read(quantities_yaml))
+      unit_systems_hash = YAML.safe_load(File.read(unit_systems_yaml))
 
       # Extract versions from each file
       prefixes_version = prefixes_hash["schema_version"]

@@ -13,10 +13,10 @@ RSpec.describe Unitsdb::Database do
     quantities_hash = YAML.safe_load(IO.read(File.join(dir_path, "quantities.yaml")))
     unit_systems_hash = YAML.safe_load(IO.read(File.join(dir_path, "unit_systems.yaml")))
 
-    prefixes_version = prefixes_hash["_version"]
+    prefixes_version = prefixes_hash["schema_version"]
 
     combined_yaml = {
-      "_version" => prefixes_version,
+      "schema_version" => prefixes_version,
       "prefixes" => prefixes_hash["prefixes"],
       "dimensions" => dimensions_hash["dimensions"],
       "units" => units_hash["units"],

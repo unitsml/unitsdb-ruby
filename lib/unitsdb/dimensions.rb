@@ -6,7 +6,7 @@ module Unitsdb
   class Dimensions < Lutaml::Model::Serializable
     # model Config.model_for(:dimensions)
 
-    attribute :_version, :string
+    attribute :schema_version, :string
     attribute :dimensions, Dimension, collection: true
   end
 end

@@ -2,6 +2,7 @@
 
 require_relative "identifier"
 require_relative "symbol_presentations"
+require_relative "external_reference"
 # ---
 # NISTp10_30:
 #   name: quetta
@@ -18,9 +19,11 @@ module Unitsdb
     # model Config.model_for(:prefix)
 
     attribute :identifiers, Identifier, collection: true
-    attribute :name, :string
+    attribute :names, :string, collection: true
+    attribute :short, :string
     attribute :symbol, SymbolPresentations
     attribute :base, :integer
     attribute :power, :integer
+    attribute :references, ExternalReference, collection: true
   end
 end

@@ -3,6 +3,7 @@
 require_relative "identifier"
 require_relative "unit_reference"
 require_relative "dimension_reference"
+require_relative "external_reference"
 
 module Unitsdb
   class Quantity < Lutaml::Model::Serializable
@@ -10,9 +11,10 @@ module Unitsdb
 
     attribute :identifiers, Identifier, collection: true
     attribute :quantity_type, :string
-    attribute :quantity_name, :string, collection: true
+    attribute :names, :string, collection: true
     attribute :short, :string
     attribute :unit_references, UnitReference, collection: true
     attribute :dimension_reference, DimensionReference
+    attribute :references, ExternalReference, collection: true
   end
 end

@@ -160,7 +160,7 @@ RSpec.describe Unitsdb::Commands::Validate::References do
         "identifiers" => [
           { "id" => "NISTu1", "type" => "nist" }
         ],
-        "unit_name" => ["meter"],
+        "names" => ["meter"],
         "short" => "meter",
         "dimension_reference" => { "id" => "NISTd1", "type" => "nist" },
         "unit_system_reference" => if valid_references

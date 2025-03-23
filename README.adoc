@@ -94,7 +94,7 @@ The references validator also supports:
 
 ==== Search
 
-Searches for entities in the database:
+Searches for entities in the database and displays ID and ID Type information for each result:
 
 [source,sh]
 ----
@@ -105,6 +105,10 @@ $ unitsdb search meter --type=units --dir=/path/to/unitsdb/data
 # Search by ID
 $ unitsdb search any-query --id=NISTu1
 $ unitsdb search any-query --id=NISTu1 --id_type=nist
+
+# Output in different formats
+$ unitsdb search meter --format=json
+$ unitsdb search kilo --format=yaml
 ----
 
 Options:
@@ -112,6 +116,31 @@ Options:
 `--type`, `-t`:: Entity type to search (units, prefixes, quantities, dimensions, unit_systems)
 `--id`, `-i`:: Search for an entity with a specific identifier
 `--id_type`:: Filter the ID search by identifier type
+`--format`:: Output format (text, json, yaml) - default is text
+`--dir`, `-d`:: Directory containing the YAML files (default: current directory)
+
+==== Get
+
+Retrieves and displays the full details of a specific entity by its identifier:
+
+[source,sh]
+----
+# Get entity details by ID
+$ unitsdb get meter
+$ unitsdb get m
+
+# Get entity with specific ID type
+$ unitsdb get meter --id_type=si
+
+# Output in different formats
+$ unitsdb get kilogram --format=json
+$ unitsdb get second --format=yaml
+----
+
+Options:
+
+`--id_type`:: Filter the search by identifier type
+`--format`:: Output format (text, json, yaml) - default is text
 `--dir`, `-d`:: Directory containing the YAML files (default: current directory)
 
 === Examples

@@ -6,6 +6,7 @@ require_relative "commands/normalize"
 require_relative "commands/validate"
 require_relative "commands/check_si_references"
 require_relative "commands/search"
+require_relative "commands/get"
 
 module Unitsdb
   class CLI < Thor
@@ -65,11 +66,25 @@ module Unitsdb
                        desc: "Search for an entity with a specific identifier"
     method_option :id_type, type: :string,
                             desc: "Filter get_by_id search by identifier type"
+    method_option :format, type: :string, default: "text",
+                           desc: "Output format (text, json, yaml)"
     method_option :dir, type: :string, default: ".", aliases: "-d",
                         desc: "Directory containing the YAML files"
 
     def search(query)
       Commands::Search.new.search(query, options)
+    end
+
+    desc "get ID", "Get detailed information about a specific entity"
+    method_option :id_type, type: :string,
+                            desc: "Identifier type to filter by"
+    method_option :format, type: :string, default: "text",
+                           desc: "Output format (text, json, yaml)"
+    method_option :dir, type: :string, default: ".", aliases: "-d",
+                        desc: "Directory containing the YAML files"
+
+    def get(id)
+      Commands::Get.new.get(id, options)
     end
   end
 end

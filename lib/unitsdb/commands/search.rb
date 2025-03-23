@@ -17,14 +17,14 @@ module Unitsdb
                       desc: "Output format (text, json, yaml)"
 
       def search(query, options = {})
-        dir = options[:dir] || "."
+        database_path = options[:database] || "."
         type = options[:type]
         id = options[:id]
         id_type = options[:id_type]
         format = options[:format] || "text"
 
         begin
-          database = load_database(dir)
+          database = load_database(database_path)
 
           # Search by ID (early return)
           if id

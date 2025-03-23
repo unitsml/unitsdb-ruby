@@ -4,6 +4,7 @@ require "lutaml/model"
 
 require_relative "unitsdb/version"
 require_relative "unitsdb/config"
+require_relative "unitsdb/errors"
 require_relative "unitsdb/database"
 require_relative "unitsdb/dimensions"
 require_relative "unitsdb/prefixes"
@@ -16,6 +17,4 @@ require_relative "unitsdb/utils"
 require_relative "unitsdb/cli" if defined?(Thor)
 
 module Unitsdb
-  class Error < StandardError; end
-  class VersionMismatchError < StandardError; end
 end

@@ -14,7 +14,7 @@ module Unitsdb
         id_type = options[:id_type]
         format = options[:format] || "text"
 
-        database = load_database(options[:dir] || ".")
+        database = load_database(options[:database] || ".")
         entity = database.get_by_id(id: id, type: id_type)
 
         # Early return if no entity found

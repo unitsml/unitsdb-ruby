@@ -8,7 +8,7 @@ module Unitsdb
       class Uniqueness < Base
         desc "check [INPUT]", "Check for uniqueness of 'short' and 'id' fields in a YAML file"
         option :all, type: :boolean, default: false, desc: "Check all YAML files in the repository"
-        option :dir, type: :string, default: ".", desc: "Directory containing the YAML files"
+        option :database, type: :string, default: ".", desc: "Path to UnitsDB database"
 
         def check(input = nil)
           # Delegate to the main uniqueness command implementation

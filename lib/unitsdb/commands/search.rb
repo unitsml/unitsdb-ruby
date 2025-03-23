@@ -95,15 +95,19 @@ module Unitsdb
 
         # Get all identifiers
         identifiers = entity.identifiers || []
-        identifier_text = if identifiers.empty?
-                            "No IDs"
-                          else
-                            identifiers.map { |id| "#{id.id} (Type: #{id.type || "N/A"})" }.join(", ")
-                          end
 
         # Print entity information
         puts "  - #{entity_type}: #{name}"
-        puts "    IDs: #{identifier_text}"
+
+        # Print each identifier on its own line for better readability
+        if identifiers.empty?
+          puts "    ID: None"
+        else
+          puts "    IDs:"
+          identifiers.each do |id|
+            puts "      - #{id.id} (Type: #{id.type || "N/A"})"
+          end
+        end
 
         # If entity has a short description, print it
         puts "    Description: #{entity.short}" if entity.respond_to?(:short) && entity.short && entity.short != name

@@ -26,10 +26,10 @@ module Unitsdb
       def load_database(database_path = nil)
         path = database_path || options[:database]
 
-        raise Unitsdb::DatabaseError, "Database path must be specified using the --database option" if path.nil?
+        raise Unitsdb::Errors::DatabaseError, "Database path must be specified using the --database option" if path.nil?
 
         Unitsdb::Database.from_db(path)
-      rescue Unitsdb::DatabaseError => e
+      rescue Unitsdb::Errors::DatabaseError => e
         puts "Error: #{e.message}"
         exit(1)
       end

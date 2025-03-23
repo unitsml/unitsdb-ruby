@@ -7,38 +7,50 @@ require_relative "../errors"
 module Unitsdb
   module Commands
     class Get < Base
-      desc "get ID", "Get detailed information about a specific entity"
-      option :id_type, type: :string, desc: "Identifier type to filter by"
-      option :format, type: :string, default: "text", desc: "Output format (text, json, yaml)"
+      desc "get ID", "Get detailed information about an entity by ID"
+      option :id_type, type: :string,
+                       desc: "Filter by identifier type"
+      option :format, type: :string, default: "text",
+                      desc: "Output format (text, json, yaml)"
+      option :database, type: :string, required: true, aliases: "-d",
+                        desc: "Path to UnitsDB database (required)"
 
       def get(id, options = {})
         # Database path is guaranteed by Thor's global option
-
         id_type = options[:id_type]
         format = options[:format] || "text"
 
-        database = load_database(options[:database])
-        entity = database.get_by_id(id: id, type: id_type)
+        begin
+          database = load_database(options[:database])
 
-        # Early return if no entity found
-        unless entity
-          puts "No entity found with ID: '#{id}'"
-          return
-        end
+          # Search by ID
+          entity = database.get_by_id(id: id, type: id_type)
 
-        # Process the found entity with format-specific output
-        if entity && %w[json yaml].include?(format.downcase)
-          begin
-            puts entity.send("to_#{format.downcase}")
+          unless entity
+            puts "No entity found with ID: '#{id}'"
             return
-          rescue NoMethodError
-            puts "Error: Unable to convert entity to #{format} format"
-            exit(1)
           end
-        end
 
-        # Default to text output
-        print_entity_details(entity)
+          # Output based on format
+          if %w[json yaml].include?(format.downcase)
+            begin
+              puts entity.send("to_#{format.downcase}")
+              return
+            rescue NoMethodError
+              puts "Error: Unable to convert entity to #{format} format"
+              exit(1)
+            end
+          end
+
+          # Default text output
+          print_entity_details(entity)
+        rescue Unitsdb::Errors::DatabaseError => e
+          puts "Error: #{e.message}"
+          exit(1)
+        rescue StandardError => e
+          puts "Error searching database: #{e.message}"
+          exit(1)
+        end
       end
 
       private
@@ -54,18 +66,18 @@ module Unitsdb
         puts "  - Type: #{entity_type}"
         puts "  - Name: #{name}"
 
-        # Print ID and Type information for each identifier
+        # Print description if available
+        puts "  - Description: #{entity.short}" if entity.respond_to?(:short) && entity.short && entity.short != name
+
+        # Print all identifiers
         if entity.identifiers&.any?
           puts "  - Identifiers:"
-          entity.identifiers.each do |identifier|
-            puts "      - #{identifier.id} (Type: #{identifier.type || "N/A"})"
+          entity.identifiers.each do |id|
+            puts "      - #{id.id} (Type: #{id.type || "N/A"})"
           end
+        else
+          puts "  - Identifiers: None"
         end
-
-        # Print description if available
-        puts "  - Description: #{entity.short}" if entity.respond_to?(:short) &&
-                                                   entity.short &&
-                                                   entity.short != name
 
         # Print additional properties based on entity type
         case entity
@@ -95,7 +107,7 @@ module Unitsdb
 
         puts "  - References:"
         entity.references.each do |ref|
-          puts "      - #{ref.type}: #{ref.id}"
+          puts "      - #{ref.type}: #{ref.uri}"
         end
       end
 

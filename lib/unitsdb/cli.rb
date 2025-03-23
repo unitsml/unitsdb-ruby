@@ -2,7 +2,6 @@
 
 require "thor"
 require_relative "commands/validate"
-require_relative "commands/check_si_references"
 require_relative "commands/search"
 require_relative "commands/get"
 require_relative "commands/check_si_units"
@@ -20,36 +19,6 @@ module Unitsdb
 
     desc "validate SUBCOMMAND", "Validate database files for different conditions"
     subcommand "validate", Commands::ValidateCommand
-
-    desc "check_si_references",
-         "Check entities in SI digital framework against entities in the database (original implementation)"
-    method_option :entity_type, type: :string, aliases: "-e",
-                                desc: "Entity type to check (units, quantities, or prefixes). If not specified, all types are checked"
-    method_option :output, type: :string, aliases: "-o",
-                           desc: "Output file path for updated YAML file(s)"
-    method_option :update, type: :boolean, default: false,
-                           desc: "Update references in output file(s)"
-    method_option :database, type: :string, required: true, aliases: "-d",
-                             desc: "Path to UnitsDB database (required)"
-
-    def check_si_references
-      Commands::CheckSiReferences.new.check
-    end
-
-    desc "check_si_refs", "Check units in SI digital framework and add missing references (simplified implementation)"
-    method_option :entity_type, type: :string, aliases: "-e",
-                                desc: "Entity type to check (units, quantities, or prefixes). Defaults to units."
-    method_option :output, type: :string, aliases: "-o",
-                           desc: "Output file path for updated YAML file"
-    method_option :update, type: :boolean, default: false,
-                           desc: "Update references in output file"
-    method_option :database, type: :string, required: true, aliases: "-d",
-                             desc: "Path to UnitsDB database (required)"
-
-    def check_si_refs
-      require_relative "commands/check_si_references_simple"
-      Commands::CheckSiReferencesSimple.new.check(options)
-    end
 
     desc "search QUERY", "Search for entities in the database"
     method_option :type, type: :string, aliases: "-t",
@@ -79,7 +48,9 @@ module Unitsdb
       Commands::Get.new.get(id, options)
     end
 
-    desc "check_si_units", "Check that every unit in the SI digital framework has an equivalent in our units.yaml"
+    desc "check_si_units", "Check entities in SI digital framework against UnitsDB content"
+    method_option :entity_type, type: :string, aliases: "-e",
+                                desc: "Entity type to check (units, quantities, prefixes). Defaults to units."
     method_option :output, type: :string, aliases: "-o",
                            desc: "Output file path for updated YAML file"
     method_option :database, type: :string, required: true, aliases: "-d",

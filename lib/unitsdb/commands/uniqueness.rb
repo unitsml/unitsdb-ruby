@@ -19,7 +19,7 @@ module Unitsdb
         end
 
         # Use database instead of direct YAML parsing
-        db = load_database(options_to_use[:dir])
+        db = load_database(options_to_use[:database])
 
         # Check for duplicate shorts
         check_duplicate_shorts(db, all_dups)

@@ -1,29 +1,43 @@
 # frozen_string_literal: true
 
-require_relative "base"
+require "thor/group"
+require_relative "../base"
 
 module Unitsdb
   module Commands
     module Validate
-      class References < Base
-        desc "check [INPUT]", "Validate that all references exist"
-        option :debug_registry, type: :boolean, desc: "Show registry contents for debugging"
-        option :all, type: :boolean, default: false, desc: "Check all YAML files in the repository"
-        option :dir, type: :string, default: ".", desc: "Directory containing the YAML files"
-        option :print_valid, type: :boolean, default: false, desc: "Print valid references too"
+      class References < Thor::Group
+        include Thor::Actions
 
-        def check(_input = nil)
-          # Load the database
-          db = load_database(options[:dir])
+        class_option :debug_registry, type: :boolean, desc: "Show registry contents for debugging"
+        class_option :database, type: :string, required: true, aliases: "-d",
+                                desc: "Path to UnitsDB database (required)"
+        class_option :print_valid, type: :boolean, default: false, desc: "Print valid references too"
 
-          # Build registry of all valid IDs
-          registry = build_id_registry(db)
+        def self.banner
+          "unitsdb validate references --database=PATH"
+        end
 
-          # Check all references
-          invalid_refs = check_references(db, registry)
+        def validate_references
+          # Create a Base instance to use its helper methods
+          base = Unitsdb::Commands::Base.new
 
-          # Display results
-          display_reference_results(invalid_refs, registry)
+          begin
+            # Load the database
+            db = base.send(:load_database, options[:database])
+
+            # Build registry of all valid IDs
+            registry = build_id_registry(db)
+
+            # Check all references
+            invalid_refs = check_references(db, registry)
+
+            # Display results
+            display_reference_results(invalid_refs, registry)
+          rescue Unitsdb::DatabaseError => e
+            puts "Error: #{e.message}"
+            exit(1)
+          end
         end
 
         private

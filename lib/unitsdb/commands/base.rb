@@ -8,7 +8,7 @@ require_relative "../database"
 module Unitsdb
   module Commands
     class Base < Thor
-      class_option :dir, type: :string, default: ".", aliases: "-d", desc: "Directory containing the YAML files"
+      class_option :database, type: :string, required: true, aliases: "-d", desc: "Path to UnitsDB database (required)"
       class_option :all, type: :boolean, default: false, aliases: "-a", desc: "Process all YAML files in the repository"
 
       protected
@@ -17,7 +17,7 @@ module Unitsdb
         options_to_use = opts || options
 
         if options_to_use[:all]
-          Unitsdb::Utils::DEFAULT_YAML_FILES.map { |f| File.join(options_to_use[:dir], f) }
+          Unitsdb::Utils::DEFAULT_YAML_FILES.map { |f| File.join(options_to_use[:database], f) }
         elsif input
           [input]
         else
@@ -26,8 +26,15 @@ module Unitsdb
         end
       end
 
-      def load_database(dir)
-        Unitsdb::Database.from_db(dir)
+      def load_database(database_path = nil)
+        path = database_path || options[:database]
+
+        raise Unitsdb::DatabaseError, "Database path must be specified using the --database option" if path.nil?
+
+        Unitsdb::Database.from_db(path)
+      rescue Unitsdb::DatabaseError => e
+        puts "Error: #{e.message}"
+        exit(1)
       end
 
       def load_yaml(file_path)

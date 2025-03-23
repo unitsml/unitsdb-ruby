@@ -3,15 +3,19 @@
 require "thor"
 require_relative "validate/references"
 require_relative "validate/uniqueness"
+require_relative "validate/identifiers"
 
 module Unitsdb
   module Commands
     class ValidateCommand < Thor
-      desc "references [INPUT]", "Validate that all references exist"
+      desc "references", "Validate that all references exist"
       subcommand "references", Validate::References
 
-      desc "uniqueness [INPUT]", "Check for uniqueness of 'short' and 'id' fields"
+      desc "uniqueness", "Check for uniqueness of 'short' and 'id' fields (legacy, use identifiers instead)"
       subcommand "uniqueness", Validate::Uniqueness
+
+      desc "identifiers", "Check for uniqueness of identifier fields"
+      subcommand "identifiers", Validate::Identifiers
     end
   end
 end

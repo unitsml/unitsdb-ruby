@@ -19,7 +19,7 @@ module Unitsdb
 
         if options_to_use[:all]
           Unitsdb::Utils::DEFAULT_YAML_FILES.each do |file|
-            path = File.join(options_to_use[:dir], file)
+            path = File.join(options_to_use[:database], file)
             next unless File.exist?(path)
 
             normalize_file(path, path, options_to_use)

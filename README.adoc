@@ -38,54 +38,39 @@ The `unitsdb` command is automatically installed when you install the gem.
 
 === Available commands
 
-==== Check uniqueness
+==== Database Validation
 
-Checks for uniqueness of 'short' and 'id' fields in YAML files.
+Validates the database for different conditions:
 
 [source,sh]
 ----
-$ unitsdb check_uniqueness [INPUT]
-$ unitsdb check_uniqueness --all --dir=/path/to/unitsdb/data
+# Validate that all references exist
+$ unitsdb validate references --database=/path/to/unitsdb/data
+
+# Check for uniqueness of identifiers
+$ unitsdb validate identifiers --database=/path/to/unitsdb/data
 ----
 
 Options:
 
-`--all`, `-a`:: Check all YAML files in the repository
-`--dir`, `-d`:: Directory containing the YAML files (default: current directory)
+`--database`, `-d`:: Path to UnitsDB database (required)
 
-==== Normalize YAML
+==== Database Modification (_modify)
 
-Normalizes YAML file format:
+Commands that modify the database are grouped under the `_modify` namespace:
 
 [source,sh]
 ----
-$ unitsdb normalize [INPUT] [OUTPUT]
-$ unitsdb normalize --all --dir=/path/to/unitsdb/data
+# Normalize YAML file format
+$ unitsdb _modify normalize [INPUT] [OUTPUT] --database=/path/to/unitsdb/data
+$ unitsdb _modify normalize --all --database=/path/to/unitsdb/data
 ----
 
 Options:
-
-`--all`, `-a`:: Normalize all YAML files in the repository
-`--dir`, `-d`:: Directory containing the YAML files (default: current directory)
-`--sort`:: Sort keys alphabetically (default: true)
-
-==== Validate
-
-Validates UnitsDB data for different conditions:
-
-[source,sh]
-----
-# Validate references between entities
-$ unitsdb validate references check --all --dir=/path/to/unitsdb/data
-
-# Check for uniqueness of 'short' and 'id' fields
-$ unitsdb validate uniqueness check --all --dir=/path/to/unitsdb/data
-----
-
-Options for both subcommands:
 
 `--all`, `-a`:: Process all YAML files in the repository
-`--dir`, `-d`:: Directory containing the YAML files (default: current directory)
+`--database`, `-d`:: Path to UnitsDB database (required)
+`--sort`:: Sort keys alphabetically (default: true)
 
 The references validator also supports:
 
@@ -99,16 +84,16 @@ Searches for entities in the database and displays ID and ID Type information fo
 [source,sh]
 ----
 # Search by text content
-$ unitsdb search meter
-$ unitsdb search meter --type=units --dir=/path/to/unitsdb/data
+$ unitsdb search meter --database=/path/to/unitsdb/data
+$ unitsdb search meter --type=units --database=/path/to/unitsdb/data
 
 # Search by ID
-$ unitsdb search any-query --id=NISTu1
-$ unitsdb search any-query --id=NISTu1 --id_type=nist
+$ unitsdb search any-query --id=NISTu1 --database=/path/to/unitsdb/data
+$ unitsdb search any-query --id=NISTu1 --id_type=nist --database=/path/to/unitsdb/data
 
 # Output in different formats
-$ unitsdb search meter --format=json
-$ unitsdb search kilo --format=yaml
+$ unitsdb search meter --format=json --database=/path/to/unitsdb/data
+$ unitsdb search kilo --format=yaml --database=/path/to/unitsdb/data
 ----
 
 Options:
@@ -117,7 +102,7 @@ Options:
 `--id`, `-i`:: Search for an entity with a specific identifier
 `--id_type`:: Filter the ID search by identifier type
 `--format`:: Output format (text, json, yaml) - default is text
-`--dir`, `-d`:: Directory containing the YAML files (default: current directory)
+`--database`, `-d`:: Path to UnitsDB database (required)
 
 ==== Get
 
@@ -126,44 +111,63 @@ Retrieves and displays the full details of a specific entity by its identifier:
 [source,sh]
 ----
 # Get entity details by ID
-$ unitsdb get meter
-$ unitsdb get m
+$ unitsdb get meter --database=/path/to/unitsdb/data
+$ unitsdb get m --database=/path/to/unitsdb/data
 
 # Get entity with specific ID type
-$ unitsdb get meter --id_type=si
+$ unitsdb get meter --id_type=si --database=/path/to/unitsdb/data
 
 # Output in different formats
-$ unitsdb get kilogram --format=json
-$ unitsdb get second --format=yaml
+$ unitsdb get kilogram --format=json --database=/path/to/unitsdb/data
+$ unitsdb get second --format=yaml --database=/path/to/unitsdb/data
 ----
 
 Options:
 
 `--id_type`:: Filter the search by identifier type
 `--format`:: Output format (text, json, yaml) - default is text
-`--dir`, `-d`:: Directory containing the YAML files (default: current directory)
+`--database`, `-d`:: Path to UnitsDB database (required)
 
-=== Examples
+==== Check SI Units
 
-Check uniqueness in a directory:
+Checks that every unit in the SI digital framework (from references/units.ttl) has an equivalent in the database based on string matching:
 
 [source,sh]
 ----
-$ unitsdb check_uniqueness --all --dir=/path/to/unitsdb/data
+# Check units and generate report
+$ unitsdb check_si_units --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework
+
+# Specify an output file for updated YAML
+$ unitsdb check_si_units --output=path/to/output.yaml --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework
+----
+
+Options:
+
+`--output`, `-o`:: Output file path for updated YAML file (default: spec/fixtures/unitsdb.units.yaml)
+`--database`, `-d`:: Path to UnitsDB database (required)
+`--ttl-dir`, `-t`:: Path to the directory containing SI digital framework TTL files (required)
+
+=== Examples
+
+Check identifiers for uniqueness:
+
+[source,sh]
+----
+$ unitsdb validate identifiers --database=/path/to/unitsdb/data
 ----
 
 Normalize all files in a directory:
 
 [source,sh]
 ----
-$ unitsdb normalize --all --dir=/path/to/unitsdb/data
+$ unitsdb _modify normalize --all --database=/path/to/unitsdb/data
 ----
 
 Validate references in a specific directory:
 
 [source,sh]
 ----
-$ unitsdb validate references check --all --dir=/path/to/unitsdb/data
+$ unitsdb validate references --database=/path/to/unitsdb/data
 ----
 
 

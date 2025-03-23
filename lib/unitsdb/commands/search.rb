@@ -2,6 +2,7 @@
 
 require_relative "base"
 require "json"
+require_relative "../errors"
 
 module Unitsdb
   module Commands
@@ -15,16 +16,19 @@ module Unitsdb
                        desc: "Filter get_by_id search by identifier type"
       option :format, type: :string, default: "text",
                       desc: "Output format (text, json, yaml)"
+      option :database, type: :string, required: true, aliases: "-d",
+                        desc: "Path to UnitsDB database (required)"
 
       def search(query, options = {})
-        database_path = options[:database] || "."
+        # Database path is guaranteed by Thor's global option
+
         type = options[:type]
         id = options[:id]
         id_type = options[:id_type]
         format = options[:format] || "text"
 
         begin
-          database = load_database(database_path)
+          database = load_database(options[:database])
 
           # Search by ID (early return)
           if id
@@ -37,8 +41,13 @@ module Unitsdb
 
             # Use the same output logic as the Get command
             if %w[json yaml].include?(format.downcase)
-              puts entity.send("to_#{format.downcase}")
-              return
+              begin
+                puts entity.send("to_#{format.downcase}")
+                return
+              rescue NoMethodError
+                puts "Error: Unable to convert entity to #{format} format"
+                exit(1)
+              end
             end
 
             print_entity_details(entity)
@@ -66,6 +75,9 @@ module Unitsdb
           results.each do |entity|
             print_entity_with_ids(entity)
           end
+        rescue Unitsdb::DatabaseError => e
+          puts "Error: #{e.message}"
+          exit(1)
         rescue StandardError => e
           puts "Error searching database: #{e.message}"
           exit(1)

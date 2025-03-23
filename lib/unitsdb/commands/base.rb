@@ -8,9 +8,6 @@ require_relative "../database"
 module Unitsdb
   module Commands
     class Base < Thor
-      class_option :database, type: :string, required: true, aliases: "-d", desc: "Path to UnitsDB database (required)"
-      class_option :all, type: :boolean, default: false, aliases: "-a", desc: "Process all YAML files in the repository"
-
       protected
 
       def yaml_files(input = nil, opts = nil)

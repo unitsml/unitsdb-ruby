@@ -1,43 +1,34 @@
 # frozen_string_literal: true
 
-require "thor/group"
-require_relative "../base"
+require_relative "base"
 
 module Unitsdb
   module Commands
     module Validate
-      class References < Thor::Group
-        include Thor::Actions
+      class References < Base
+        desc "check", "Validate that all references exist"
+        option :debug_registry, type: :boolean, desc: "Show registry contents for debugging"
+        option :database, type: :string, required: true, aliases: "-d",
+                          desc: "Path to UnitsDB database (required)"
+        option :print_valid, type: :boolean, default: false, desc: "Print valid references too"
 
-        class_option :debug_registry, type: :boolean, desc: "Show registry contents for debugging"
-        class_option :database, type: :string, required: true, aliases: "-d",
-                                desc: "Path to UnitsDB database (required)"
-        class_option :print_valid, type: :boolean, default: false, desc: "Print valid references too"
+        default_command :check
 
-        def self.banner
-          "unitsdb validate references --database=PATH"
-        end
+        def check
+          # Load the database
+          db = load_database(options[:database])
 
-        def validate_references
-          # Create a Base instance to use its helper methods
-          base = Unitsdb::Commands::Base.new
+          # Build registry of all valid IDs
+          registry = build_id_registry(db)
 
-          begin
-            # Load the database
-            db = base.send(:load_database, options[:database])
+          # Check all references
+          invalid_refs = check_references(db, registry)
 
-            # Build registry of all valid IDs
-            registry = build_id_registry(db)
-
-            # Check all references
-            invalid_refs = check_references(db, registry)
-
-            # Display results
-            display_reference_results(invalid_refs, registry)
-          rescue Unitsdb::DatabaseError => e
-            puts "Error: #{e.message}"
-            exit(1)
-          end
+          # Display results
+          display_reference_results(invalid_refs, registry)
+        rescue Unitsdb::DatabaseError => e
+          puts "Error: #{e.message}"
+          exit(1)
         end
 
         private

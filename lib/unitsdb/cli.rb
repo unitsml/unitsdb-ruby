@@ -10,6 +10,11 @@ require_relative "commands/_modify"
 
 module Unitsdb
   class CLI < Thor
+    # Fix Thor deprecation warning
+    def self.exit_on_failure?
+      true
+    end
+
     desc "_modify SUBCOMMAND", "Commands that modify the database"
     subcommand "_modify", Commands::ModifyCommand
 

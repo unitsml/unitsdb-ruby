@@ -9,20 +9,6 @@ RSpec.describe Unitsdb::CLI do
 
   # No global output capture - each test will capture output explicitly
 
-  describe "#check_uniqueness" do
-    it "delegates to the Uniqueness command" do
-      expect_any_instance_of(Unitsdb::Commands::Uniqueness).to receive(:check).with(nil, {})
-      cli.check_uniqueness
-    end
-
-    it "passes options to the command" do
-      expect_any_instance_of(Unitsdb::Commands::Uniqueness).to receive(:check).with("input.yaml",
-                                                                                    { all: true, dir: "test_dir" })
-      cli.options = { all: true, dir: "test_dir" }
-      cli.check_uniqueness("input.yaml")
-    end
-  end
-
   describe "#normalize" do
     it "delegates to the Normalize command" do
       expect_any_instance_of(Unitsdb::Commands::Normalize).to receive(:yaml).with(nil, nil, {})

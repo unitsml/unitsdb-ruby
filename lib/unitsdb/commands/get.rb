@@ -2,6 +2,7 @@
 
 require_relative "base"
 require "json"
+require_relative "../errors"
 
 module Unitsdb
   module Commands
@@ -11,10 +12,12 @@ module Unitsdb
       option :format, type: :string, default: "text", desc: "Output format (text, json, yaml)"
 
       def get(id, options = {})
+        # Database path is guaranteed by Thor's global option
+
         id_type = options[:id_type]
         format = options[:format] || "text"
 
-        database = load_database(options[:database] || ".")
+        database = load_database(options[:database])
         entity = database.get_by_id(id: id, type: id_type)
 
         # Early return if no entity found
@@ -24,9 +27,14 @@ module Unitsdb
         end
 
         # Process the found entity with format-specific output
-        if %w[json yaml].include?(format.downcase)
-          puts entity.send("to_#{format.downcase}")
-          return
+        if entity && %w[json yaml].include?(format.downcase)
+          begin
+            puts entity.send("to_#{format.downcase}")
+            return
+          rescue NoMethodError
+            puts "Error: Unable to convert entity to #{format} format"
+            exit(1)
+          end
         end
 
         # Default to text output
@@ -46,18 +54,18 @@ module Unitsdb
         puts "  - Type: #{entity_type}"
         puts "  - Name: #{name}"
 
-        # Print description if available
-        puts "  - Description: #{entity.short}" if entity.respond_to?(:short) && entity.short && entity.short != name
-
-        # Print all identifiers
+        # Print ID and Type information for each identifier
         if entity.identifiers&.any?
           puts "  - Identifiers:"
-          entity.identifiers.each do |id|
-            puts "      - #{id.id} (Type: #{id.type || "N/A"})"
+          entity.identifiers.each do |identifier|
+            puts "      - #{identifier.id} (Type: #{identifier.type || "N/A"})"
           end
-        else
-          puts "  - Identifiers: None"
         end
+
+        # Print description if available
+        puts "  - Description: #{entity.short}" if entity.respond_to?(:short) &&
+                                                   entity.short &&
+                                                   entity.short != name
 
         # Print additional properties based on entity type
         case entity

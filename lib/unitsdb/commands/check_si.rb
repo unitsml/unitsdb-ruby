@@ -4,6 +4,7 @@ require "rdf"
 require "rdf/turtle"
 require "yaml"
 require "fileutils"
+require "terminal-table"
 require_relative "base"
 require_relative "../utils"
 require_relative "../database"
@@ -61,6 +62,14 @@ module Unitsdb
 
       private
 
+      # Extract identifying suffix from SI TTL URI
+      def extract_identifying_suffix(uri)
+        return "" unless uri
+
+        # Remove the prefix http://si-digital-framework.org/SI/
+        uri.gsub("http://si-digital-framework.org/SI/", "")
+      end
+
       def process_entity_type(entity_type, db, graph, direction, output_dir)
         puts "\n========== Processing #{entity_type.upcase} References ==========\n"
 
@@ -86,32 +95,89 @@ module Unitsdb
         # Find TTL entities referenced by database entities
         matches, missing_matches, unmatched_ttl = match_ttl_to_db(entity_type, ttl_entities, db_entities)
 
-        # Print results
+        # Print instructions for this direction
+        puts "\n=== Instructions for SI → UnitsDB direction ==="
+        puts "If you are the UnitsDB Register Manager, please ensure that all SI entities have proper references in the UnitsDB database."
+        puts "For each missing reference, add a reference with the appropriate URI and 'authority: \"si-digital-framework\"'."
+
+        # Print results in table format
         puts "\n=== #{entity_type.capitalize} with matching SI references ==="
         if matches.empty?
           puts "None"
         else
+          rows = []
           matches.each do |match|
-            puts "✓ #{match[:entity_id]} (#{match[:entity_name]}) -> #{match[:si_uri]}"
+            si_suffix = extract_identifying_suffix(match[:si_uri])
+            rows << [
+              "UnitsDB: #{match[:entity_id]}",
+              "(#{match[:entity_name]})"
+            ]
+            rows << [
+              "SI TTL:  #{si_suffix}",
+              "(#{match[:si_label] || match[:si_name]})"
+            ]
+            rows << :separator unless match == matches.last
           end
+
+          table = Terminal::Table.new(
+            title: "Valid SI Reference Mappings",
+            rows: rows
+          )
+          puts table
         end
 
         puts "\n=== #{entity_type.capitalize} without SI references ==="
         if missing_matches.empty?
           puts "None"
         else
+          rows = []
           missing_matches.each do |match|
-            puts "✗ #{match[:entity_id]} (#{match[:entity_name]}) -> #{match[:si_uri]} (missing reference)"
+            si_suffix = extract_identifying_suffix(match[:si_uri])
+            rows << [
+              "UnitsDB: #{match[:entity_id]}",
+              "(#{match[:entity_name]})"
+            ]
+            rows << [
+              "SI TTL:  #{si_suffix}",
+              "(#{match[:si_label] || match[:si_name]})"
+            ]
+            rows << [
+              "Status: Missing reference",
+              "✗"
+            ]
+            rows << :separator unless match == missing_matches.last
           end
+
+          table = Terminal::Table.new(
+            title: "Missing SI Reference Mappings",
+            rows: rows
+          )
+          puts table
         end
 
         puts "\n=== SI #{entity_type.capitalize} not mapped to our database ==="
         if unmatched_ttl.empty?
           puts "None (All TTL entities are referenced - Good job!)"
         else
+          rows = []
           unmatched_ttl.each do |entity|
-            puts "? #{entity[:name]} (#{entity[:label]}) -> #{entity[:uri]}"
+            si_suffix = extract_identifying_suffix(entity[:uri])
+            rows << [
+              "SI TTL:  #{si_suffix}",
+              "(#{entity[:label] || entity[:name]})"
+            ]
+            rows << [
+              "Status: No matching UnitsDB entity",
+              "?"
+            ]
+            rows << :separator unless entity == unmatched_ttl.last
           end
+
+          table = Terminal::Table.new(
+            title: "Unmapped SI Entities",
+            rows: rows
+          )
+          puts table
         end
 
         # Update references if output directory is specified
@@ -125,6 +191,11 @@ module Unitsdb
       def check_to_si(entity_type, ttl_entities, db_entities, output_dir)
         puts "\n=== Checking UnitsDB → SI (database entities referencing TTL) ==="
 
+        # Print instructions for this direction
+        puts "\n=== Instructions for UnitsDB → SI direction ==="
+        puts "If you are the UnitsDB Register Manager, please add SI references to UnitsDB entities that should have them."
+        puts "For each entity that should reference SI, add a reference with 'authority: \"si-digital-framework\"' and the SI TTL URI."
+
         # Find database entities that should reference TTL entities
         matches, missing_refs, unmatched_db = match_db_to_ttl(entity_type, ttl_entities, db_entities)
 
@@ -134,15 +205,66 @@ module Unitsdb
         puts "#{entity_type.capitalize} missing SI references: #{missing_refs.size}"
         puts "Database #{entity_type} not matching any SI entity: #{unmatched_db.size}"
 
+        # Show entities with valid references
+        unless matches.empty?
+          puts "\n=== #{entity_type.capitalize} with SI references ==="
+          rows = []
+          matches.each do |match|
+            db_entity = match[:db_entity]
+            entity_id = db_entity.short
+            entity_name = db_entity.names.first if db_entity.respond_to?(:names)
+            si_suffix = extract_identifying_suffix(match[:ttl_uri])
+
+            ttl_label = match[:ttl_entity] ? (match[:ttl_entity][:label] || match[:ttl_entity][:name]) : "Unknown"
+
+            rows << [
+              "UnitsDB: #{entity_id}",
+              "(#{entity_name})"
+            ]
+            rows << [
+              "SI TTL:  #{si_suffix}",
+              "(#{ttl_label})"
+            ]
+            rows << :separator unless match == matches.last
+          end
+
+          table = Terminal::Table.new(
+            title: "Valid SI References",
+            rows: rows
+          )
+          puts table
+        end
+
         # Show entities missing references
         unless missing_refs.empty?
           puts "\n=== #{entity_type.capitalize} that should reference SI ==="
+          rows = []
           missing_refs.each do |match|
             db_entity = match[:db_entity]
             entity_id = db_entity.short
             entity_name = db_entity.names.first if db_entity.respond_to?(:names)
-            puts "✗ #{entity_id} (#{entity_name}) -> #{match[:ttl_entity][:uri]}"
+            si_suffix = extract_identifying_suffix(match[:ttl_entity][:uri])
+
+            rows << [
+              "UnitsDB: #{entity_id}",
+              "(#{entity_name})"
+            ]
+            rows << [
+              "SI TTL:  #{si_suffix}",
+              "(#{match[:ttl_entity][:label] || match[:ttl_entity][:name]})"
+            ]
+            rows << [
+              "Status: Missing reference",
+              "✗"
+            ]
+            rows << :separator unless match == missing_refs.last
           end
+
+          table = Terminal::Table.new(
+            title: "Missing SI References",
+            rows: rows
+          )
+          puts table
         end
 
         # Update references if output directory is specified
@@ -298,20 +420,23 @@ module Unitsdb
         db_entities.each do |db_entity|
           entity_id = find_entity_id(db_entity)
 
-          # Try to find matching TTL entity
-          matching_ttl = []
-
           # Check first if this entity has a reference to any TTL entity
+          # This is important - if there's already a si-digital-framework reference,
+          # we consider it a valid mapping
           has_si_reference = false
           if db_entity.respond_to?(:references) && db_entity.references
             db_entity.references.each do |ref|
               next unless ref.authority == "si-digital-framework"
 
               has_si_reference = true
+              # Find the matching TTL entity for better display
+              matching_ttl_entity = ttl_entities.find { |e| e[:uri] == ref.uri }
+
               matches << {
                 entity_id: entity_id,
                 db_entity: db_entity,
-                ttl_uri: ref.uri
+                ttl_uri: ref.uri,
+                ttl_entity: matching_ttl_entity
               }
               break
             end
@@ -323,7 +448,8 @@ module Unitsdb
             next
           end
 
-          # Try to find matching TTL entity by name/symbol
+          # If no reference found, try to find matching TTL entity by name/symbol
+          matching_ttl = []
           ttl_entities.each do |ttl_entity|
             matching_ttl << ttl_entity if match_entity_names?(entity_type, db_entity, ttl_entity)
           end

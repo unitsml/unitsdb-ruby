@@ -46,7 +46,7 @@ module Unitsdb
       Commands::Get.new(options).get(id)
     end
 
-    desc "check_si", "Check entities in SI digital framework against UnitsDB content"
+    desc "check_si", "Check and update SI digital framework references in UnitsDB"
     option :entity_type, type: :string, aliases: "-e",
                          desc: "Entity type to check (units, quantities, or prefixes). If not specified, all types are checked"
     option :ttl_dir, type: :string, required: true, aliases: "-t",
@@ -57,26 +57,10 @@ module Unitsdb
                        desc: "Direction to check: 'to_si' (UnitsDB→TTL), 'from_si' (TTL→UnitsDB), or 'both'"
     option :database, type: :string, required: true, aliases: "-d",
                       desc: "Path to UnitsDB database (required)"
+
     def check_si
       require_relative "commands/check_si"
       Commands::CheckSi.new(options).run
-    end
-
-    desc "check_si_references", "Check and update SI digital framework references in UnitsDB"
-    option :entity_type, type: :string, aliases: "-e",
-                         desc: "Entity type to check (units, quantities, or prefixes). If not specified, all types are checked"
-    option :ttl_dir, type: :string, required: true, aliases: "-t",
-                     desc: "Path to the directory containing SI digital framework TTL files"
-    option :output_updated_database, type: :string, aliases: "-o",
-                                     desc: "Directory path to write updated YAML files with added SI references"
-    option :direction, type: :string, default: "both", aliases: "-r",
-                       desc: "Direction to check: 'to_si' (UnitsDB→TTL), 'from_si' (TTL→UnitsDB), or 'both'"
-    option :database, type: :string, required: true, aliases: "-d",
-                      desc: "Path to UnitsDB database (required)"
-
-    def check_si_references
-      require_relative "commands/check_si_references"
-      Commands::CheckSiReferences.new(options).run
     end
   end
 end

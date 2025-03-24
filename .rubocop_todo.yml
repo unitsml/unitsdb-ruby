@@ -23,7 +23,6 @@ Lint/ShadowingOuterLocalVariable:
 Lint/UnderscorePrefixedVariableName:
   Exclude:
     - 'lib/unitsdb/commands/check_si.rb'
-    - 'lib/unitsdb/commands/check_si_references.rb'
 
 # Offense count: 39
 # Configuration parameters: AllowedMethods, AllowedPatterns, CountRepeatedAttributes.
@@ -67,7 +66,7 @@ Metrics/PerceivedComplexity:
 Naming/MethodParameterName:
   Exclude:
     - 'lib/unitsdb/commands/check_si.rb'
-    - 'lib/unitsdb/commands/check_si_references.rb'
+    - 'lib/unitsdb/commands/check_si.rb'
     - 'lib/unitsdb/utils.rb'
 
 # Offense count: 35

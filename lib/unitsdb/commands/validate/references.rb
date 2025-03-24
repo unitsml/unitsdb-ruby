@@ -1,22 +1,12 @@
 # frozen_string_literal: true
 
-require_relative "base"
-
 module Unitsdb
   module Commands
     module Validate
       class References < Base
-        desc "check", "Validate that all references exist"
-        option :debug_registry, type: :boolean, desc: "Show registry contents for debugging"
-        option :database, type: :string, required: true, aliases: "-d",
-                          desc: "Path to UnitsDB database (required)"
-        option :print_valid, type: :boolean, default: false, desc: "Print valid references too"
-
-        default_command :check
-
-        def check
+        def run
           # Load the database
-          db = load_database(options[:database])
+          db = load_database(@options[:database])
 
           # Build registry of all valid IDs
           registry = build_id_registry(db)
@@ -26,7 +16,7 @@ module Unitsdb
 
           # Display results
           display_reference_results(invalid_refs, registry)
-        rescue Unitsdb::DatabaseError => e
+        rescue Unitsdb::Errors::DatabaseError => e
           puts "Error: #{e.message}"
           exit(1)
         end
@@ -112,7 +102,7 @@ module Unitsdb
           end
 
           # Debug registry if requested
-          if options[:debug_registry]
+          if @options[:debug_registry]
             puts "Registry contents:"
             registry.each do |type, ids|
               puts "  #{type}:"
@@ -234,7 +224,7 @@ module Unitsdb
             end
 
             if valid
-              puts "Valid reference: #{id} (#{type}) at #{file_type}:#{ref_path}" if options[:print_valid]
+              puts "Valid reference: #{id} (#{type}) at #{file_type}:#{ref_path}" if @options[:print_valid]
             else
               invalid_refs[file_type] ||= {}
               invalid_refs[file_type][ref_path] = { id: id, type: type, ref_type: ref_type }
@@ -265,7 +255,7 @@ module Unitsdb
             end
 
             if valid
-              puts "Valid reference: #{id} (#{type}) at #{file_type}:#{ref_path}" if options[:print_valid]
+              puts "Valid reference: #{id} (#{type}) at #{file_type}:#{ref_path}" if @options[:print_valid]
             else
               invalid_refs[file_type] ||= {}
               invalid_refs[file_type][ref_path] = { id: id, type: type, ref_type: ref_type }
@@ -275,7 +265,7 @@ module Unitsdb
             valid = registry.key?(ref_type) && registry[ref_type].key?(ref_id)
 
             if valid
-              puts "Valid reference: #{ref_id} (#{ref_type}) at #{file_type}:#{ref_path}" if options[:print_valid]
+              puts "Valid reference: #{ref_id} (#{ref_type}) at #{file_type}:#{ref_path}" if @options[:print_valid]
             else
               invalid_refs[file_type] ||= {}
               invalid_refs[file_type][ref_path] = { id: ref_id, type: ref_type }
@@ -293,7 +283,7 @@ module Unitsdb
 
           # Display registry contents if debug_registry is enabled
           # This is needed for the failing test
-          if options[:debug_registry]
+          if @options[:debug_registry]
             puts "\nRegistry contents:"
             registry.each do |type, ids|
               next if ids.empty?

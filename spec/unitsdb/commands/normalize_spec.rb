@@ -6,8 +6,8 @@ require "stringio"
 require "tempfile"
 
 RSpec.describe Unitsdb::Commands::Normalize do
-  let(:command) { described_class.new }
-  let(:mock_options) { { dir: "./test_dir", sort: true } }
+  let(:command) { described_class.new(options) }
+  let(:options) { { database: "./test_dir", sort: true } }
   let(:test_yaml) { { "key2" => "value2", "key1" => "value1" } }
   let(:normalized_yaml) { { "key1" => "value1", "key2" => "value2" } }
 
@@ -28,31 +28,33 @@ RSpec.describe Unitsdb::Commands::Normalize do
         expect(Unitsdb::Utils).to receive(:sort_yaml_keys).with(test_yaml).and_return(normalized_yaml)
         expect(File).to receive(:write).with("output.yaml", anything)
 
-        command.yaml("input.yaml", "output.yaml", mock_options)
+        command.run("input.yaml", "output.yaml")
         expect(command).to have_received(:load_yaml).with("input.yaml")
       end
 
       it "outputs a success message" do
         output = capture_output do
-          command.yaml("input.yaml", "output.yaml", mock_options)
+          command.run("input.yaml", "output.yaml")
         end
         expect(output[:output]).to include("Normalized YAML written to output.yaml")
       end
 
-      it "respects the sort option" do
+      context "when the sort option is false" do
         # When sort is false, should not sort keys
-        mock_options_no_sort = { dir: "./test_dir", sort: false }
+        let(:options) { { database: "./test_dir", sort: false } }
+        it "respects the sort option" do
+          expect(Unitsdb::Utils).not_to receive(:sort_yaml_keys)
+          expect(File).to receive(:write).with("output.yaml", anything)
 
-        expect(Unitsdb::Utils).not_to receive(:sort_yaml_keys)
-        expect(File).to receive(:write).with("output.yaml", anything)
-
-        command.yaml("input.yaml", "output.yaml", mock_options_no_sort)
+          command.run("input.yaml", "output.yaml")
+        end
       end
     end
 
     context "with --all option" do
       # Use the actual list from Utils module to ensure test is in sync with implementation
       let(:default_files) { Unitsdb::Utils::DEFAULT_YAML_FILES }
+      let(:options) { { all: true, database: "./test_dir", sort: true } }
 
       before do
         allow(Unitsdb::Utils).to receive(:DEFAULT_YAML_FILES).and_return(default_files)
@@ -63,12 +65,12 @@ RSpec.describe Unitsdb::Commands::Normalize do
         # Instead of expecting specific files in a specific order, just count the calls
         expect(command).to receive(:normalize_file).exactly(default_files.length).times
 
-        command.yaml(nil, nil, { all: true, dir: "./test_dir", sort: true })
+        command.run(nil, nil)
       end
 
       it "outputs success messages for each file" do
         output = capture_output do
-          command.yaml(nil, nil, { all: true, dir: "./test_dir", sort: true })
+          command.run(nil, nil)
         end
         default_files.each do |file|
           file_path = File.join("./test_dir", file)
@@ -90,20 +92,20 @@ RSpec.describe Unitsdb::Commands::Normalize do
         # Should only normalize the files that exist
         expect(command).to receive(:normalize_file).exactly(existing_files_count).times
 
-        command.yaml(nil, nil, { all: true, dir: "./test_dir", sort: true })
+        command.run(nil, nil)
       end
     end
 
     context "with invalid arguments" do
       it "exits with an error when input and output are missing and --all is not specified" do
         expect(command).to receive(:exit).with(1)
-        command.yaml(nil, nil, mock_options)
+        command.run(nil, nil)
         expect(command).not_to receive(:normalize_file)
       end
 
       it "exits with a helpful error message" do
         output = capture_output do
-          command.yaml(nil, nil, mock_options)
+          command.run(nil, nil)
         end
         expect(output[:output]).to include("Error: INPUT and OUTPUT are required when not using --all")
       end
@@ -116,7 +118,7 @@ RSpec.describe Unitsdb::Commands::Normalize do
       expect(Unitsdb::Utils).to receive(:sort_yaml_keys).with(test_yaml).and_return(normalized_yaml)
       expect(File).to receive(:write).with("output.yaml", normalized_yaml.to_yaml)
 
-      command.send(:normalize_file, "input.yaml", "output.yaml", mock_options)
+      command.send(:normalize_file, "input.yaml", "output.yaml")
     end
   end
 end

@@ -1,23 +1,15 @@
 # frozen_string_literal: true
 
-require_relative "base"
-
 module Unitsdb
   module Commands
     module Validate
       class Identifiers < Base
-        desc "check", "Check for uniqueness of identifier fields"
-        option :database, type: :string, required: true, aliases: "-d",
-                          desc: "Path to UnitsDB database (required)"
-
-        default_command :check
-
-        def check
+        def run
           db = load_database
           all_dups = db.validate_uniqueness
 
           display_results(all_dups)
-        rescue Unitsdb::DatabaseError => e
+        rescue Unitsdb::Errors::DatabaseError => e
           puts "Error: #{e.message}"
           exit(1)
         end

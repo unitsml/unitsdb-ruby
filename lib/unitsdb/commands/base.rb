@@ -7,11 +7,15 @@ require_relative "../database"
 
 module Unitsdb
   module Commands
-    class Base < Thor
+    class Base
+      def initialize(options = {})
+        @options = options
+      end
+
       protected
 
       def yaml_files(input = nil, opts = nil)
-        options_to_use = opts || options
+        options_to_use = opts || @options
 
         if options_to_use[:all]
           Unitsdb::Utils::DEFAULT_YAML_FILES.map { |f| File.join(options_to_use[:database], f) }
@@ -24,7 +28,7 @@ module Unitsdb
       end
 
       def load_database(database_path = nil)
-        path = database_path || options[:database]
+        path = database_path || @options[:database]
 
         raise Unitsdb::Errors::DatabaseError, "Database path must be specified using the --database option" if path.nil?
 

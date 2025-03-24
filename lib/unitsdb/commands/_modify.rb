@@ -14,7 +14,7 @@ module Unitsdb
 
       def normalize(input = nil, output = nil)
         require_relative "normalize"
-        Normalize.new.yaml(input, output, options)
+        Normalize.new(options).run(input, output)
       end
     end
   end

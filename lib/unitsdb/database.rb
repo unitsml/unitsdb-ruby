@@ -140,8 +140,12 @@ module Unitsdb
     end
 
     def self.from_db(dir_path)
+      # If dir_path is a relative path, make it relative to the current working directory
+      db_path = dir_path
+      puts "Database directory path: #{db_path}"
+
       # Check if the directory exists
-      raise DatabaseNotFoundError, "Database directory not found: #{dir_path}" unless Dir.exist?(dir_path)
+      raise Errors::DatabaseNotFoundError, "Database directory not found: #{db_path}" unless Dir.exist?(db_path)
 
       # Define required files
       required_files = %w[prefixes.yaml dimensions.yaml units.yaml quantities.yaml unit_systems.yaml]
@@ -150,7 +154,10 @@ module Unitsdb
       # Check if all required files exist
       missing_files = required_files.reject { |file| File.exist?(File.join(dir_path, file)) }
 
-      raise DatabaseFileNotFoundError, "Missing required database files: #{missing_files.join(", ")}" if missing_files.any?
+      if missing_files.any?
+        raise Errors::DatabaseFileNotFoundError,
+              "Missing required database files: #{missing_files.join(", ")}"
+      end
 
       # Ensure we have path properly joined with filenames
       prefixes_yaml = yaml_files[0]
@@ -177,11 +184,11 @@ module Unitsdb
         quantities_hash = YAML.safe_load(File.read(quantities_yaml))
         unit_systems_hash = YAML.safe_load(File.read(unit_systems_yaml))
       rescue Errno::ENOENT => e
-        raise DatabaseFileNotFoundError, "Failed to read database file: #{e.message}"
+        raise Errors::DatabaseFileNotFoundError, "Failed to read database file: #{e.message}"
       rescue Psych::SyntaxError => e
-        raise DatabaseFileInvalidError, "Invalid YAML in database file: #{e.message}"
+        raise Errors::DatabaseFileInvalidError, "Invalid YAML in database file: #{e.message}"
       rescue StandardError => e
-        raise DatabaseLoadError, "Error loading database: #{e.message}"
+        raise Errors::DatabaseLoadError, "Error loading database: #{e.message}"
       end
 
       # Verify all files have schema_version field
@@ -192,7 +199,10 @@ module Unitsdb
       missing_schema << "quantities.yaml" unless quantities_hash.key?("schema_version")
       missing_schema << "unit_systems.yaml" unless unit_systems_hash.key?("schema_version")
 
-      raise DatabaseFileInvalidError, "Missing schema_version in files: #{missing_schema.join(", ")}" if missing_schema.any?
+      if missing_schema.any?
+        raise Errors::DatabaseFileInvalidError,
+              "Missing schema_version in files: #{missing_schema.join(", ")}"
+      end
 
       # Extract versions from each file
       prefixes_version = prefixes_hash["schema_version"]
@@ -218,7 +228,7 @@ module Unitsdb
           "quantities.yaml" => quantities_version,
           "unit_systems.yaml" => unit_systems_version
         }
-        raise VersionMismatchError, "Version mismatch in database files: #{version_info.inspect}"
+        raise Errors::VersionMismatchError, "Version mismatch in database files: #{version_info.inspect}"
       end
 
       combined_yaml = {

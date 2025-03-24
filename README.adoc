@@ -128,28 +128,65 @@ Options:
 `--format`:: Output format (text, json, yaml) - default is text
 `--database`, `-d`:: Path to UnitsDB database (required)
 
-==== Check SI Units
+==== Check SI
 
-Checks entities in the BIPM's SI digital framework against the database to ensure UnitsDB is a strict superset of TTL content. Identifies both missing references in UnitsDB entities and TTL entities not found in the database:
+Performs a comprehensive check of entities in the BIPM's SI digital framework TTL files against UnitsDB database entities. This combined command checks in both directions to ensure UnitsDB is a strict superset of the SI digital framework:
+
+* From SI to UnitsDB: Ensures every TTL entity is referenced by at least one UnitsDB entity
+* From UnitsDB to SI: Identifies UnitsDB entities that should reference TTL entities
 
 [source,sh]
 ----
-# Check units and generate report
-$ unitsdb check_si_units --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework
+# Check all entity types and generate a report
+$ unitsdb check_si --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework
 
-# Check other entity types (quantities or prefixes)
-$ unitsdb check_si_units --entity-type=quantities --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework
+# Check a specific entity type (units, quantities, or prefixes)
+$ unitsdb check_si --entity-type=units --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework
 
-# Specify an output file for updated YAML
-$ unitsdb check_si_units --output=path/to/output.yaml --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework
+# Check in a specific direction only
+$ unitsdb check_si --direction=from_si --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework
+
+# Update references and write to output directory
+$ unitsdb check_si --output-updated-database=/path/to/output/dir --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework
 ----
 
 Options:
 
-`--entity_type`, `-e`:: Entity type to check (units, quantities, prefixes). Defaults to units
-`--output`, `-o`:: Output file path for updated YAML file (default: [database path]/[entity_type].yaml)
-`--database`, `-d`:: Path to UnitsDB database (required)
+`--entity-type`, `-e`:: Entity type to check (units, quantities, or prefixes). If not specified, all types are checked
 `--ttl-dir`, `-t`:: Path to the directory containing SI digital framework TTL files (required)
+`--output_updated_database`, `-o`:: Directory path to write updated YAML files with added SI references
+`--direction`, `-r`:: Direction to check: 'to_si' (UnitsDB→TTL), 'from_si' (TTL→UnitsDB), or 'both' (default)
+`--database`, `-d`:: Path to UnitsDB database (required)
+
+===== SI References Workflow
+
+When the BIPM updates their SI Digital Reference TTL files, follow these steps to ensure UnitsDB remains a strict superset:
+
+1. Verify unreferenced TTL entries:
+   * Run `unitsdb check_si_references --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework`
+   * Look for entries in the "SI [Entity Type] not mapped to our database" section
+   * These are TTL entities that are not currently referenced by any UnitsDB entity
+
+2. For each unreferenced TTL entry:
+   * Search for matching entities in UnitsDB: `unitsdb search "entity_name" --database=/path/to/unitsdb/data`
+   * If a match exists:
+     ** Update its references manually in the appropriate YAML file
+     ** Add a new reference with `authority: "si-digital-framework"` and the TTL URI
+   * If no match exists:
+     ** Create a new entity in the appropriate YAML file (units.yaml, quantities.yaml, or prefixes.yaml)
+     ** Include the necessary reference to the TTL entity
+
+3. Verify all references are complete:
+   * Run `unitsdb check_si_references --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework` again
+   * Confirm no entries appear in the "SI [Entity Type] not mapped to our database" section
+   * If needed, run with the output option to automatically add missing references:
+     `unitsdb check_si_references --output-updated-database=/path/to/output/dir --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework`
+
+The `check_si_references` command ensures every entity in the BIPM's SI Digital Reference is properly referenced in UnitsDB:
+
+* It verifies that every TTL entity has at least one corresponding UnitsDB entity referencing it
+* It identifies UnitsDB entities that should reference SI Digital Framework but don't yet
+* It can automatically update YAML files with proper references when used with the `--output-updated-database` option
 
 === Examples
 

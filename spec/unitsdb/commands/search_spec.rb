@@ -6,7 +6,8 @@ require "fileutils"
 
 RSpec.describe Unitsdb::Commands::Search do
   let(:fixtures_dir) { File.join("spec", "fixtures", "unitsdb") }
-  let(:instance) { described_class.new }
+  let(:command) { described_class.new(options) }
+  let(:options) { { database: fixtures_dir } }
 
   describe "#search" do
     context "when searching for text" do
@@ -17,7 +18,7 @@ RSpec.describe Unitsdb::Commands::Search do
         $stdout = output
 
         # Execute search
-        instance.search("meter", dir: fixtures_dir)
+        command.run("meter")
 
         # Reset stdout
         $stdout = original_stdout
@@ -36,7 +37,7 @@ RSpec.describe Unitsdb::Commands::Search do
         $stdout = output
 
         # Execute search with a term unlikely to exist
-        instance.search("nonexistentterm123456", dir: fixtures_dir)
+        command.run("nonexistentterm123456")
 
         # Reset stdout
         $stdout = original_stdout
@@ -47,6 +48,7 @@ RSpec.describe Unitsdb::Commands::Search do
     end
 
     context "when specifying entity type" do
+      let(:options) { { database: fixtures_dir, type: "prefixes" } }
       it "limits search to that type" do
         # Redirect stdout to capture output
         original_stdout = $stdout
@@ -54,7 +56,7 @@ RSpec.describe Unitsdb::Commands::Search do
         $stdout = output
 
         # Execute search with type constraint
-        instance.search("kilo", type: "prefixes", dir: fixtures_dir)
+        command.run("kilo")
 
         # Reset stdout
         $stdout = original_stdout
@@ -65,6 +67,7 @@ RSpec.describe Unitsdb::Commands::Search do
     end
 
     context "when searching by id" do
+      let(:options) { { database: fixtures_dir, id: "NISTu1" } }
       it "finds the entity with the matching id" do
         # Redirect stdout to capture output
         original_stdout = $stdout
@@ -72,13 +75,13 @@ RSpec.describe Unitsdb::Commands::Search do
         $stdout = output
 
         # Execute search with ID
-        instance.search("meter", id: "NISTu1", dir: fixtures_dir)
+        command.run("meter")
 
         # Reset stdout
         $stdout = original_stdout
 
         # Verify output contains expected content
-        expect(output.string).to include("Found entity:")
+        expect(output.string).to include("Entity details:")
         expect(output.string).to include("Unit")
         expect(output.string).to include("NISTu1")
         expect(output.string).to include("Identifiers:")
@@ -86,6 +89,7 @@ RSpec.describe Unitsdb::Commands::Search do
     end
 
     context "when searching by id with type filter" do
+      let(:options) { { database: fixtures_dir, id: "NISTu1", id_type: "nist" } }
       it "finds the entity with the matching id and type" do
         # Redirect stdout to capture output
         original_stdout = $stdout
@@ -93,17 +97,18 @@ RSpec.describe Unitsdb::Commands::Search do
         $stdout = output
 
         # Execute search with ID and ID type
-        instance.search("meter", id: "NISTu1", id_type: "nist", dir: fixtures_dir)
+        command.run("meter")
 
         # Reset stdout
         $stdout = original_stdout
 
         # Verify output contains expected content
-        expect(output.string).to include("Found entity:")
+        expect(output.string).to include("Entity details:")
       end
     end
 
     context "when searching by id that doesn't exist" do
+      let(:options) { { database: fixtures_dir, id: "NonExistentID" } }
       it "indicates that no entity was found" do
         # Redirect stdout to capture output
         original_stdout = $stdout
@@ -111,7 +116,7 @@ RSpec.describe Unitsdb::Commands::Search do
         $stdout = output
 
         # Execute search with non-existent ID
-        instance.search("meter", id: "NonExistentID", dir: fixtures_dir)
+        command.run("meter")
 
         # Reset stdout
         $stdout = original_stdout
@@ -124,10 +129,10 @@ RSpec.describe Unitsdb::Commands::Search do
     context "when an error occurs" do
       it "handles the error gracefully" do
         # Create a test database that will raise an error when loaded
-        allow(instance).to receive(:load_database).and_raise(StandardError.new("Test error"))
+        allow(command).to receive(:load_database).and_raise(Unitsdb::Errors::DatabaseError, "Test error")
 
         # Expect exit to be called with status 1
-        expect(instance).to receive(:exit).with(1)
+        expect(command).to receive(:exit).with(1)
 
         # Redirect stdout to capture output
         original_stdout = $stdout
@@ -135,7 +140,7 @@ RSpec.describe Unitsdb::Commands::Search do
         $stdout = output
 
         # Execute search
-        expect { instance.search("test", dir: fixtures_dir) }.to output(/Error searching database: Test error/).to_stdout
+        expect { command.run("test") }.to output(/Test error/).to_stdout
 
         # Reset stdout
         $stdout = original_stdout

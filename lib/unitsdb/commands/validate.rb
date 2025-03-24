@@ -1,17 +1,30 @@
 # frozen_string_literal: true
 
 require "thor"
-require_relative "validate/references"
-require_relative "validate/identifiers"
 
 module Unitsdb
   module Commands
     class ValidateCommand < Thor
       desc "references", "Validate that all references exist"
-      subcommand "references", Validate::References
+      option :debug_registry, type: :boolean, desc: "Show registry contents for debugging"
+      option :database, type: :string, required: true, aliases: "-d",
+                        desc: "Path to UnitsDB database (required)"
+      option :print_valid, type: :boolean, default: false, desc: "Print valid references too"
+      def references
+        require_relative "validate/references"
+
+        Commands::References.new(options).run
+      end
 
       desc "identifiers", "Check for uniqueness of identifier fields"
-      subcommand "identifiers", Validate::Identifiers
+      option :database, type: :string, required: true, aliases: "-d",
+                        desc: "Path to UnitsDB database (required)"
+
+      def identifiers
+        require_relative "validate/identifiers"
+
+        Commands::Identifiers.new(options).run
+      end
     end
   end
 end

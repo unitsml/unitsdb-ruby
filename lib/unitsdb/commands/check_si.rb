@@ -92,7 +92,7 @@ module Unitsdb
           puts "None"
         else
           matches.each do |match|
-            puts "✓ #{match[:entity_id]} (#{match[:entity_short]}) -> #{match[:si_uri]}"
+            puts "✓ #{match[:entity_id]} (#{match[:entity_name]}) -> #{match[:si_uri]}"
           end
         end
 
@@ -101,7 +101,7 @@ module Unitsdb
           puts "None"
         else
           missing_matches.each do |match|
-            puts "✗ #{match[:entity_id]} (#{match[:entity_short]}) -> #{match[:si_uri]} (missing reference)"
+            puts "✗ #{match[:entity_id]} (#{match[:entity_name]}) -> #{match[:si_uri]} (missing reference)"
           end
         end
 
@@ -139,8 +139,9 @@ module Unitsdb
           puts "\n=== #{entity_type.capitalize} that should reference SI ==="
           missing_refs.each do |match|
             db_entity = match[:db_entity]
-            entity_name = db_entity.short || (db_entity.respond_to?(:id) ? db_entity.id : "Unknown")
-            puts "✗ #{entity_name} -> #{match[:ttl_entity][:uri]}"
+            entity_id = db_entity.short
+            entity_name = db_entity.names.first if db_entity.respond_to?(:names)
+            puts "✗ #{entity_id} (#{entity_name}) -> #{match[:ttl_entity][:uri]}"
           end
         end
 
@@ -256,6 +257,7 @@ module Unitsdb
           matching_entities.each do |entity|
             # Get entity ID
             entity_id = entity.short
+            entity_name = entity.names.first if entity.respond_to?(:names)
 
             # Check if this entity already has a reference to SI digital framework
             has_reference = entity.references&.any? do |ref|
@@ -264,7 +266,7 @@ module Unitsdb
 
             match_data = {
               entity_id: entity_id,
-              entity_short: entity.short,
+              entity_name: entity_name,
               si_uri: ttl_entity[:uri],
               si_name: ttl_entity[:name],
               si_label: ttl_entity[:label],

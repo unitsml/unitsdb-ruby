@@ -138,16 +138,16 @@ Performs a comprehensive check of entities in the BIPM's SI digital framework TT
 [source,sh]
 ----
 # Check all entity types and generate a report
-$ unitsdb check_si --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework
+$ unitsdb check_si --database=spec/fixtures/unitsdb --ttl-dir=bipm-si-ttl
 
 # Check a specific entity type (units, quantities, or prefixes)
-$ unitsdb check_si --entity-type=units --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework
+$ unitsdb check_si --entity-type=units --database=spec/fixtures/unitsdb --ttl-dir=bipm-si-ttl
 
 # Check in a specific direction only
-$ unitsdb check_si --direction=from_si --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework
+$ unitsdb check_si --direction=from_si --database=spec/fixtures/unitsdb --ttl-dir=bipm-si-ttl
 
 # Update references and write to output directory
-$ unitsdb check_si --output-updated-database=/path/to/output/dir --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework
+$ unitsdb check_si --output-updated-database=new_unitsdb --database=spec/fixtures/unitsdb --ttl-dir=bipm-si-ttl
 ----
 
 Options:
@@ -163,7 +163,7 @@ Options:
 When the BIPM updates their SI Digital Reference TTL files, follow these steps to ensure UnitsDB remains a strict superset:
 
 1. Verify unreferenced TTL entries:
-   * Run `unitsdb check_si_references --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework`
+   * Run `unitsdb check_si --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework`
    * Look for entries in the "SI [Entity Type] not mapped to our database" section
    * These are TTL entities that are not currently referenced by any UnitsDB entity
 
@@ -177,12 +177,12 @@ When the BIPM updates their SI Digital Reference TTL files, follow these steps t
      ** Include the necessary reference to the TTL entity
 
 3. Verify all references are complete:
-   * Run `unitsdb check_si_references --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework` again
+   * Run `unitsdb check_si --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework` again
    * Confirm no entries appear in the "SI [Entity Type] not mapped to our database" section
    * If needed, run with the output option to automatically add missing references:
-     `unitsdb check_si_references --output-updated-database=/path/to/output/dir --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework`
+     `unitsdb check_si --output-updated-database=/path/to/output/dir --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework`
 
-The `check_si_references` command ensures every entity in the BIPM's SI Digital Reference is properly referenced in UnitsDB:
+The `check_si` command ensures every entity in the BIPM's SI Digital Reference is properly referenced in UnitsDB:
 
 * It verifies that every TTL entity has at least one corresponding UnitsDB entity referencing it
 * It identifies UnitsDB entities that should reference SI Digital Framework but don't yet

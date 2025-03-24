@@ -14,10 +14,6 @@ RSpec.describe Unitsdb::Commands::CheckSi do
   before do
     # Redirect output for testing
     $stdout = output
-
-    # Allow RDF::Graph to be mocked
-    allow(RDF::Graph).to receive(:new).and_return(double("graph").as_null_object)
-    allow_any_instance_of(RDF::Graph).to receive(:from_file).and_return(true)
   end
 
   after do

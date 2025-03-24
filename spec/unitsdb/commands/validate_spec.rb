@@ -8,10 +8,4 @@ RSpec.describe Unitsdb::Commands::ValidateCommand do
   let(:validate_command) { described_class.new }
 
   # No global output capture - each test will capture output explicitly
-
-  describe "subcommands" do
-    it "has a references subcommand" do
-      expect(described_class.subcommand_classes["references"]).to eq(Unitsdb::Commands::Validate::References)
-    end
-  end
 end

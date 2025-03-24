@@ -12,7 +12,7 @@ require_relative "../errors"
 
 module Unitsdb
   module Commands
-    class CheckSiReferences < Base
+    class CheckSi < Base
       # Entity types supported by this command
       ENTITY_TYPES = %w[units quantities prefixes].freeze
 
@@ -22,9 +22,19 @@ module Unitsdb
         direction = @options[:direction]&.downcase || "both"
         output_dir = @options[:output_updated_database]
 
+        # Debug: Print all CLI @options
+        puts "CLI @options received: #{@options.inspect}"
+
         # Use the path as-is without expansion
         database_path = @options[:database] || "."
         puts "Using database directory: #{database_path}"
+
+        # Debug: Check if the files exist
+        required_files = %w[prefixes.yaml dimensions.yaml units.yaml quantities.yaml unit_systems.yaml]
+        required_files.each do |file|
+          full_path = File.join(database_path, file)
+          puts "Checking if file exists: #{full_path} - #{File.exist?(full_path)}"
+        end
 
         # Validate direction
         unless %w[to_si from_si both].include?(direction)
@@ -62,7 +72,7 @@ module Unitsdb
       private
 
       def process_entity_type(entity_type, db, graph, direction, output_dir)
-        puts "\n========== Processing #{entity_type.upcase} References ==========\n"
+        puts "\n========== Processing #{entity_type.upcase} ==========\n"
 
         # Get entities from DB and TTL
         db_entities = db.send(entity_type)
@@ -107,7 +117,7 @@ module Unitsdb
 
         puts "\n=== SI #{entity_type.capitalize} not mapped to our database ==="
         if unmatched_ttl.empty?
-          puts "None (All TTL entities are referenced - Good job!)"
+          puts "None"
         else
           unmatched_ttl.each do |entity|
             puts "? #{entity[:name]} (#{entity[:label]}) -> #{entity[:uri]}"
@@ -360,8 +370,8 @@ module Unitsdb
 
       def find_matching_units(ttl_unit, _units)
         # Match by name or label
-        matching_units = @db.search(text: ttl_unit[:name], type: "units")
-        matching_units += @db.search(text: ttl_unit[:label], type: "units") if ttl_unit[:label]
+        matching_units = @db.search_text(ttl_unit[:name], type: "units")
+        matching_units += @db.search_text(ttl_unit[:label], type: "units") if ttl_unit[:label]
 
         # If no match by name, try by symbol
         if matching_units.empty? && ttl_unit[:symbol]
@@ -375,20 +385,17 @@ module Unitsdb
 
       def find_matching_quantities(ttl_quantity, _quantities)
         # Match by name, label, or alt_label
-        matching_quantities = @db.search(text: ttl_quantity[:name], type: "quantities")
-        matching_quantities += @db.search(text: ttl_quantity[:label], type: "quantities") if ttl_quantity[:label]
-        if ttl_quantity[:alt_label]
-          matching_quantities += @db.search(text: ttl_quantity[:alt_label],
-                                            type: "quantities")
-        end
+        matching_quantities = @db.search_text(ttl_quantity[:name], type: "quantities")
+        matching_quantities += @db.search_text(ttl_quantity[:label], type: "quantities") if ttl_quantity[:label]
+        matching_quantities += @db.search_text(ttl_quantity[:alt_label], type: "quantities") if ttl_quantity[:alt_label]
 
         matching_quantities.uniq
       end
 
       def find_matching_prefixes(ttl_prefix, _prefixes)
         # Match by name or label
-        matching_prefixes = @db.search(text: ttl_prefix[:name], type: "prefixes")
-        matching_prefixes += @db.search(text: ttl_prefix[:label], type: "prefixes") if ttl_prefix[:label]
+        matching_prefixes = @db.search_text(ttl_prefix[:name], type: "prefixes")
+        matching_prefixes += @db.search_text(ttl_prefix[:label], type: "prefixes") if ttl_prefix[:label]
 
         # If no match by name, try by symbol
         if matching_prefixes.empty? && ttl_prefix[:symbol]
@@ -559,8 +566,11 @@ module Unitsdb
 
       def find_entity_id(entity)
         return entity.id if entity.respond_to?(:id) && entity.id
-        return entity.identifiers.first.id if !entity.identifiers.empty? &&
-                                              entity.identifiers.first.respond_to?(:id)
+
+        if entity.identifiers&.first &&
+           entity.identifiers.first.respond_to?(:id)
+          return entity.identifiers.first.id
+        end
 
         entity.short
       end

@@ -6,23 +6,18 @@ require "yaml"
 module Unitsdb
   module Commands
     class Normalize < Base
-      desc "yaml [INPUT] [OUTPUT]", "Normalize a YAML file or all YAML files with --all"
-      method_option :sort, type: :boolean, default: true, desc: "Sort keys alphabetically"
-
-      def yaml(input = nil, output = nil, opts = nil)
-        options_to_use = opts || options
-
-        unless options_to_use[:all] || (input && output)
+      def run(input = nil, output = nil)
+        unless @options[:all] || (input && output)
           puts "Error: INPUT and OUTPUT are required when not using --all"
           exit(1)
         end
 
-        if options_to_use[:all]
+        if @options[:all]
           Unitsdb::Utils::DEFAULT_YAML_FILES.each do |file|
-            path = File.join(options_to_use[:database], file)
+            path = File.join(@options[:database], file)
             next unless File.exist?(path)
 
-            normalize_file(path, path, options_to_use)
+            normalize_file(path, path)
             puts "Normalized #{path}"
           end
           puts "All YAML files normalized successfully!"
@@ -30,18 +25,18 @@ module Unitsdb
 
         return unless input && output
 
-        normalize_file(input, output, options_to_use)
+        normalize_file(input, output)
         puts "Normalized YAML written to #{output}"
       end
 
       private
 
-      def normalize_file(input, output, opts)
+      def normalize_file(input, output)
         # Load the original YAML to work with
         yaml = load_yaml(input)
 
         # Sort keys if requested
-        yaml = Unitsdb::Utils.sort_yaml_keys(yaml) if opts[:sort]
+        yaml = Unitsdb::Utils.sort_yaml_keys(yaml) if @options[:sort]
 
         # Write the normalized output
         File.write(output, yaml.to_yaml)

@@ -7,28 +7,16 @@ require_relative "../errors"
 module Unitsdb
   module Commands
     class Search < Base
-      desc "search QUERY", "Search for entities containing the given text"
-      option :type, type: :string, aliases: "-t",
-                    desc: "Entity type to search (units, prefixes, quantities, dimensions, unit_systems)"
-      option :id, type: :string, aliases: "-i",
-                  desc: "Search for an entity with a specific identifier"
-      option :id_type, type: :string,
-                       desc: "Filter get_by_id search by identifier type"
-      option :format, type: :string, default: "text",
-                      desc: "Output format (text, json, yaml)"
-      option :database, type: :string, required: true, aliases: "-d",
-                        desc: "Path to UnitsDB database (required)"
-
-      def search(query, options = {})
+      def run(query)
         # Database path is guaranteed by Thor's global option
 
-        type = options[:type]
-        id = options[:id]
-        id_type = options[:id_type]
-        format = options[:format] || "text"
+        type = @options[:type]
+        id = @options[:id]
+        id_type = @options[:id_type]
+        format = @options[:format] || "text"
 
         begin
-          database = load_database(options[:database])
+          database = load_database(@options[:database])
 
           # Search by ID (early return)
           if id
@@ -75,7 +63,7 @@ module Unitsdb
           results.each do |entity|
             print_entity_with_ids(entity)
           end
-        rescue Unitsdb::DatabaseError => e
+        rescue Unitsdb::Errors::DatabaseError => e
           puts "Error: #{e.message}"
           exit(1)
         rescue StandardError => e

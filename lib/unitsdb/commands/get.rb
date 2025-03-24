@@ -7,21 +7,13 @@ require_relative "../errors"
 module Unitsdb
   module Commands
     class Get < Base
-      desc "get ID", "Get detailed information about an entity by ID"
-      option :id_type, type: :string,
-                       desc: "Filter by identifier type"
-      option :format, type: :string, default: "text",
-                      desc: "Output format (text, json, yaml)"
-      option :database, type: :string, required: true, aliases: "-d",
-                        desc: "Path to UnitsDB database (required)"
-
-      def get(id, options = {})
+      def get(id)
         # Database path is guaranteed by Thor's global option
-        id_type = options[:id_type]
-        format = options[:format] || "text"
+        id_type = @options[:id_type]
+        format = @options[:format] || "text"
 
         begin
-          database = load_database(options[:database])
+          database = load_database(@options[:database])
 
           # Search by ID
           entity = database.get_by_id(id: id, type: id_type)

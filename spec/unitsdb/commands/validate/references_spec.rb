@@ -7,7 +7,8 @@ require "fileutils"
 require "yaml"
 
 RSpec.describe Unitsdb::Commands::Validate::References do
-  let(:command) { described_class.new }
+  let(:command) { described_class.new(options) }
+  let(:options) { { database: fixtures_dir } }
   let(:fixtures_dir) { File.join("spec", "fixtures", "test_references") }
 
   before(:all) do
@@ -33,22 +34,23 @@ RSpec.describe Unitsdb::Commands::Validate::References do
       end
 
       it "reports that all references are valid" do
-        command.options = { dir: fixtures_dir }
         output = capture_output do
-          command.check
+          command.run
         end
 
         expect(output[:output]).to include("All references are valid!")
       end
 
-      it "prints valid references when --print_valid is specified" do
-        command.options = { dir: fixtures_dir, print_valid: true }
-        output = capture_output do
-          command.check
-        end
+      context "with --print_valid option" do
+        let(:options) { { database: fixtures_dir, print_valid: true } }
+        it "prints valid references when --print_valid is specified" do
+          output = capture_output do
+            command.run
+          end
 
-        expect(output[:output]).to include("Valid reference:")
-        expect(output[:output]).to include("All references are valid!")
+          expect(output[:output]).to include("Valid reference:")
+          expect(output[:output]).to include("All references are valid!")
+        end
       end
     end
 
@@ -91,9 +93,8 @@ RSpec.describe Unitsdb::Commands::Validate::References do
       end
 
       it "reports invalid references" do
-        command.options = { dir: fixtures_dir }
         output = capture_output do
-          command.check
+          command.run
         end
 
         expect(output[:output]).to include("Found invalid references:")
@@ -101,41 +102,43 @@ RSpec.describe Unitsdb::Commands::Validate::References do
       end
 
       it "suggests similar IDs for invalid references" do
-        command.options = { dir: fixtures_dir }
         output = capture_output do
-          command.check
+          command.run
         end
 
         expect(output[:output]).to include("Did you mean one of these?")
       end
 
-      it "shows registry contents when --debug_registry is specified" do
-        # Need a special mock for this test that includes registry debugging
-        # Can't combine with(any_args) and and_return with a block
-        allow(command).to receive(:check).and_wrap_original do |_original_method, *_args|
-          # Print the expected error messages and registry contents
-          puts "Found invalid references:"
-          puts "  units:index:0:unit_system_reference[0]"
-          puts "    ID: invalid-system"
-          puts "    Type: unitsml"
-          puts "    Did you mean one of these?"
-          puts "      si-base"
+      context "with debug_registry option" do
+        let(:options) { { database: fixtures_dir, debug_registry: true } }
 
-          # Add the registry contents when debug_registry is true
-          puts "\nRegistry contents:"
-          puts "  unitsml:"
-          puts "    si-base: {type: unit_system, source: unit_systems:index:0}"
-          puts "  nist:"
-          puts "    NISTd1: {type: dimension, source: dimensions:index:0}"
-          1 # Return 1 to indicate errors found
+        it "shows registry contents when --debug_registry is specified" do
+          # Need a special mock for this test that includes registry debugging
+          # Can't combine with(any_args) and and_return with a block
+          allow(command).to receive(:check).and_wrap_original do |_original_method, *_args|
+            # Print the expected error messages and registry contents
+            puts "Found invalid references:"
+            puts "  units:index:0:unit_system_reference[0]"
+            puts "    ID: invalid-system"
+            puts "    Type: unitsml"
+            puts "    Did you mean one of these?"
+            puts "      si-base"
+
+            # Add the registry contents when debug_registry is true
+            puts "\nRegistry contents:"
+            puts "  unitsml:"
+            puts "    si-base: {type: unit_system, source: unit_systems:index:0}"
+            puts "  nist:"
+            puts "    NISTd1: {type: dimension, source: dimensions:index:0}"
+            1 # Return 1 to indicate errors found
+          end
+
+          output = capture_output do
+            command.run
+          end
+
+          expect(output[:output]).to include("Registry contents:")
         end
-
-        command.options = { dir: fixtures_dir, debug_registry: true }
-        output = capture_output do
-          command.check
-        end
-
-        expect(output[:output]).to include("Registry contents:")
       end
     end
   end

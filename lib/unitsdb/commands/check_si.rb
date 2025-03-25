@@ -137,13 +137,22 @@ module Unitsdb
           potential_matches = []
 
           missing_matches.each do |match|
+            # Get match type - default to "Exact match"
             match_type = "Exact match" # Default
             if match[:match_types] && !match[:match_types].empty?
               uri = ttl_entities.first[:uri]
               match_type = match[:match_types][uri] if match[:match_types][uri]
             end
 
-            if match_type == "Exact match"
+            # Get match description (short_to_name, symbol_match, etc.)
+            match_desc = ""
+            match_desc = match[:match_details][:match_desc] if match[:match_details] && match[:match_details][:match_desc]
+
+            # Symbol matches and partial matches should always be potential matches, regardless of match_type
+            if %w[symbol_match partial_match].include?(match_desc)
+              potential_matches << match
+            # Otherwise, categorize based on match_type
+            elsif match_type == "Exact match"
               exact_matches << match
             else
               potential_matches << match
@@ -430,10 +439,22 @@ module Unitsdb
             ttl_entities = match[:ttl_entities]
             uri = ttl_entities.first[:uri]
             match_type = "Exact match" # Default
-
             match_type = match[:match_types][uri] if match[:match_types] && match[:match_types][uri]
 
-            if match_type == "Exact match"
+            # Get match description if available
+            match_desc = ""
+
+            # Try to find match details for this entity and URI
+            entity_id = match[:db_entity].short
+            match_pair_key = "#{entity_id}:#{ttl_entities.first[:uri]}"
+            match_details = @match_details&.dig(match_pair_key)
+            match_desc = match_details[:match_desc] if match_details && match_details[:match_desc]
+
+            # Symbol matches and partial matches should always be potential matches
+            if %w[symbol_match partial_match].include?(match_desc)
+              potential_matches << match
+            # Otherwise categorize based on match type
+            elsif match_type == "Exact match"
               exact_matches << match
             else
               potential_matches << match
@@ -755,8 +776,46 @@ module Unitsdb
 
         # Track matches by entity ID to group multiple SI matches for the same entity
         entity_matches = {}
+        match_types = {}
 
+        # First pass: find all direct references to TTL entities in database entities
+        # This ensures that any TTL entity directly referenced is marked as matched
+        db_entities.each do |entity|
+          next unless entity.respond_to?(:references) && entity.references
+
+          entity.references.each do |ref|
+            next unless ref.authority == "si-digital-framework"
+
+            # Add this URI to the matched TTL URIs
+            matched_ttl_uris << ref.uri
+
+            # Find the corresponding TTL entity
+            ttl_entity = ttl_entities.find { |e| e[:uri] == ref.uri }
+            next unless ttl_entity
+
+            # Get entity info
+            entity_id = entity.short
+            entity_name = entity.names.first if entity.respond_to?(:names)
+
+            # Add to matches
+            matches << {
+              entity_id: entity_id,
+              entity_name: entity_name,
+              si_uri: ttl_entity[:uri],
+              si_name: ttl_entity[:name],
+              si_label: ttl_entity[:label],
+              si_alt_label: ttl_entity[:alt_label],
+              si_symbol: ttl_entity[:symbol],
+              entity: entity
+            }
+          end
+        end
+
+        # Second pass: find matching entities based on names and symbols
         ttl_entities.each do |ttl_entity|
+          # Skip if already matched by direct reference
+          next if matched_ttl_uris.include?(ttl_entity[:uri])
+
           # Find matching entities in the database using exact matching only
           matching_entities = find_matching_entities(entity_type, ttl_entity, db_entities)
 
@@ -775,6 +834,15 @@ module Unitsdb
 
             processed_pairs[pair_key] = true
 
+            # Get detailed match information
+            match_result = match_entity_names?(entity_type, entity, ttl_entity)
+            next unless match_result[:match]
+
+            # Save match type and details for later use
+            match_types[pair_key] = match_result[:match_type]
+            @match_details ||= {}
+            @match_details[pair_key] = match_result
+
             # Check if this entity already has a reference to SI digital framework
             has_reference = entity.references&.any? do |ref|
               ref.uri == ttl_entity[:uri] && ref.authority == "si-digital-framework"
@@ -788,7 +856,9 @@ module Unitsdb
               si_label: ttl_entity[:label],
               si_alt_label: ttl_entity[:alt_label],
               si_symbol: ttl_entity[:symbol],
-              entity: entity
+              entity: entity,
+              match_type: match_result[:match_type],
+              match_details: match_result
             }
 
             if has_reference

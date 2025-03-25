@@ -9,7 +9,7 @@ RSpec.describe Unitsdb::Commands::CheckSi do
   let(:options) { { database: fixture_dir, ttl_dir: ttl_dir } }
   let(:output) { StringIO.new }
   let(:fixture_dir) { File.join(File.dirname(__FILE__), "../../fixtures/unitsdb") }
-  let(:ttl_dir) { File.join(File.dirname(__FILE__), "../../../references") }
+  let(:ttl_dir) { File.join(File.dirname(__FILE__), "../../fixtures/bipm-si-ttl") }
 
   before do
     # Redirect output for testing
@@ -139,6 +139,43 @@ RSpec.describe Unitsdb::Commands::CheckSi do
         command.run
       end
     end
+
+    context "when include_potential_matches is specified" do
+      # Set include_potential_matches option to true
+      let(:options) do
+        {
+          database: fixture_dir,
+          ttl_dir: ttl_dir,
+          entity_type: "units",
+          output_updated_database: "test_output",
+          include_potential_matches: true
+        }
+      end
+
+      it "includes potential matches when updating references" do
+        # Should pass include_potential=true to update methods
+        expect(command).to receive(:process_entity_type).with("units", anything, anything, anything, anything, true).once
+        command.run
+      end
+    end
+
+    context "when include_potential_matches is not specified" do
+      # Set include_potential_matches option to nil (defaults to false)
+      let(:options) do
+        {
+          database: fixture_dir,
+          ttl_dir: ttl_dir,
+          entity_type: "units",
+          output_updated_database: "test_output"
+        }
+      end
+
+      it "does not include potential matches by default" do
+        # Should pass include_potential=false to update methods
+        expect(command).to receive(:process_entity_type).with("units", anything, anything, anything, anything, false).once
+        command.run
+      end
+    end
   end
 
   describe "#match_ttl_to_db and #match_db_to_ttl" do
@@ -161,7 +198,12 @@ RSpec.describe Unitsdb::Commands::CheckSi do
       allow(db_entity).to receive(:references).and_return([])
       allow(command).to receive(:find_entity_id).and_return("test-id")
       allow(command).to receive(:find_matching_entities).and_return([db_entity])
-      allow(command).to receive(:match_entity_names?).and_return(true)
+      allow(command).to receive(:match_entity_names?).and_return({
+                                                                   match: true,
+                                                                   exact: true,
+                                                                   match_type: "Exact match",
+                                                                   match_desc: "short_to_name"
+                                                                 })
 
       result = command.send(:match_ttl_to_db, "units", [ttl_entity], [db_entity])
       expect(result[0]).to eq([]) # No matches

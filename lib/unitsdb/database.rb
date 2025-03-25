@@ -101,6 +101,136 @@ module Unitsdb
       results
     end
 
+    # Find entities by symbol
+    # @param symbol [String] the symbol to search for (exact match, case-insensitive)
+    # @param entity_type [String, Symbol, nil] the entity type to search (units or prefixes)
+    # @return [Array] entities with matching symbol
+    def find_by_symbol(symbol, entity_type = nil)
+      return [] unless symbol
+
+      results = []
+
+      # Symbol search only applies to units and prefixes
+      collections = entity_type ? [entity_type.to_s] : %w[units prefixes]
+
+      collections.each do |collection_name|
+        next unless respond_to?(collection_name) && %w[units prefixes].include?(collection_name)
+
+        collection = send(collection_name)
+        collection.each do |entity|
+          if collection_name == "units" && entity.respond_to?(:symbols) && entity.symbols
+            # Units can have multiple symbols
+            matches = entity.symbols.any? do |sym|
+              sym.respond_to?(:ascii) && sym.ascii &&
+                sym.ascii.downcase == symbol.downcase
+            end
+
+            results << entity if matches
+          elsif collection_name == "prefixes" && entity.respond_to?(:symbol) && entity.symbol
+            # Prefixes have a single symbol
+            if entity.symbol.respond_to?(:ascii) && entity.symbol.ascii &&
+               entity.symbol.ascii.downcase == symbol.downcase
+              results << entity
+            end
+          end
+        end
+      end
+
+      results
+    end
+
+    # Match entities by name, short, or symbol with different match types
+    # @param params [Hash] match parameters
+    # @option params [String] :value The value to match against
+    # @option params [String, Symbol] :match_type The type of match to perform (exact, symbol)
+    # @option params [String, Symbol, nil] :entity_type Optional entity type to limit search scope
+    # @return [Hash] matches grouped by match type (exact, symbol_match) with match details
+    def match_entities(params = {})
+      value = params[:value]
+      match_type = params[:match_type]&.to_s || "exact"
+      entity_type = params[:entity_type]
+
+      return {} unless value
+
+      result = {
+        exact: [],
+        symbol_match: []
+      }
+
+      # Define collections to search based on entity_type parameter
+      collections = entity_type ? [entity_type.to_s] : %w[units prefixes quantities dimensions unit_systems]
+
+      collections.each do |collection_name|
+        next unless respond_to?(collection_name)
+
+        collection = send(collection_name)
+
+        collection.each do |entity|
+          # For exact matches - look at short and names
+          if %w[exact all].include?(match_type)
+            # Match by short
+            if entity.respond_to?(:short) && entity.short &&
+               entity.short.downcase == value.downcase
+              result[:exact] << {
+                entity: entity,
+                match_desc: "short_to_name",
+                details: "UnitsDB short '#{entity.short}' matches '#{value}'"
+              }
+              next
+            end
+
+            # Match by names
+            if entity.respond_to?(:names) && entity.names
+              matching_name = entity.names.find { |name| name.downcase == value.downcase }
+              if matching_name
+                result[:exact] << {
+                  entity: entity,
+                  match_desc: "name_to_name",
+                  details: "UnitsDB name '#{matching_name}' matches '#{value}'"
+                }
+                next
+              end
+            end
+          end
+
+          # For symbol matches - only applicable to units and prefixes
+          if %w[symbol all].include?(match_type) &&
+             %w[units prefixes].include?(collection_name)
+            if collection_name == "units" && entity.respond_to?(:symbols) && entity.symbols
+              # Units can have multiple symbols
+              matching_symbol = entity.symbols.find do |sym|
+                sym.respond_to?(:ascii) && sym.ascii &&
+                  sym.ascii.downcase == value.downcase
+              end
+
+              if matching_symbol
+                result[:symbol_match] << {
+                  entity: entity,
+                  match_desc: "symbol_match",
+                  details: "UnitsDB symbol '#{matching_symbol.ascii}' matches '#{value}'"
+                }
+              end
+            elsif collection_name == "prefixes" && entity.respond_to?(:symbol) && entity.symbol
+              # Prefixes have a single symbol
+              if entity.symbol.respond_to?(:ascii) && entity.symbol.ascii &&
+                 entity.symbol.ascii.downcase == value.downcase
+                result[:symbol_match] << {
+                  entity: entity,
+                  match_desc: "symbol_match",
+                  details: "UnitsDB symbol '#{entity.symbol.ascii}' matches '#{value}'"
+                }
+              end
+            end
+          end
+        end
+      end
+
+      # Remove empty categories
+      result.delete_if { |_, v| v.empty? }
+
+      result
+    end
+
     # Checks for uniqueness of identifiers and short names
     def validate_uniqueness
       results = {

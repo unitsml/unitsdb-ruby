@@ -138,16 +138,16 @@ Performs a comprehensive check of entities in the BIPM's SI digital framework TT
 [source,sh]
 ----
 # Check all entity types and generate a report
-$ unitsdb check_si --database=spec/fixtures/unitsdb --ttl-dir=bipm-si-ttl
+$ unitsdb check_si --database=spec/fixtures/unitsdb --ttl-dir=spec/fixtures/bipm-si-ttl
 
 # Check a specific entity type (units, quantities, or prefixes)
-$ unitsdb check_si --entity-type=units --database=spec/fixtures/unitsdb --ttl-dir=bipm-si-ttl
+$ unitsdb check_si --entity-type=units --database=spec/fixtures/unitsdb --ttl-dir=spec/fixtures/bipm-si-ttl
 
 # Check in a specific direction only
-$ unitsdb check_si --direction=from_si --database=spec/fixtures/unitsdb --ttl-dir=bipm-si-ttl
+$ unitsdb check_si --direction=from_si --database=spec/fixtures/unitsdb --ttl-dir=spec/fixtures/bipm-si-ttl
 
 # Update references and write to output directory
-$ unitsdb check_si --output-updated-database=new_unitsdb --database=spec/fixtures/unitsdb --ttl-dir=bipm-si-ttl
+$ unitsdb check_si --output-updated-database=new_unitsdb --database=spec/fixtures/unitsdb --ttl-dir=spec/fixtures/bipm-si-ttl
 ----
 
 Options:

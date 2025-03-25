@@ -55,6 +55,8 @@ module Unitsdb
                                      desc: "Directory path to write updated YAML files with added SI references"
     option :direction, type: :string, default: "both", aliases: "-r",
                        desc: "Direction to check: 'to_si' (UnitsDB→TTL), 'from_si' (TTL→UnitsDB), or 'both'"
+    option :include_potential_matches, type: :boolean, default: false, aliases: "-p",
+                                       desc: "Include potential matches when updating references (default: false)"
     option :database, type: :string, required: true, aliases: "-d",
                       desc: "Path to UnitsDB database (required)"
 

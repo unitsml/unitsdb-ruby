@@ -51,7 +51,7 @@ module Unitsdb
               next unless ref.authority == "si-digital-framework"
 
               # Get entity info for display
-              entity_id = if entity.respond_to?(:identifiers) && entity.identifiers&.first&.respond_to?(:id)
+              entity_id = if entity.respond_to?(:identifiers) && entity.identifiers&.first.respond_to?(:id)
                             entity.identifiers.first.id
                           else
                             entity.short

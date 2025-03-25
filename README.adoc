@@ -38,22 +38,102 @@ The `unitsdb` command is automatically installed when you install the gem.
 
 === Available commands
 
-==== Database Validation
+==== Database validation
 
-Validates the database for different conditions:
+The UnitsDB CLI provides several validation subcommands to ensure database
+integrity and correctness. These commands help identify potential issues in the
+database structure and content.
+
+===== References validation
+
+Validates that all references within the database exist and point to actual entities:
 
 [source,sh]
 ----
-# Validate that all references exist
+# Validate all references
 $ unitsdb validate references --database=/path/to/unitsdb/data
 
-# Check for uniqueness of identifiers
-$ unitsdb validate identifiers --database=/path/to/unitsdb/data
+# Show valid references too (not just errors)
+$ unitsdb validate references --print-valid --database=/path/to/unitsdb/data
+
+# Show detailed registry contents for debugging
+$ unitsdb validate references --debug-registry --database=/path/to/unitsdb/data
 ----
+
+This command checks all entity references (unit references, quantity references,
+dimension references, etc.) to ensure they point to existing entities within the
+database. It reports any "dangling" references that point to non-existent
+entities, which could cause issues in applications using the database.
 
 Options:
 
 `--database`, `-d`:: Path to UnitsDB database (required)
+`--debug_registry`:: Show registry contents for debugging
+`--print_valid`:: Print valid references too, not just invalid ones
+
+===== Identifiers validation
+
+Checks for uniqueness of identifier fields to prevent duplicate IDs:
+
+[source,sh]
+----
+$ unitsdb validate identifiers --database=/path/to/unitsdb/data
+----
+
+This command ensures that each identifier within an entity type (units,
+prefixes, quantities, etc.) is unique. Duplicate identifiers could lead to
+ambiguity and unexpected behavior when referencing entities by ID.
+
+Options:
+
+`--database`, `-d`:: Path to UnitsDB database (required)
+
+===== SI references validation
+
+Validates that each SI digital framework reference is unique per entity type:
+
+[source,sh]
+----
+$ unitsdb validate si_references --database=/path/to/unitsdb/data
+----
+
+This command checks that each SI digital framework URI is referenced by at most
+one entity of each type. Multiple entities of the same type referencing the same
+SI URI could cause issues with mapping and conversion processes.
+
+The command reports:
+
+* Any duplicate SI references within each entity type
+* The entities that share the same SI reference
+* Their position in the database for easy location
+
+Options:
+
+`--database`, `-d`:: Path to UnitsDB database (required)
+
+=== Examples of validation commands
+
+* Check identifiers for uniqueness:
++
+[source,sh]
+----
+$ unitsdb validate identifiers --database=/path/to/unitsdb/data
+----
+
+* Validate references in a specific directory:
++
+[source,sh]
+----
+$ unitsdb validate references --database=/path/to/unitsdb/data
+----
+
+* Check for duplicate SI references:
++
+[source,sh]
+----
+$ unitsdb validate si_references --database=/path/to/unitsdb/data
+----
+
 
 ==== Database Modification (_modify)
 
@@ -72,10 +152,6 @@ Options:
 `--database`, `-d`:: Path to UnitsDB database (required)
 `--sort`:: Sort keys alphabetically (default: true)
 
-The references validator also supports:
-
-`--debug_registry`:: Show registry contents for debugging
-`--print_valid`:: Print valid references too
 
 ==== Search
 
@@ -128,12 +204,19 @@ Options:
 `--format`:: Output format (text, json, yaml) - default is text
 `--database`, `-d`:: Path to UnitsDB database (required)
 
-==== Check SI
+==== Check references to SI Digital Framework
 
-Performs a comprehensive check of entities in the BIPM's SI digital framework TTL files against UnitsDB database entities. This combined command checks in both directions to ensure UnitsDB is a strict superset of the SI digital framework:
+Performs a comprehensive check of entities in the BIPM's SI digital framework
+TTL files against UnitsDB database entities.
 
-* From SI to UnitsDB: Ensures every TTL entity is referenced by at least one UnitsDB entity
-* From UnitsDB to SI: Identifies UnitsDB entities that should reference TTL entities
+This combined command checks in both directions to ensure UnitsDB is a strict
+superset of the SI digital framework:
+
+* From SI to UnitsDB: Ensures every TTL entity is referenced by at least one
+UnitsDB entity
+
+* From UnitsDB to SI: Identifies UnitsDB entities that should reference TTL
+entities
 
 [source,sh]
 ----
@@ -141,83 +224,164 @@ Performs a comprehensive check of entities in the BIPM's SI digital framework TT
 $ unitsdb check_si --database=spec/fixtures/unitsdb --ttl-dir=spec/fixtures/bipm-si-ttl
 
 # Check a specific entity type (units, quantities, or prefixes)
-$ unitsdb check_si --entity-type=units --database=spec/fixtures/unitsdb --ttl-dir=spec/fixtures/bipm-si-ttl
+$ unitsdb check_si --entity-type=units \
+  --database=spec/fixtures/unitsdb \
+  --ttl-dir=spec/fixtures/bipm-si-ttl
 
 # Check in a specific direction only
-$ unitsdb check_si --direction=from_si --database=spec/fixtures/unitsdb --ttl-dir=spec/fixtures/bipm-si-ttl
+$ unitsdb check_si --direction=from_si \
+  --database=spec/fixtures/unitsdb \
+  --ttl-dir=spec/fixtures/bipm-si-ttl
 
 # Update references and write to output directory
-$ unitsdb check_si --output-updated-database=new_unitsdb --database=spec/fixtures/unitsdb --ttl-dir=spec/fixtures/bipm-si-ttl
+$ unitsdb check_si --output-updated-database=new_unitsdb \
+  --database=spec/fixtures/unitsdb \
+  --ttl-dir=spec/fixtures/bipm-si-ttl
+
+# Include potential matches when updating references (default: false)
+$ unitsdb check_si --include-potential-matches \
+  --output-updated-database=new_unitsdb \
+  --database=spec/fixtures/unitsdb \
+  --ttl-dir=spec/fixtures/bipm-si-ttl
 ----
 
 Options:
 
-`--entity-type`, `-e`:: Entity type to check (units, quantities, or prefixes). If not specified, all types are checked
-`--ttl-dir`, `-t`:: Path to the directory containing SI digital framework TTL files (required)
-`--output_updated_database`, `-o`:: Directory path to write updated YAML files with added SI references
-`--direction`, `-r`:: Direction to check: 'to_si' (UnitsDB→TTL), 'from_si' (TTL→UnitsDB), or 'both' (default)
 `--database`, `-d`:: Path to UnitsDB database (required)
+
+`--ttl-dir`, `-t`:: Path to the directory containing SI digital framework TTL
+files (required)
+
+`--entity-type`, `-e`:: Entity type to check (units, quantities, or prefixes).
+If not specified, all types are checked
+
+`--output-updated-database`, `-o`:: Directory path to write updated YAML files
+with added SI references
+
+`--direction`, `-r`:: Direction to check: 'to_si' (UnitsDB→TTL), 'from_si'
+(TTL→UnitsDB), or 'both' (default)
+
+`--include-potential-matches`, `-p`:: Include potential matches when updating
+references (default: false)
+
+
+===== Match Types in check_si
+
+The `check_si` command classifies matches into two categories:
+
+**Exact Matches**::
+These are high-confidence matches based on exact name or label equivalence:
+
+** `short_to_name`: UnitsDB short name matches SI name
+** `short_to_label`: UnitsDB short name matches SI label
+** `name_to_name`: UnitsDB name matches SI name
+** `name_to_label`: UnitsDB name matches SI label
+** `name_to_alt_label`: UnitsDB name matches SI alternative label
+
+**Potential Matches**::
+These are lower-confidence matches that require manual verification:
+
+** `symbol_match`: Only the symbols match, not the names
+** `partial_match`: Incomplete match (e.g., "sidereal_day" vs "day")
+
+When using `--include-potential-matches`, both exact and potential matches will
+be included in the reference updates. Without this flag, only exact matches are
+used for automatic updates.
 
 ===== SI References Workflow
 
-When the BIPM updates their SI Digital Reference TTL files, follow these steps to ensure UnitsDB remains a strict superset:
+When the BIPM updates their SI Digital Reference TTL files, follow these steps
+to ensure UnitsDB remains a strict superset:
 
-1. Verify unreferenced TTL entries:
-   * Run `unitsdb check_si --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework`
-   * Look for entries in the "SI [Entity Type] not mapped to our database" section
-   * These are TTL entities that are not currently referenced by any UnitsDB entity
+. Verify unreferenced TTL entries:
 
-2. For each unreferenced TTL entry:
-   * Search for matching entities in UnitsDB: `unitsdb search "entity_name" --database=/path/to/unitsdb/data`
-   * If a match exists:
-     ** Update its references manually in the appropriate YAML file
-     ** Add a new reference with `authority: "si-digital-framework"` and the TTL URI
-   * If no match exists:
-     ** Create a new entity in the appropriate YAML file (units.yaml, quantities.yaml, or prefixes.yaml)
-     ** Include the necessary reference to the TTL entity
-
-3. Verify all references are complete:
-   * Run `unitsdb check_si --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework` again
-   * Confirm no entries appear in the "SI [Entity Type] not mapped to our database" section
-   * If needed, run with the output option to automatically add missing references:
-     `unitsdb check_si --output-updated-database=/path/to/output/dir --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework`
-
-The `check_si` command ensures every entity in the BIPM's SI Digital Reference is properly referenced in UnitsDB:
-
-* It verifies that every TTL entity has at least one corresponding UnitsDB entity referencing it
-* It identifies UnitsDB entities that should reference SI Digital Framework but don't yet
-* It can automatically update YAML files with proper references when used with the `--output-updated-database` option
-
-=== Examples
-
-Check identifiers for uniqueness:
-
+** Run this:
++
 [source,sh]
 ----
-$ unitsdb validate identifiers --database=/path/to/unitsdb/data
+$ unitsdb check_si --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework
 ----
 
-Normalize all files in a directory:
+** Look for entries in the "SI [Entity Type] not mapped to our database" section
 
+** These are TTL entities that are not currently referenced by any UnitsDB entity
+
+. For each unreferenced TTL entry:
+
+** Search for matching entities in UnitsDB:
++
 [source,sh]
 ----
-$ unitsdb _modify normalize --all --database=/path/to/unitsdb/data
+$ unitsdb search "entity_name" --database=/path/to/unitsdb/data
 ----
 
-Validate references in a specific directory:
+** If a match exists:
 
+*** Update its references manually in the appropriate YAML file
+*** Add a new reference with `authority: "si-digital-framework"` and the TTL URI
+
+** If no match exists:
+
+*** Create a new entity in the appropriate YAML file (`units.yaml`,
+`quantities.yaml`, or `prefixes.yaml`)
+
+*** Include the necessary reference to the TTL entity
+
+. Verify all references are complete:
+
+** Run this again:
++
 [source,sh]
 ----
-$ unitsdb validate references --database=/path/to/unitsdb/data
+$ unitsdb check_si --database=/path/to/unitsdb/data --ttl-dir=/path/to/si-framework
 ----
 
+** Confirm no entries appear in the "SI [Entity Type] not mapped to our database" section
+
+** If needed, run with the output option to automatically add missing references:
++
+[source,sh]
+----
+$ unitsdb check_si --output-updated-database=/path/to/output/dir \
+  --database=/path/to/unitsdb/data \
+  --ttl-dir=/path/to/si-framework
+----
+
+. Verify reference uniqueness:
+
+** Run:
++
+[source,sh]
+----
+$ unitsdb validate si_references --database=/path/to/unitsdb/data
+----
+
+** This checks that each SI URI is used by at most one entity of each type
+
+** Fix any duplicate references found
+
+The `check_si` command ensures every entity in the BIPM's SI Digital Reference
+is properly referenced in UnitsDB:
+
+* It verifies that every TTL entity has at least one corresponding UnitsDB
+entity referencing it
+
+* It identifies UnitsDB entities that should reference SI Digital Framework but
+don't yet
+
+* It can automatically update YAML files with proper references when used with
+the `--output-updated-database` option
+
+* It correctly differentiates between exact and potential matches, with
+symbol-to-symbol and partial matches always classified as potential
 
 
 == Usage: Ruby
 
 === Loading the database
 
-The primary way to load the UnitsDB data is through the `Database.from_db` method, which reads data from YAML files:
+The primary way to load the UnitsDB data is through the `Database.from_db`
+method, which reads data from YAML files:
 
 [source,ruby]
 ----
@@ -236,11 +400,13 @@ unit_systems = db.unit_systems
 
 === Database search methods
 
-The UnitsDB Ruby gem provides several methods for searching and retrieving entities.
+The UnitsDB Ruby gem provides several methods for searching and retrieving
+entities.
 
 ==== Search by text content
 
-The `search` method allows you to find entities containing specific text in their identifiers, names, or descriptions:
+The `search` method allows you to find entities containing specific text in
+their identifiers, names, or descriptions:
 
 [source,ruby]
 ----
@@ -253,7 +419,8 @@ units_with_meter = db.search(text: "meter", type: "units")
 
 ==== Find entity by ID
 
-The `get_by_id` method finds an entity with a specific identifier across all entity types:
+The `get_by_id` method finds an entity with a specific identifier across all
+entity types:
 
 [source,ruby]
 ----
@@ -266,7 +433,8 @@ meter_entity = db.get_by_id(id: "NISTu1", type: "nist")
 
 ==== Find entity by ID within a specific type collection
 
-The `find_by_type` method searches for an entity by ID within a specific entity type collection:
+The `find_by_type` method searches for an entity by ID within a specific entity
+type collection:
 
 [source,ruby]
 ----
@@ -274,13 +442,53 @@ The `find_by_type` method searches for an entity by ID within a specific entity 
 meter_unit = db.find_by_type(id: "NISTu1", type: "units")
 ----
 
-=== Main Classes
+==== Find entities by symbol
+
+The `find_by_symbol` method allows you to search for units and prefixes by their
+symbol representation:
+
+[source,ruby]
+----
+# Find all entities with symbol "m"
+matching_entities = db.find_by_symbol("m")
+
+# Find only units with symbol "m"
+matching_units = db.find_by_symbol("m", "units")
+
+# Find only prefixes with symbol "k"
+matching_prefixes = db.find_by_symbol("k", "prefixes")
+----
+
+This method performs case-insensitive exact matches on the ASCII representation
+of symbols. It's useful for finding units or prefixes when you know the symbol
+but not the name or identifier.
+
+Parameters:
+
+`symbol` (String)::
+The symbol to search for
+
+`entity_type` (String, Symbol, nil)::
+Optional. Limit search to a specific entity type ("units" or "prefixes"). If
+nil, searches both.
+
+Returns:
+
+* An array of entities (Unit or Prefix objects) with matching symbols
+* Empty array if no matches are found
+
+NOTE: This method only searches units and prefixes, as these are the only entity
+types that have symbol representations.
+
+=== Main classes
 
 The UnitsDB Ruby gem provides the following main classes.
 
 ==== Database
 
-The `Database` class is the main container that holds all UnitsML components. It loads and provides access to units, prefixes, dimensions, quantities, and unit systems.
+The `Database` class is the main container that holds all UnitsML components. It
+loads and provides access to units, prefixes, dimensions, quantities, and unit
+systems.
 
 [source,ruby]
 ----
@@ -294,7 +502,8 @@ db.unit_systems # => Array of UnitSystem objects
 
 ==== Unit
 
-The `Unit` class represents units of measure with their properties and relationships:
+The `Unit` class represents units of measure with their properties and
+relationships:
 
 * Identifiers
 * Short name

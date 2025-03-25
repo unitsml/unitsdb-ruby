@@ -887,8 +887,12 @@ module Unitsdb
           match[:multiple_si] = si_matches if si_matches && si_matches.size > 1
         end
 
-        # Find unmatched TTL entities
-        unmatched_ttl = ttl_entities.reject { |entity| matched_ttl_uris.include?(entity[:uri]) }
+        # Find unmatched TTL entities - filter out base namespace URI (units/, quantities/, prefixes/)
+        unmatched_ttl = ttl_entities.reject do |entity|
+          matched_ttl_uris.include?(entity[:uri]) ||
+            # Exclude base namespace URIs like "http://si-digital-framework.org/SI/units/"
+            entity[:uri].end_with?("/units/") || entity[:uri].end_with?("/quantities/") || entity[:uri].end_with?("/prefixes/")
+        end
 
         [matches, missing_matches, unmatched_ttl]
       end

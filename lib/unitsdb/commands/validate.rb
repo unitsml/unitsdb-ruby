@@ -25,6 +25,16 @@ module Unitsdb
 
         Commands::Identifiers.new(options).run
       end
+
+      desc "si_references", "Validate that each SI digital framework reference is unique per entity type"
+      option :database, type: :string, required: true, aliases: "-d",
+                        desc: "Path to UnitsDB database (required)"
+
+      def si_references
+        require_relative "validate/si_references"
+
+        Validate::SiReferences.new(options).run
+      end
     end
   end
 end

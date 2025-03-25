@@ -154,7 +154,8 @@ RSpec.describe Unitsdb::Commands::CheckSi do
 
       it "includes potential matches when updating references" do
         # Should pass include_potential=true to update methods
-        expect(command).to receive(:process_entity_type).with("units", anything, anything, anything, anything, true).once
+        expect(command).to receive(:process_entity_type).with("units", anything, anything, anything, anything,
+                                                              true).once
         command.run
       end
     end
@@ -172,7 +173,8 @@ RSpec.describe Unitsdb::Commands::CheckSi do
 
       it "does not include potential matches by default" do
         # Should pass include_potential=false to update methods
-        expect(command).to receive(:process_entity_type).with("units", anything, anything, anything, anything, false).once
+        expect(command).to receive(:process_entity_type).with("units", anything, anything, anything, anything,
+                                                              false).once
         command.run
       end
     end

@@ -167,8 +167,6 @@ module Unitsdb
             rows = []
             exact_matches.each do |match|
               si_suffix = extract_identifying_suffix(match[:si_uri])
-              # Get match details if available
-              match_desc = match[:match_details]&.dig(:match_desc) || "unknown"
 
               # First row: UnitsDB short and name
               rows << [

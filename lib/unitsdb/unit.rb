@@ -7,6 +7,8 @@ require_relative "si_derived_base"
 require_relative "quantity_reference"
 require_relative "dimension_reference"
 require_relative "external_reference"
+require_relative "localized_string"
+require_relative "scale_reference"
 
 # "NISTu10":
 #   dimension_url: "#NISTd9"
@@ -50,11 +52,12 @@ module Unitsdb
     attribute :prefixed, :boolean
     attribute :dimension_reference, DimensionReference
     attribute :unit_system_reference, UnitSystemReference, collection: true
-    attribute :names, :string, collection: true
+    attribute :names, LocalizedString, collection: true
     attribute :symbols, SymbolPresentations, collection: true
     attribute :quantity_references, QuantityReference, collection: true
     attribute :si_derived_bases, SiDerivedBase, collection: true
     attribute :root_units, RootUnitReference, collection: true
     attribute :references, ExternalReference, collection: true
+    attribute :scale_reference, ScaleReference
   end
 end

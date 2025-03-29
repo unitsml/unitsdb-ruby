@@ -26,6 +26,71 @@ to access and manipulate the UnitsDB content.
 $ gem install unitsdb
 ----
 
+
+
+== UnitsDB version support
+
+=== General
+
+This library supports the UnitsDB 2.0.0 format only.
+
+The version of the YAML files are stored in the `version` field of the `*.yaml`
+files. The library checks this version when loading the database and raises an
+error if the version is not 2.0.0.
+
+=== UnitsDB 2.0.0 features
+
+==== General
+
+UnitsDB 2.0.0 introduces several significant improvements over version 1.0.0.
+
+==== UnitsML identifiers
+
+From UnitsDB 2.0.0, all entities now have an organization-independent identifier
+that is unique across all entities in the scope of `unitsml`.
+
+==== New Content
+
+Version 2.0.0 includes several new additions:
+
+* New dimensions (fluence, phase, fuel efficiency, etc.)
+* New quantities (like emission_rate, fluence, kerma_rate, etc.)
+* Formal structure for scale definitions
+* Additional symbols and improved representation
+
+==== Multilingual support
+
+Version 2.0.0 adds support for localized names in multiple languages:
+
+* Names are now structured as objects with `value` and `lang` properties
+* English (en) is the primary language for all entries
+* French (fr) translations for units and quantities are available
+
+[source,ruby]
+----
+# Accessing multilingual names (UnitsDB 2.0.0)
+meter = db.find_by_type(id: "NISTu1", type: "units")
+english_names = meter.names.select { |n| n.lang == "en" }.map(&:value)
+french_names = meter.names.select { |n| n.lang == "fr" }.map(&:value)
+----
+
+==== Enhanced symbol representation
+
+Symbols now have more comprehensive representation formats:
+
+* All entities with symbols have representations in multiple formats (ASCII, Unicode, HTML, MathML, LaTeX)
+* Prefixes now use the same symbol structure as units with a collection of symbol objects
+* Dimensions now use `symbols` instead of `dim_symbols`
+
+==== External references
+
+The 2.0.0 format includes a formalized approach to external references:
+
+* The `references` field links to external resources like the SI Digital Framework
+* More consistent structure for references between entities
+
+
+
 == Usage: CLI
 
 The UnitsDB gem includes a command-line utility for working with UnitsDB data.
@@ -565,6 +630,8 @@ The `Database.from_db` method reads the following YAML files:
 * `units.yaml` - Contains unit definitions (e.g., meter, kilogram)
 * `quantities.yaml` - Contains quantity definitions (e.g., length, mass)
 * `unit_systems.yaml` - Contains unit system definitions (e.g., SI, Imperial)
+
+
 
 
 == License

@@ -64,9 +64,7 @@ module Unitsdb
         puts "Found #{ttl_entities.size} #{entity_type} in SI digital framework"
         puts "Found #{db_entities.size} #{entity_type} in database"
 
-        if %w[from_si both].include?(direction)
-          check_from_si(entity_type, ttl_entities, db_entities, output_dir, include_potential)
-        end
+        check_from_si(entity_type, ttl_entities, db_entities, output_dir, include_potential) if %w[from_si both].include?(direction)
 
         return unless %w[to_si both].include?(direction)
 
@@ -99,7 +97,7 @@ module Unitsdb
         return unless output_dir && !missing_matches.empty?
 
         output_file = File.join(output_dir, "#{entity_type}.yaml")
-        SiUpdater.update_references(entity_type, missing_matches, db_entities, output_file, include_potential)
+        SiUpdater.update_references(entity_type, missing_matches, db_entities, output_file, include_potential, database_path)
         puts "\nUpdated references written to #{output_file}"
       end
 
@@ -116,7 +114,7 @@ module Unitsdb
         return unless output_dir && !missing_refs.empty?
 
         output_file = File.join(output_dir, "#{entity_type}.yaml")
-        SiUpdater.update_db_references(entity_type, missing_refs, output_file, include_potential)
+        SiUpdater.update_db_references(entity_type, missing_refs, output_file, include_potential, @options[:database])
         puts "\nUpdated references written to #{output_file}"
       end
     end

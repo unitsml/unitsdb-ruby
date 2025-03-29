@@ -142,9 +142,7 @@ module Unitsdb
           nist_id = entity.identifiers.first.id
 
           # For quantities and prefixes, we want to show the "short" field
-          if %w[quantities prefixes].include?(entity_type) && entity.respond_to?(:short)
-            nist_id_to_display[nist_id] = entity.short
-          end
+          nist_id_to_display[nist_id] = entity.short if %w[quantities prefixes].include?(entity_type) && entity.respond_to?(:short)
         end
 
         db_entities.each do |db_entity|

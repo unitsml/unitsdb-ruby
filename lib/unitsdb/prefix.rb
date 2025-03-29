@@ -3,6 +3,7 @@
 require_relative "identifier"
 require_relative "symbol_presentations"
 require_relative "external_reference"
+require_relative "localized_string"
 # ---
 # NISTp10_30:
 #   name: quetta
@@ -19,9 +20,9 @@ module Unitsdb
     # model Config.model_for(:prefix)
 
     attribute :identifiers, Identifier, collection: true
-    attribute :names, :string, collection: true
+    attribute :names, LocalizedString, collection: true
     attribute :short, :string
-    attribute :symbol, SymbolPresentations
+    attribute :symbols, SymbolPresentations, collection: true
     attribute :base, :integer
     attribute :power, :integer
     attribute :references, ExternalReference, collection: true

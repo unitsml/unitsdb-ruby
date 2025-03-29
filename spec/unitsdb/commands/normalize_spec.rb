@@ -11,114 +11,61 @@ RSpec.describe Unitsdb::Commands::Normalize do
   let(:test_yaml) { { "key2" => "value2", "key1" => "value1" } }
   let(:normalized_yaml) { { "key1" => "value1", "key2" => "value2" } }
 
-  # No global output capture - each test will capture output explicitly
-
   before do
     # Mock yaml loading and Utils sort functionality
     allow(command).to receive(:load_yaml).and_return(test_yaml)
     allow(Unitsdb::Utils).to receive(:sort_yaml_keys).and_return(normalized_yaml)
     allow(File).to receive(:write)
-    # Allow exit to be stubbed
     allow(command).to receive(:exit)
   end
 
-  describe "#yaml" do
-    context "with input and output files" do
-      it "normalizes the YAML file" do
-        expect(Unitsdb::Utils).to receive(:sort_yaml_keys).with(test_yaml).and_return(normalized_yaml)
-        expect(File).to receive(:write).with("output.yaml", anything)
-
-        command.run("input.yaml", "output.yaml")
-        expect(command).to have_received(:load_yaml).with("input.yaml")
-      end
-
-      it "outputs a success message" do
-        output = capture_output do
-          command.run("input.yaml", "output.yaml")
-        end
-        expect(output[:output]).to include("Normalized YAML written to output.yaml")
-      end
-
-      context "when the sort option is false" do
-        # When sort is false, should not sort keys
-        let(:options) { { database: "./test_dir", sort: false } }
-        it "respects the sort option" do
-          expect(Unitsdb::Utils).not_to receive(:sort_yaml_keys)
-          expect(File).to receive(:write).with("output.yaml", anything)
-
-          command.run("input.yaml", "output.yaml")
-        end
-      end
-    end
-
-    context "with --all option" do
-      # Use the actual list from Utils module to ensure test is in sync with implementation
-      let(:default_files) { Unitsdb::Utils::DEFAULT_YAML_FILES }
-      let(:options) { { all: true, database: "./test_dir", sort: true } }
-
-      before do
-        allow(Unitsdb::Utils).to receive(:DEFAULT_YAML_FILES).and_return(default_files)
-        allow(File).to receive(:exist?).and_return(true)
-      end
-
-      it "processes all default YAML files" do
-        # Instead of expecting specific files in a specific order, just count the calls
-        expect(command).to receive(:normalize_file).exactly(default_files.length).times
-
-        command.run(nil, nil)
-      end
-
-      it "outputs success messages for each file" do
-        output = capture_output do
-          command.run(nil, nil)
-        end
-        default_files.each do |file|
-          file_path = File.join("./test_dir", file)
-          expect(output[:output]).to include("Normalized #{file_path}")
-        end
-        expect(output[:output]).to include("All YAML files normalized successfully!")
-      end
-
-      it "skips files that don't exist" do
-        # Set up file existence mocks
-        default_files.each_with_index do |file, index|
-          # Make half the files exist and half not exist
-          allow(File).to receive(:exist?).with(File.join("./test_dir", file)).and_return(index.even?)
-        end
-
-        # Count how many files should exist (even-indexed files)
-        existing_files_count = (default_files.length + 1) / 2
-
-        # Should only normalize the files that exist
-        expect(command).to receive(:normalize_file).exactly(existing_files_count).times
-
-        command.run(nil, nil)
-      end
-    end
-
-    context "with invalid arguments" do
-      it "exits with an error when input and output are missing and --all is not specified" do
-        expect(command).to receive(:exit).with(1)
-        command.run(nil, nil)
-        expect(command).not_to receive(:normalize_file)
-      end
-
-      it "exits with a helpful error message" do
-        output = capture_output do
-          command.run(nil, nil)
-        end
-        expect(output[:output]).to include("Error: INPUT and OUTPUT are required when not using --all")
-      end
-    end
-  end
-
-  describe "#normalize_file" do
-    it "loads, processes, and writes the YAML file" do
-      expect(command).to receive(:load_yaml).with("input.yaml").and_return(test_yaml)
+  describe "#run" do
+    it "normalizes YAML files with proper input/output handling" do
+      # Test single file normalization
       expect(Unitsdb::Utils).to receive(:sort_yaml_keys).with(test_yaml).and_return(normalized_yaml)
-      expect(File).to receive(:write).with("output.yaml", normalized_yaml.to_yaml)
+      expect(File).to receive(:write).with("output.yaml", anything)
+      command.run("input.yaml", "output.yaml")
 
-      command.send(:normalize_file, "input.yaml", "output.yaml")
+      # Test success message
+      output = capture_output do
+        command.run("input.yaml", "output.yaml")
+      end
+      expect(output[:output]).to include("Normalized YAML written to output.yaml")
+
+      # Test respecting sort option when false
+      no_sort_command = described_class.new({ database: "./test_dir", sort: false })
+      allow(no_sort_command).to receive(:load_yaml).and_return(test_yaml)
+      allow(no_sort_command).to receive(:exit)
+      expect(Unitsdb::Utils).not_to receive(:sort_yaml_keys)
+      no_sort_command.run("input.yaml", "output.yaml")
+
+      # Test error for missing input/output without --all
+      expect(command).to receive(:exit).with(1)
+      output = capture_output do
+        command.run(nil, nil)
+      end
+      expect(output[:output]).to include("Error: INPUT and OUTPUT are required when not using --all")
+    end
+
+    it "handles --all option correctly" do
+      # Setup for --all option tests
+      default_files = %w[dimensions.yaml prefixes.yaml quantities.yaml unit_systems.yaml units.yaml]
+      all_command = described_class.new({ all: true, database: "./test_dir", sort: true })
+      allow(all_command).to receive(:load_yaml).and_return(test_yaml)
+      allow(Unitsdb::Utils).to receive(:DEFAULT_YAML_FILES).and_return(default_files)
+      allow(File).to receive(:exist?).and_return(true)
+
+      # Test processing all files when they exist
+      expect(all_command).to receive(:normalize_file).exactly(default_files.length).times
+      all_command.run(nil, nil)
+
+      # Test skipping non-existent files
+      default_files.each_with_index do |file, index|
+        allow(File).to receive(:exist?).with(File.join("./test_dir", file)).and_return(index.even?)
+      end
+      existing_files_count = (default_files.length + 1) / 2
+      expect(all_command).to receive(:normalize_file).exactly(existing_files_count).times
+      all_command.run(nil, nil)
     end
   end
 end

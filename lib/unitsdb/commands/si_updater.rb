@@ -13,9 +13,20 @@ module Unitsdb
 
       # Update references in YAML file (TTL → DB direction)
       def update_references(entity_type, missing_matches, db_entities, output_file, include_potential = false)
-        # Get path to original YAML file
-        fixture_dir = File.expand_path(File.join(__dir__, "../../../spec/fixtures/unitsdb"))
-        original_yaml_file = File.join(fixture_dir, "#{entity_type}.yaml")
+        # Use the database objects to access the data directly
+        original_yaml_file = db_entities.first.send(:yaml_file) if db_entities&.first&.respond_to?(:yaml_file, true)
+
+        # If we can't get the path from the database object, use the output file path as a fallback
+        if original_yaml_file.nil? || !File.exist?(original_yaml_file)
+          puts "Warning: Could not determine original YAML file path. Using output file as template."
+          original_yaml_file = output_file
+
+          # Create an empty template if output file doesn't exist
+          unless File.exist?(original_yaml_file)
+            FileUtils.mkdir_p(File.dirname(original_yaml_file))
+            File.write(original_yaml_file, { entity_type => [] }.to_yaml)
+          end
+        end
 
         # Load the original YAML file
         yaml_content = File.read(original_yaml_file)
@@ -93,9 +104,21 @@ module Unitsdb
 
       # Update references in YAML file (DB → TTL direction)
       def update_db_references(entity_type, missing_refs, output_file, include_potential = false)
-        # Get path to original YAML file
-        fixture_dir = File.expand_path(File.join(__dir__, "../../../spec/fixtures/unitsdb"))
-        original_yaml_file = File.join(fixture_dir, "#{entity_type}.yaml")
+        # Try to get the original YAML file from the first entity
+        first_entity = missing_refs.first&.dig(:db_entity)
+        original_yaml_file = first_entity.send(:yaml_file) if first_entity&.respond_to?(:yaml_file, true)
+
+        # If we can't get the path from the database object, use the output file path as a fallback
+        if original_yaml_file.nil? || !File.exist?(original_yaml_file)
+          puts "Warning: Could not determine original YAML file path. Using output file as template."
+          original_yaml_file = output_file
+
+          # Create an empty template if output file doesn't exist
+          unless File.exist?(original_yaml_file)
+            FileUtils.mkdir_p(File.dirname(original_yaml_file))
+            File.write(original_yaml_file, { entity_type => [] }.to_yaml)
+          end
+        end
 
         # Load the original YAML file
         yaml_content = File.read(original_yaml_file)

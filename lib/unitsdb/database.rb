@@ -76,8 +76,7 @@ module Unitsdb
           end
 
           # Search in names (if the entity has names)
-          if entity.respond_to?(:names) && entity.names &&
-             entity.names.any? { |name| name.to_s.downcase.include?(text.downcase) }
+          if entity.respond_to?(:names) && entity.names && entity.names.any? { |name| name.value.to_s.downcase.include?(text.downcase) }
             results << entity
             next
           end
@@ -126,12 +125,14 @@ module Unitsdb
             end
 
             results << entity if matches
-          elsif collection_name == "prefixes" && entity.respond_to?(:symbol) && entity.symbol
-            # Prefixes have a single symbol
-            if entity.symbol.respond_to?(:ascii) && entity.symbol.ascii &&
-               entity.symbol.ascii.downcase == symbol.downcase
-              results << entity
+          elsif collection_name == "prefixes" && entity.respond_to?(:symbols) && entity.symbols
+            # Prefixes have multiple symbols in 2.0.0
+            matches = entity.symbols.any? do |sym|
+              sym.respond_to?(:ascii) && sym.ascii &&
+                sym.ascii.downcase == symbol.downcase
             end
+
+            results << entity if matches
           end
         end
       end
@@ -181,12 +182,12 @@ module Unitsdb
 
             # Match by names
             if entity.respond_to?(:names) && entity.names
-              matching_name = entity.names.find { |name| name.downcase == value.downcase }
+              matching_name = entity.names.find { |name| name.value.to_s.downcase == value.downcase }
               if matching_name
                 result[:exact] << {
                   entity: entity,
                   match_desc: "name_to_name",
-                  details: "UnitsDB name '#{matching_name}' matches '#{value}'"
+                  details: "UnitsDB name '#{matching_name.value}' (#{matching_name.lang}) matches '#{value}'"
                 }
                 next
               end
@@ -210,14 +211,18 @@ module Unitsdb
                   details: "UnitsDB symbol '#{matching_symbol.ascii}' matches '#{value}'"
                 }
               end
-            elsif collection_name == "prefixes" && entity.respond_to?(:symbol) && entity.symbol
-              # Prefixes have a single symbol
-              if entity.symbol.respond_to?(:ascii) && entity.symbol.ascii &&
-                 entity.symbol.ascii.downcase == value.downcase
+            elsif collection_name == "prefixes" && entity.respond_to?(:symbols) && entity.symbols
+              # Prefixes have multiple symbols in 2.0.0
+              matching_symbol = entity.symbols.find do |sym|
+                sym.respond_to?(:ascii) && sym.ascii &&
+                  sym.ascii.downcase == value.downcase
+              end
+
+              if matching_symbol
                 result[:symbol_match] << {
                   entity: entity,
                   match_desc: "symbol_match",
-                  details: "UnitsDB symbol '#{entity.symbol.ascii}' matches '#{value}'"
+                  details: "UnitsDB symbol '#{matching_symbol.ascii}' matches '#{value}'"
                 }
               end
             end
@@ -359,6 +364,12 @@ module Unitsdb
           "unit_systems.yaml" => unit_systems_version
         }
         raise Errors::VersionMismatchError, "Version mismatch in database files: #{version_info.inspect}"
+      end
+
+      # Check if the version is supported
+      version = versions.first
+      unless version == "2.0.0"
+        raise Errors::UnsupportedVersionError, "Unsupported database version: #{version}. Only version 2.0.0 is supported."
       end
 
       combined_yaml = {

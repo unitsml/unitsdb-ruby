@@ -76,7 +76,9 @@ module Unitsdb
           end
 
           # Search in names (if the entity has names)
-          if entity.respond_to?(:names) && entity.names && entity.names.any? { |name| name.value.to_s.downcase.include?(text.downcase) }
+          if entity.respond_to?(:names) && entity.names && entity.names.any? do |name|
+            name.value.to_s.downcase.include?(text.downcase)
+          end
             results << entity
             next
           end
@@ -369,7 +371,8 @@ module Unitsdb
       # Check if the version is supported
       version = versions.first
       unless version == "2.0.0"
-        raise Errors::UnsupportedVersionError, "Unsupported database version: #{version}. Only version 2.0.0 is supported."
+        raise Errors::UnsupportedVersionError,
+              "Unsupported database version: #{version}. Only version 2.0.0 is supported."
       end
 
       combined_yaml = {

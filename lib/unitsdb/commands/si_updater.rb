@@ -14,7 +14,7 @@ module Unitsdb
       # Update references in YAML file (TTL → DB direction)
       def update_references(entity_type, missing_matches, db_entities, output_file, include_potential = false)
         # Use the database objects to access the data directly
-        original_yaml_file = db_entities.first.send(:yaml_file) if db_entities&.first&.respond_to?(:yaml_file, true)
+        original_yaml_file = db_entities.first.send(:yaml_file) if db_entities&.first.respond_to?(:yaml_file, true)
 
         # If we can't get the path from the database object, use the output file path as a fallback
         if original_yaml_file.nil? || !File.exist?(original_yaml_file)
@@ -106,7 +106,7 @@ module Unitsdb
       def update_db_references(entity_type, missing_refs, output_file, include_potential = false)
         # Try to get the original YAML file from the first entity
         first_entity = missing_refs.first&.dig(:db_entity)
-        original_yaml_file = first_entity.send(:yaml_file) if first_entity&.respond_to?(:yaml_file, true)
+        original_yaml_file = first_entity.send(:yaml_file) if first_entity.respond_to?(:yaml_file, true)
 
         # If we can't get the path from the database object, use the output file path as a fallback
         if original_yaml_file.nil? || !File.exist?(original_yaml_file)

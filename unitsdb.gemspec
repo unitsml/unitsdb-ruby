@@ -36,6 +36,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "lutaml-model", "~>0.7"
   spec.add_dependency "rdf", "~> 3.1"
   spec.add_dependency "rdf-turtle", "~> 3.1"
+  spec.add_dependency "rubyzip", "~> 2.3"
   spec.add_dependency "terminal-table"
   spec.add_dependency "thor", "~> 1.0"
 end

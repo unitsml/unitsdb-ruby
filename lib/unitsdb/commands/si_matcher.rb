@@ -420,8 +420,8 @@ module Unitsdb
         end
 
         # Special validation for "sidereal_" units
-        if match_details[:match] && match_details[:exact] && (db_entity.short&.include?("sidereal_") &&
-                  !(ttl_entity[:name]&.include?("sidereal") || ttl_entity[:label]&.include?("sidereal")))
+        if match_details[:match] && match_details[:exact] && db_entity.short&.include?("sidereal_") &&
+           !(ttl_entity[:name]&.include?("sidereal") || ttl_entity[:label]&.include?("sidereal"))
           match_details = {
             match: true,
             exact: false,

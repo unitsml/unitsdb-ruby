@@ -209,13 +209,19 @@ Commands that modify the database are grouped under the `_modify` namespace:
 # Normalize YAML file format
 $ unitsdb _modify normalize [INPUT] [OUTPUT] --database=/path/to/unitsdb/data
 $ unitsdb _modify normalize --all --database=/path/to/unitsdb/data
+
+# Sort by different ID types
+$ unitsdb _modify normalize --sort=nist [INPUT] [OUTPUT] --database=/path/to/unitsdb/data
+$ unitsdb _modify normalize --sort=unitsml [INPUT] [OUTPUT] --database=/path/to/unitsdb/data
+$ unitsdb _modify normalize --sort=short [INPUT] [OUTPUT] --database=/path/to/unitsdb/data
+$ unitsdb _modify normalize --sort=none [INPUT] [OUTPUT] --database=/path/to/unitsdb/data
 ----
 
 Options:
 
 `--all`, `-a`:: Process all YAML files in the repository
 `--database`, `-d`:: Path to UnitsDB database (required)
-`--sort`:: Sort keys alphabetically (default: true)
+`--sort`:: Sort units by: 'short' (name, default), 'nist' (ID), 'unitsml' (ID), or 'none'
 
 
 ==== Search

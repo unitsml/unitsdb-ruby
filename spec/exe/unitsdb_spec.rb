@@ -5,7 +5,8 @@ require "spec_helper"
 RSpec.describe "unitsdb executable" do
   let(:executable_path) { File.expand_path("../../exe/unitsdb", __dir__) }
 
-  it "exists and is executable" do
+  # This test is skipped on Windows because the executable may not be executable
+  it "exists and is executable", skip: Gem.win_platform? do
     expect(File.exist?(executable_path)).to be true
     expect(File.executable?(executable_path)).to be true
   end

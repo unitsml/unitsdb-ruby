@@ -214,11 +214,11 @@ module Unitsdb
             valid = true if !valid && registry.key?(ref_type) && registry[ref_type].key?(id)
 
             # 3. Try alternate ID formats for unit systems (e.g., SI_base vs si-base)
-            if !valid && type == "unitsml" && ref_type == "unit_systems" && (registry.key?(ref_type) && (
+            if !valid && type == "unitsml" && ref_type == "unit_systems" && registry.key?(ref_type) && (
                 registry[ref_type].keys.any? { |k| k.end_with?(":#{id}") } ||
                 registry[ref_type].keys.any? { |k| k.end_with?(":SI_#{id.sub("si-", "")}") } ||
                 registry[ref_type].keys.any? { |k| k.end_with?(":non-SI_#{id.sub("nonsi-", "")}") }
-              ))
+              )
               # Special handling for unit_systems between unitsml and nist types
               valid = true
             end
@@ -245,11 +245,11 @@ module Unitsdb
             valid = true if !valid && registry.key?(ref_type) && registry[ref_type].key?(id)
 
             # 3. Try alternate ID formats for unit systems (e.g., SI_base vs si-base)
-            if !valid && type == "unitsml" && ref_type == "unit_systems" && (registry.key?(ref_type) && (
+            if !valid && type == "unitsml" && ref_type == "unit_systems" && registry.key?(ref_type) && (
                 registry[ref_type].keys.any? { |k| k.end_with?(":#{id}") } ||
                 registry[ref_type].keys.any? { |k| k.end_with?(":SI_#{id.sub("si-", "")}") } ||
                 registry[ref_type].keys.any? { |k| k.end_with?(":non-SI_#{id.sub("nonsi-", "")}") }
-              ))
+              )
               # Special handling for unit_systems between unitsml and nist types
               valid = true
             end

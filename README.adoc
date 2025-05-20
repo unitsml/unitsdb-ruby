@@ -90,6 +90,54 @@ The 2.0.0 format includes a formalized approach to external references:
 * More consistent structure for references between entities
 
 
+=== Unified UnitsDB release file format
+
+While the UnitsDB database is maintained in separate YAML files for easier
+management (`units.yaml`, `quantities.yaml`, etc.), the unified release file
+consolidates all data into a single YAML file for improved user convenience.
+
+Syntax:
+
+[source,yaml]
+----
+schema_version: 2.0.0
+dimensions:
+  - identifiers: [...]
+    length: {...}
+    names: [...]
+  - ...
+prefixes:
+  - identifiers: [...]
+    name: ...
+    symbols: [...]
+  - ...
+quantities:
+  - identifiers: [...]
+    quantity_type: ...
+    names: [...]
+  - ...
+units:
+  - identifiers: [...]
+    names: [...]
+    symbols: [...]
+  - ...
+unit_systems:
+  - identifiers: [...]
+    name: ...
+  - ...
+----
+
+There are several advantages to using the unified file format:
+
+* Simplified usage: obsoletes the needd to load and manage multiple files
+* Consistency: All data is guaranteed to be compatible and consistently integrated
+
+The unified file maintains the same structure and relationships as the separate
+files, with all entities organized by type under their respective top-level keys,
+while preserving all identifiers, references, and properties from the original
+database.
+
+
 
 == Usage: CLI
 
@@ -335,13 +383,51 @@ with added SI references
 `--include-potential-matches`, `-p`:: Include potential matches when updating
 references (default: false)
 
+==== Release
 
-===== Match Types in check_si
+Creates release files for UnitsDB in unified formats:
+
+[source,sh]
+----
+# Create both unified YAML and ZIP archive
+$ unitsdb release --database=/path/to/unitsdb/data
+
+# Create only unified YAML file
+$ unitsdb release --format=yaml --database=/path/to/unitsdb/data
+
+# Create only ZIP archive
+$ unitsdb release --format=zip --database=/path/to/unitsdb/data
+
+# Specify output directory
+$ unitsdb release --output-dir=/path/to/output --database=/path/to/unitsdb/data
+----
+
+This command creates release files for UnitsDB in two formats:
+
+. A unified YAML file that combines all database files into a single file
+
+. A ZIP archive containing all individual database files
+
+The command verifies that all files have the same schema version before creating
+the release files. The output files are named with the schema version (e.g.,
+`unitsdb-2.0.0.yaml` and `unitsdb-2.0.0.zip`).
+
+Options:
+
+`--format`, `-f`:: Output format: 'yaml' (single file), 'zip' (archive), or
+'all' (both). Default is 'all'.
+
+`--output-dir`, `-o`:: Directory to output release files. Default is current
+directory.
+
+`--database`, `-d`:: Path to UnitsDB database (required)
+
+===== Match types in check_si
 
 The `check_si` command classifies matches into two categories:
 
-**Exact Matches**::
-These are high-confidence matches based on exact name or label equivalence:
+**Exact matches**::
+These are high-confidence matches based on exact name or label equivalence.
 
 ** `short_to_name`: UnitsDB short name matches SI name
 ** `short_to_label`: UnitsDB short name matches SI label
@@ -349,8 +435,8 @@ These are high-confidence matches based on exact name or label equivalence:
 ** `name_to_label`: UnitsDB name matches SI label
 ** `name_to_alt_label`: UnitsDB name matches SI alternative label
 
-**Potential Matches**::
-These are lower-confidence matches that require manual verification:
+**Potential matches**::
+These are lower-confidence matches that require manual verification.
 
 ** `symbol_match`: Only the symbols match, not the names
 ** `partial_match`: Incomplete match (e.g., "sidereal_day" vs "day")

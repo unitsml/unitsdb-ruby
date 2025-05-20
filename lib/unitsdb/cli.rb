@@ -3,6 +3,7 @@
 require "thor"
 require_relative "commands/validate"
 require_relative "commands/_modify"
+require "fileutils"
 
 module Unitsdb
   class CLI < Thor
@@ -63,6 +64,18 @@ module Unitsdb
     def check_si
       require_relative "commands/check_si"
       Commands::CheckSi.new(options).run
+    end
+
+    desc "release", "Create release files (unified YAML and/or ZIP archive)"
+    option :format, type: :string, default: "all", aliases: "-f",
+                    desc: "Output format: 'yaml' (single file), 'zip' (archive), or 'all' (both)"
+    option :output_dir, type: :string, default: ".", aliases: "-o",
+                        desc: "Directory to output release files"
+    option :database, type: :string, required: true, aliases: "-d",
+                      desc: "Path to UnitsDB database (required)"
+    def release
+      require_relative "commands/release"
+      Commands::Release.new(options).run
     end
   end
 end

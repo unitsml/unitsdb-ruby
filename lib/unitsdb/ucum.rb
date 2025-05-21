@@ -13,7 +13,7 @@ module Unitsdb
     attribute :code, :string
     attribute :dimension, :string
     attribute :name, :string
-    attribute :print_symbol, :string
+    attribute :print_symbol, :string, raw: true
     attribute :property, :string
 
     xml do
@@ -21,7 +21,13 @@ module Unitsdb
       map_attribute "Code", to: :code_sensitive
       map_attribute "CODE", to: :code
       map_attribute "dim", to: :dimension
-      map_attribute "property", to: :property
+      map_element "name", to: :name
+      map_element "printSymbol", to: :print_symbol
+      map_element "property", to: :property
+    end
+
+    def identifier
+      "ucum:base-unit:code:#{code_sensitive}"
     end
   end
 
@@ -47,7 +53,7 @@ module Unitsdb
     attribute :code_sensitive, :string
     attribute :code, :string
     attribute :name, :string
-    attribute :print_symbol, :string
+    attribute :print_symbol, :string, raw: true
     attribute :value, UcumPrefixValue
 
     xml do
@@ -57,6 +63,10 @@ module Unitsdb
       map_element "name", to: :name
       map_element "printSymbol", to: :print_symbol
       map_element "value", to: :value
+    end
+
+    def identifier
+      "ucum:prefix:code:#{code_sensitive}"
     end
   end
 
@@ -85,10 +95,33 @@ module Unitsdb
   #   <value Unit="1" UNIT="1" value="1">1</value>
   #  </unit>
 
+  #    <unit Code="Cel" CODE="CEL" isMetric="yes" isSpecial="yes" class="si">
+  #     <name>degree Celsius</name>
+  #     <printSymbol>&#176;C</printSymbol>
+  #     <property>temperature</property>
+  #     <value Unit="cel(1 K)" UNIT="CEL(1 K)">
+  #        <function name="Cel" value="1" Unit="K"/>
+  #     </value>
+  #  </unit>
+
+  class UcumUnitValueFunction < Lutaml::Model::Serializable
+    attribute :name, :string
+    attribute :value, :string
+    attribute :unit_sensitive, :string
+
+    xml do
+      root "function"
+      map_attribute "name", to: :name
+      map_attribute "value", to: :value
+      map_attribute "Unit", to: :unit_sensitive
+    end
+  end
+
   class UcumUnitValue < Lutaml::Model::Serializable
     attribute :unit_sensitive, :string
     attribute :unit, :string
     attribute :value, :string
+    attribute :function, UcumUnitValueFunction
     attribute :content, :string
 
     xml do
@@ -96,6 +129,7 @@ module Unitsdb
       map_attribute "Unit", to: :unit_sensitive
       map_attribute "UNIT", to: :unit
       map_attribute "value", to: :value
+      map_element "function", to: :function
       map_content to: :content
     end
   end
@@ -105,9 +139,10 @@ module Unitsdb
     attribute :code, :string
     attribute :is_metric, :string
     attribute :is_arbitrary, :string
-    attribute :class, :string
+    attribute :is_special, :string
+    attribute :klass, :string
     attribute :name, :string, collection: true
-    attribute :print_symbol, :string
+    attribute :print_symbol, :string, raw: true
     attribute :property, :string
     attribute :value, UcumUnitValue
 
@@ -117,16 +152,24 @@ module Unitsdb
       map_attribute "CODE", to: :code
       map_attribute "isMetric", to: :is_metric
       map_attribute "isArbitrary", to: :is_arbitrary
-      map_attribute "class", to: :class
-      map_attribute "property", to: :property
+      map_attribute "isSpecial", to: :is_special
+      map_attribute "class", to: :klass
 
       map_element "name", to: :name
       map_element "printSymbol", to: :print_symbol
       map_element "property", to: :property
       map_element "value", to: :value
     end
+
+    def identifier
+      # Use empty string if klass is not present
+      k = klass || ""
+      "ucum:unit:#{k}:code:#{code_sensitive}"
+    end
   end
 
+  # This is the root element of the UCUM XML "ucum-essence.xml" file.
+  #
   # <root xmlns="http://unitsofmeasure.org/ucum-essence" version="2.2" revision="N/A"
   #     revision-date="2024-06-17">
 
@@ -140,6 +183,7 @@ module Unitsdb
 
     xml do
       root "root"
+      namespace "http://unitsofmeasure.org/ucum-essence"
       map_attribute "version", to: :version
       map_attribute "revision", to: :revision
       map_attribute "revision-date", to: :revision_date
@@ -148,5 +192,7 @@ module Unitsdb
       map_element "base-unit", to: :base_units
       map_element "unit", to: :units
     end
+
+    # No adapter registration needed
   end
 end

@@ -4,6 +4,7 @@ require "thor"
 require_relative "commands/base"
 require_relative "commands/validate"
 require_relative "commands/_modify"
+require_relative "commands/ucum"
 require "fileutils"
 
 module Unitsdb
@@ -12,6 +13,9 @@ module Unitsdb
     def self.exit_on_failure?
       true
     end
+
+    desc "ucum SUBCOMMAND", "UCUM-related commands"
+    subcommand "ucum", Commands::UcumCommand
 
     desc "_modify SUBCOMMAND", "Commands that modify the database"
     subcommand "_modify", Commands::ModifyCommand

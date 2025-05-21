@@ -6,8 +6,8 @@ module Unitsdb
   module Commands
     class ModifyCommand < Thor
       desc "normalize [INPUT] [OUTPUT]", "Normalize a YAML file or all YAML files with --all"
-      method_option :sort, type: :string, default: "short",
-                           desc: "Sort units by: 'short' (name), 'nist' (ID), 'unitsml' (ID), or 'none'"
+      method_option :sort, type: :string, default: "nist",
+                           desc: "Sort units by: 'short' (name), 'nist' (ID, default), 'unitsml' (ID), or 'none'"
       method_option :database, type: :string, required: true, aliases: "-d",
                                desc: "Path to UnitsDB database (required)"
       method_option :all, type: :boolean, default: false, aliases: "-a",

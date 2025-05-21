@@ -66,7 +66,8 @@ module Unitsdb
           puts "Found #{ucum_entities.size} #{entity_type} in UCUM"
           puts "Found #{db_entities.size} #{entity_type} in database"
 
-          check_from_ucum(entity_type, ucum_entities, db_entities, output_dir, include_potential) if %w[from_ucum both].include?(direction)
+          check_from_ucum(entity_type, ucum_entities, db_entities, output_dir, include_potential) if %w[from_ucum
+                                                                                                        both].include?(direction)
 
           return unless %w[to_ucum both].include?(direction)
 

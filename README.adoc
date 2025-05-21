@@ -270,7 +270,7 @@ Options:
 
 `--all`, `-a`:: Process all YAML files in the repository
 `--database`, `-d`:: Path to UnitsDB database (required)
-`--sort`:: Sort units by: 'short' (name, default), 'nist' (ID), 'unitsml' (ID), or 'none'
+`--sort`:: Sort units by: 'short' (name), 'nist' (ID, default), 'unitsml' (ID), or 'none'
 
 
 ==== Search
@@ -380,6 +380,108 @@ with added SI references
 
 `--direction`, `-r`:: Direction to check: 'to_si' (UnitsDB→TTL), 'from_si'
 (TTL→UnitsDB), or 'both' (default)
+
+`--include-potential-matches`, `-p`:: Include potential matches when updating
+references (default: false)
+
+
+==== Check references to UCUM
+
+Performs a comprehensive check of entities in the UCUM XML file against UnitsDB
+database entities and updates UnitsDB with UCUM references.
+
+UCUM supports the following entity types:
+
+* Base units
+* Units
+* Prefixes
+
+UCUM provides dimensions as part of their unit definitions but not as
+uniquely referencable entities.
+
+This combined command checks in both directions to ensure UnitsDB supports
+every UCUM entity:
+
+* From UCUM to UnitsDB: Ensures every UCUM entity is referenced by at least one
+UnitsDB entity
+
+* From UnitsDB to UCUM: Identifies UnitsDB entities that should reference UCUM
+entities
+
+There are two commands:
+
+* `ucum check`: Checks for matches between UnitsDB and UCUM entities and reports results
+
+* `ucum update`: Updates UnitsDB entities with references to matching UCUM entities
+
+[source,sh]
+----
+# Check all entity types and generate a report
+$ unitsdb ucum check --database=spec/fixtures/unitsdb --ucum-file=spec/fixtures/ucum/ucum-essence.xml
+
+# Check a specific entity type (units or prefixes)
+$ unitsdb ucum check --entity-type=units \
+  --database=spec/fixtures/unitsdb \
+  --ucum-file=spec/fixtures/ucum/ucum-essence.xml
+
+# Check in a specific direction only
+$ unitsdb ucum check --direction=from_ucum \
+  --database=spec/fixtures/unitsdb \
+  --ucum-file=spec/fixtures/ucum/ucum-essence.xml
+----
+
+Options:
+
+`--database`, `-d`:: Path to UnitsDB database (required)
+
+`--ucum-file`, `-u`:: Path to the UCUM essence XML file (required)
+
+`--entity-type`, `-e`:: Entity type to check (units or prefixes).
+If not specified, all types are checked.
+
+`--direction`, `-r`:: Direction to check: `to_ucum` (UnitsDB→UCUM), `from_ucum`
+(UCUM→UnitsDB), or `both` (default)
+
+`--output-updated-database`, `-o`:: Directory path to write updated YAML files
+with added UCUM references
+
+`--include-potential-matches`, `-p`:: Include potential matches when updating
+references (default: false)
+
+
+==== Update UCUM references
+
+[source,sh]
+----
+# Update all entity types with UCUM references
+$ unitsdb ucum update --database=spec/fixtures/unitsdb \
+  --ucum-file=spec/fixtures/ucum/ucum-essence.xml \
+  --output-dir=new_unitsdb
+
+# Update a specific entity type (units or prefixes)
+$ unitsdb ucum update --entity-type=units \
+  --database=spec/fixtures/unitsdb \
+  --ucum-file=spec/fixtures/ucum/ucum-essence.xml \
+  --output-dir=new_unitsdb
+
+# Include potential matches when updating references (default: false)
+$ unitsdb ucum update --include-potential-matches \
+  --database=spec/fixtures/unitsdb \
+  --ucum-file=spec/fixtures/ucum/ucum-essence.xml \
+  --output-dir=new_unitsdb
+----
+
+Options:
+
+`--database`, `-d`:: Path to UnitsDB database (required)
+
+`--ucum-file`, `-u`:: Path to the UCUM essence XML file (required)
+
+`--entity-type`, `-e`:: Entity type to update (units or prefixes).
+If not specified, all types are updated
+
+`--output-dir`, `-o`:: Directory path to write updated YAML files
+(defaults to database path)
 
 `--include-potential-matches`, `-p`:: Include potential matches when updating
 references (default: false)

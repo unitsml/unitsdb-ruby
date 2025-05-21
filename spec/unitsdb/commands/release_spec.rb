@@ -95,7 +95,7 @@ RSpec.describe Unitsdb::Commands::Release do
     end
 
     context "with custom version" do
-      let(:custom_version) { "v2.1.0" }
+      let(:custom_version) { "2.1.0" }
       let(:options) { { database: database_path, output_dir: output_dir, version: custom_version } }
 
       it "creates files with custom version in filename" do

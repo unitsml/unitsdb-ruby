@@ -101,6 +101,7 @@ Syntax:
 [source,yaml]
 ----
 schema_version: 2.0.0
+version: 1.0.0  # Release version (in semantic format x.y.z)
 dimensions:
   - identifiers: [...]
     length: {...}
@@ -400,6 +401,9 @@ $ unitsdb release --format=zip --database=/path/to/unitsdb/data
 
 # Specify output directory
 $ unitsdb release --output-dir=/path/to/output --database=/path/to/unitsdb/data
+
+# Specify a version (required)
+$ unitsdb release --version=2.1.0 --database=/path/to/unitsdb/data
 ----
 
 This command creates release files for UnitsDB in two formats:
@@ -410,7 +414,7 @@ This command creates release files for UnitsDB in two formats:
 
 The command verifies that all files have the same schema version before creating
 the release files. The output files are named with the schema version (e.g.,
-`unitsdb-2.0.0.yaml` and `unitsdb-2.0.0.zip`).
+`unitsdb-2.1.0.yaml` and `unitsdb-2.1.0.zip`).
 
 Options:
 

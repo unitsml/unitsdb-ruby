@@ -12,6 +12,7 @@ module Unitsdb
     # model Config.model_for(:units)
 
     attribute :schema_version, :string
+    attribute :version, :string
     attribute :units, Unit, collection: true
     attribute :prefixes, Prefix, collection: true
     attribute :quantities, Quantity, collection: true

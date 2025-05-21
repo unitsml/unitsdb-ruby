@@ -7,6 +7,7 @@ module Unitsdb
     # model Config.model_for(:unit_systems)
 
     attribute :schema_version, :string
+    attribute :version, :string
     attribute :unit_systems, UnitSystem, collection: true
   end
 end

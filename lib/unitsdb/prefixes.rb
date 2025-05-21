@@ -17,6 +17,7 @@ module Unitsdb
     # model Config.model_for(:prefixes)
 
     attribute :schema_version, :string
+    attribute :version, :string
     attribute :prefixes, Prefix, collection: true
   end
 end

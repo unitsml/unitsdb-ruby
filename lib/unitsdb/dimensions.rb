@@ -7,6 +7,7 @@ module Unitsdb
     # model Config.model_for(:dimensions)
 
     attribute :schema_version, :string
+    attribute :version, :string
     attribute :dimensions, Dimension, collection: true
   end
 end

@@ -13,7 +13,7 @@ module Unitsdb
       def references
         require_relative "validate/references"
 
-        Commands::References.new(options).run
+        Commands::Validate::References.new(options).run
       end
 
       desc "identifiers", "Check for uniqueness of identifier fields"
@@ -23,7 +23,7 @@ module Unitsdb
       def identifiers
         require_relative "validate/identifiers"
 
-        Commands::Identifiers.new(options).run
+        Commands::Validate::Identifiers.new(options).run
       end
 
       desc "si_references", "Validate that each SI digital framework reference is unique per entity type"
@@ -33,7 +33,7 @@ module Unitsdb
       def si_references
         require_relative "validate/si_references"
 
-        Validate::SiReferences.new(options).run
+        Commands::Validate::SiReferences.new(options).run
       end
     end
   end

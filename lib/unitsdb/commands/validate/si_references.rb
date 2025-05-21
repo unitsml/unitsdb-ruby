@@ -103,12 +103,6 @@ module Unitsdb
           puts "Please fix the duplicates by either removing the reference from all but one entity,"
           puts "or by updating the references to use different URIs appropriate for each entity."
         end
-
-        def load_database(path)
-          Unitsdb::Database.from_db(path)
-        rescue StandardError => e
-          raise Unitsdb::Errors::DatabaseError, "Failed to load database: #{e.message}"
-        end
       end
     end
   end

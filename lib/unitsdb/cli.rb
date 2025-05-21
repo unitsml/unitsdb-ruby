@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "thor"
+require_relative "commands/base"
 require_relative "commands/validate"
 require_relative "commands/_modify"
 require "fileutils"

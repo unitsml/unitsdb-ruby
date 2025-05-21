@@ -6,6 +6,7 @@ source "https://rubygems.org"
 gemspec
 
 gem "diffy"
+gem "nokogiri"
 gem "rake"
 gem "rspec"
 gem "rubocop"

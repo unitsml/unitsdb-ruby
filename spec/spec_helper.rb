@@ -61,3 +61,9 @@ RSpec::Matchers.define :be_yaml_equivalent_to do |expected|
       diff.to_s(:color)
   end
 end
+
+# Configure LutaML adapters
+Lutaml::Model::Config.configure do |config|
+  config.xml_adapter_type = :nokogiri
+  config.yaml_adapter_type = :standard_yaml
+end

@@ -71,6 +71,8 @@ module Unitsdb
                     desc: "Output format: 'yaml' (single file), 'zip' (archive), or 'all' (both)"
     option :output_dir, type: :string, default: ".", aliases: "-o",
                         desc: "Directory to output release files"
+    option :version, type: :string, aliases: "-v", required: true,
+                     desc: "Version number for the release (x.y.z)"
     option :database, type: :string, required: true, aliases: "-d",
                       desc: "Path to UnitsDB database (required)"
     def release

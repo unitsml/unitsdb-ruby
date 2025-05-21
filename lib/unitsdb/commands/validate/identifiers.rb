@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
+require_relative "../base"
+
 module Unitsdb
   module Commands
     module Validate
-      class Identifiers < Base
+      class Identifiers < Unitsdb::Commands::Base
         def run
           db = load_database
           all_dups = db.validate_uniqueness

@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
+require_relative "../base"
+
 module Unitsdb
   module Commands
     module Validate
-      class References < Base
+      class References < Unitsdb::Commands::Base
         def run
           # Load the database
           db = load_database(@options[:database])

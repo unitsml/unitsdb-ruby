@@ -1,132 +1,72 @@
 # frozen_string_literal: true
 
-require_relative "base"
 require "yaml"
 require "zip"
 require "fileutils"
 
 module Unitsdb
   module Commands
-    class Release < Base
+    class Release < ::Unitsdb::Commands::Base
       def run
-        # Get release version (required parameter)
-        release_version = @options[:version]
-
-        # Verify version is in semantic format (x.y.z)
-        unless release_version =~ /^\d+\.\d+\.\d+$/
-          puts "Error: Version must be in semantic format (x.y.z)"
-          exit(1)
-        end
+        # Load the database
+        db = load_database(@options[:database])
+        db.version = @options[:version]
 
         # Create output directory if it doesn't exist
-        output_dir = @options[:output_dir] || "."
-        FileUtils.mkdir_p(output_dir) unless Dir.exist?(output_dir)
+        FileUtils.mkdir_p(@options[:output_dir])
 
-        # Load the database from the specified directory
-        begin
-          database = Unitsdb::Database.from_db(@options[:database])
-        rescue Unitsdb::Errors::DatabaseError => e
-          puts "Error: #{e.message}"
+        # Generate release files based on format option
+        format = (@options[:format] || "all").downcase
+        case format
+        when "yaml"
+          create_unified_yaml(db)
+        when "zip"
+          create_zip_archive(db)
+        when "all"
+          create_unified_yaml(db)
+          create_zip_archive(db)
+        else
+          puts "Invalid format option: #{@options[:format]}"
+          puts "Valid options are: 'yaml', 'zip', or 'all'"
           exit(1)
         end
 
-        # Set the version field on the database
-        database.version = release_version
-
-        # Generate outputs based on format option
-        format = @options[:format] || "all"
-
-        case format.downcase
-        when "yaml", "all"
-          create_unified_yaml(database, release_version, output_dir)
-        end
-
-        case format.downcase
-        when "zip", "all"
-          create_zip_archive(database, release_version, output_dir)
-        end
-
-        puts "Release files created successfully in #{output_dir}"
+        puts "Release files created successfully in #{@options[:output_dir]}"
+      rescue Unitsdb::Errors::DatabaseError => e
+        puts "Error: #{e.message}"
+        exit(1)
       end
 
       private
 
-      def create_unified_yaml(database, release_version, output_dir)
-        # Write the unified YAML to a file
-        output_file = File.join(output_dir, "unitsdb-#{release_version}.yaml")
-        File.write(output_file, database.to_yaml)
-        puts "Created unified YAML file: #{output_file}"
+      def create_unified_yaml(db)
+        # Create a unified YAML file with all database components
+        output_path = File.join(@options[:output_dir], "unitsdb-#{@options[:version]}.yaml")
+        File.write(output_path, db.to_yaml)
+        puts "Created unified YAML file: #{output_path}"
       end
 
-      def create_zip_archive(database, release_version, output_dir)
-        # Create a ZIP archive containing all YAML files
-        output_file = File.join(output_dir, "unitsdb-#{release_version}.zip")
-        temp_dir = File.join(output_dir, "temp_zip_files")
+      def create_zip_archive(db)
+        # Create a ZIP archive with individual YAML files
+        output_path = File.join(@options[:output_dir], "unitsdb-#{@options[:version]}.zip")
 
-        begin
-          # Create a temporary directory for version-added files
-          FileUtils.mkdir_p(temp_dir)
-
-          # Create individual YAML files with version field
-          create_individual_yaml_files(database, release_version, temp_dir)
-
-          # Create the ZIP file with versioned files
-          Zip::File.open(output_file, Zip::File::CREATE) do |zipfile|
-            Dir.glob(File.join(temp_dir, "*.yaml")).each do |file|
-              # Get the filename without the path
-              filename = File.basename(file)
-              # Add the file to the ZIP archive
-              zipfile.add(filename, file)
+        Zip::File.open(output_path, Zip::File::CREATE) do |zipfile|
+          {
+            dimensions: Unitsdb::Dimensions,
+            unit_systems: Unitsdb::UnitSystems,
+            units: Unitsdb::Units,
+            prefixes: Unitsdb::Prefixes,
+            quantities: Unitsdb::Quantities
+          }.each_pair do |access_method, collection_klass|
+            db.send(access_method).tap do |data|
+              collection = collection_klass.new(access_method => data)
+              collection.version = @options[:version]
+              zipfile.get_output_stream("#{access_method}.yaml") { |f| f.write(collection.to_yaml) }
             end
           end
-
-          puts "Created ZIP archive: #{output_file}"
-        ensure
-          # Clean up temporary directory
-          FileUtils.rm_rf(temp_dir) if Dir.exist?(temp_dir)
         end
-      end
 
-      def create_individual_yaml_files(database, release_version, temp_dir)
-        # Create units.yaml
-        units = Unitsdb::Units.new(
-          schema_version: database.schema_version,
-          version: release_version,
-          units: database.units
-        )
-        File.write(File.join(temp_dir, "units.yaml"), units.to_yaml)
-
-        # Create quantities.yaml
-        quantities = Unitsdb::Quantities.new(
-          schema_version: database.schema_version,
-          version: release_version,
-          quantities: database.quantities
-        )
-        File.write(File.join(temp_dir, "quantities.yaml"), quantities.to_yaml)
-
-        # Create dimensions.yaml
-        dimensions = Unitsdb::Dimensions.new(
-          schema_version: database.schema_version,
-          version: release_version,
-          dimensions: database.dimensions
-        )
-        File.write(File.join(temp_dir, "dimensions.yaml"), dimensions.to_yaml)
-
-        # Create prefixes.yaml
-        prefixes = Unitsdb::Prefixes.new(
-          schema_version: database.schema_version,
-          version: release_version,
-          prefixes: database.prefixes
-        )
-        File.write(File.join(temp_dir, "prefixes.yaml"), prefixes.to_yaml)
-
-        # Create unit_systems.yaml
-        unit_systems = Unitsdb::UnitSystems.new(
-          schema_version: database.schema_version,
-          version: release_version,
-          unit_systems: database.unit_systems
-        )
-        File.write(File.join(temp_dir, "unit_systems.yaml"), unit_systems.to_yaml)
+        puts "Created ZIP archive: #{output_path}"
       end
     end
   end

@@ -33,7 +33,7 @@ module Unitsdb
 
       def normalize_file(input, output)
         # Load the original YAML to work with
-        yaml = load_yaml(input)
+        yaml = YAML.safe_load(File.read(input))
 
         # For schema 2.0.0, we need to handle the schema_version and the main collection key
         if yaml.key?("schema_version") && yaml["schema_version"] == "2.0.0"

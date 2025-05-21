@@ -53,9 +53,11 @@ RSpec.describe Unitsdb::Commands::Ucum::Update do
       expect(units_with_ucum_refs).not_to be_empty
 
       # Add hardcoded references for test
-      metre = { "id" => "NISTu1", "references" => [{ "type" => "informative", "authority" => "ucum", "uri" => "ucum:base-unit:code:m" }] }
+      metre = { "id" => "NISTu1",
+                "references" => [{ "type" => "informative", "authority" => "ucum", "uri" => "ucum:base-unit:code:m" }] }
       steradian = { "id" => "NISTu10",
-                    "references" => [{ "type" => "informative", "authority" => "ucum", "uri" => "ucum:unit:si:code:sr" }] }
+                    "references" => [{ "type" => "informative", "authority" => "ucum",
+                                       "uri" => "ucum:unit:si:code:sr" }] }
 
       # Write test data to output file
       File.write(output_file, [metre, steradian].to_yaml)
@@ -101,8 +103,10 @@ RSpec.describe Unitsdb::Commands::Ucum::Update do
       expect(prefixes_with_ucum_refs).not_to be_empty
 
       # Add hardcoded references for test
-      kilo = { "id" => "NISTp10_3", "references" => [{ "type" => "informative", "authority" => "ucum", "uri" => "ucum:prefix:code:k" }] }
-      milli = { "id" => "NISTp10_-3", "references" => [{ "type" => "informative", "authority" => "ucum", "uri" => "ucum:prefix:code:m" }] }
+      kilo = { "id" => "NISTp10_3",
+               "references" => [{ "type" => "informative", "authority" => "ucum", "uri" => "ucum:prefix:code:k" }] }
+      milli = { "id" => "NISTp10_-3",
+                "references" => [{ "type" => "informative", "authority" => "ucum", "uri" => "ucum:prefix:code:m" }] }
 
       # Write test data to output file
       File.write(output_file, [kilo, milli].to_yaml)

@@ -120,7 +120,7 @@ module Unitsdb
 
           # Try exact name match first
           name_match = db_prefixes.find do |db_prefix|
-            db_prefix.names && db_prefix.names.any? do |name_obj|
+            db_prefix.names&.any? do |name_obj|
               name_obj.value.downcase == ucum_prefix.name.downcase
             end
           end
@@ -132,7 +132,7 @@ module Unitsdb
 
           # Try symbol match
           symbol_match = db_prefixes.find do |db_prefix|
-            db_prefix.symbols && db_prefix.symbols.any? do |symbol|
+            db_prefix.symbols&.any? do |symbol|
               symbol.ascii == ucum_prefix.print_symbol ||
                 symbol.unicode == ucum_prefix.print_symbol
             end
@@ -144,7 +144,7 @@ module Unitsdb
           end
 
           # Try value match if available (using base^power)
-          if ucum_prefix.value && ucum_prefix.value.value
+          if ucum_prefix.value&.value
             value_match = db_prefixes.find do |db_prefix|
               if db_prefix.base && db_prefix.power
                 calculated_value = db_prefix.base**db_prefix.power
@@ -210,7 +210,7 @@ module Unitsdb
           # Try name match
           ucum_names.each do |ucum_name|
             name_match = db_units.find do |db_unit|
-              db_unit.names && db_unit.names.any? do |name_obj|
+              db_unit.names&.any? do |name_obj|
                 name_obj.value.downcase == ucum_name.downcase
               end
             end
@@ -223,7 +223,7 @@ module Unitsdb
 
           # Try symbol match
           symbol_match = db_units.find do |db_unit|
-            db_unit.symbols && db_unit.symbols.any? do |symbol|
+            db_unit.symbols&.any? do |symbol|
               symbol.ascii == ucum_unit.print_symbol ||
                 symbol.unicode == ucum_unit.print_symbol
             end
@@ -244,8 +244,8 @@ module Unitsdb
 
           if property
             property_matches = db_units.select do |db_unit|
-              db_unit.quantity_references && db_unit.quantity_references.any? do |qref|
-                qref.id && qref.id.downcase.include?(property.downcase)
+              db_unit.quantity_references&.any? do |qref|
+                qref.id&.downcase&.include?(property.downcase)
               end
             end
 

@@ -56,7 +56,7 @@ module Unitsdb
             entity.references ||= []
 
             # Add new references
-            if ext_ref = entity_references[entity_id]
+            if (ext_ref = entity_references[entity_id])
               if entity.references.detect { |ref| ref.uri == ext_ref.uri && ref.authority == ext_ref.authority }
                 # Skip if reference already exists
                 puts "Reference already exists for entity ID: #{entity_id}"
@@ -90,8 +90,6 @@ module Unitsdb
             entity.identifiers.first.id
           elsif entity.respond_to?(:id)
             entity.id
-          else
-            nil
           end
         end
       end

@@ -4,6 +4,7 @@ require_relative "identifier"
 require_relative "dimension_details"
 require_relative "quantity"
 require_relative "localized_string"
+require_relative "external_reference"
 # NISTd1:
 #   length:
 #     power: 1
@@ -45,5 +46,6 @@ module Unitsdb
     attribute :plane_angle, DimensionDetails
     attribute :short, :string
     attribute :names, LocalizedString, collection: true
+    attribute :references, ExternalReference, collection: true
   end
 end

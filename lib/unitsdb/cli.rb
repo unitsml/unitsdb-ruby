@@ -5,6 +5,7 @@ require_relative "commands/base"
 require_relative "commands/validate"
 require_relative "commands/_modify"
 require_relative "commands/ucum"
+require_relative "commands/qudt"
 require "fileutils"
 
 module Unitsdb
@@ -16,6 +17,9 @@ module Unitsdb
 
     desc "ucum SUBCOMMAND", "UCUM-related commands"
     subcommand "ucum", Commands::UcumCommand
+
+    desc "qudt SUBCOMMAND", "QUDT-related commands"
+    subcommand "qudt", Commands::QudtCommand
 
     desc "_modify SUBCOMMAND", "Commands that modify the database"
     subcommand "_modify", Commands::ModifyCommand

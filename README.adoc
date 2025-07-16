@@ -225,6 +225,29 @@ Options:
 
 `--database`, `-d`:: Path to UnitsDB database (required)
 
+===== QUDT references validation
+
+Validates that each QUDT reference is unique per entity type:
+
+[source,sh]
+----
+$ unitsdb validate qudt_references --database=/path/to/unitsdb/data
+----
+
+This command checks that each QUDT (Quantities, Units, Dimensions and Types) URI is referenced by at most
+one entity of each type. Multiple entities of the same type referencing the same
+QUDT URI could cause issues with mapping and conversion processes.
+
+The command reports:
+
+* Any duplicate QUDT references within each entity type
+* The entities that share the same QUDT reference
+* Their position in the database for easy location
+
+Options:
+
+`--database`, `-d`:: Path to UnitsDB database (required)
+
 === Examples of validation commands
 
 * Check identifiers for uniqueness:
@@ -482,6 +505,138 @@ If not specified, all types are updated
 
 `--output-dir`, `-o`:: Directory path to write updated YAML files
 (defaults to database path)
+
+`--include-potential-matches`, `-p`:: Include potential matches when updating
+references (default: false)
+
+
+==== Check references to QUDT
+
+Performs a comprehensive check of entities in the
+https://qudt.org/3.1.2/vocab/unit[QUDT] (Quantities, Units, Dimensions and
+Types) vocabularies against UnitsDB database entities and updates UnitsDB with
+QUDT references.
+
+The support of QUDT mappings in the UnitsDB is purely informative.
+
+QUDT supports the following entity types, and they are mapped to
+UnitsDB as follows:
+
+* Units: mapped to Units in UnitsDB
+* Quantity Kinds: mapped to Quantities in UnitsDB
+* Dimension Vectors: mapped to Dimensions in UnitsDB
+* Systems of Units: mapped to Unit Systems in UnitsDB
+* Prefixes: mapped to Prefixes in UnitsDB
+* (Physical Constants: not supported in UnitsDB)
+* (Systems of Quantity Kinds: not supported in UnitsDB)
+
+The QUDT Vocabulary is very extensive and includes many entities that are not
+reflected in the UnitsDB database, with the following categories:
+
+* Many composed units in QUDT are omitted from UnitsDB for separation of
+concerns;
+
+* Some quantities are not included in UnitsDB for being less commonly used;
+(e.g. "Deaths per million")
+
+
+This combined command checks in both directions to ensure UnitsDB supports
+every QUDT entity.
+
+* From QUDT to UnitsDB: Ensures every QUDT entity is referenced by at least one
+UnitsDB entity
+
+* From UnitsDB to QUDT: Identifies UnitsDB entities that should reference QUDT
+entities
+
+There are two commands:
+
+* `qudt check`: Checks for matches between UnitsDB and QUDT entities and reports results
+
+* `qudt update`: Updates UnitsDB entities with references to matching QUDT entities
+
+[source,sh]
+----
+# Check all entity types and generate a report
+$ unitsdb qudt check --database=spec/fixtures/unitsdb
+
+# Check a specific entity type (units, quantities, dimensions, or unit_systems)
+$ unitsdb qudt check --entity-type=units \
+  --database=spec/fixtures/unitsdb
+
+# Use local TTL files instead of downloading from QUDT.org
+$ unitsdb qudt check --ttl-dir=/path/to/qudt/ttl/files \
+  --database=spec/fixtures/unitsdb
+
+# Check in a specific direction only
+$ unitsdb qudt check --direction=from_qudt \
+  --database=spec/fixtures/unitsdb
+
+# Include potential matches in the output
+$ unitsdb qudt check --include-potential-matches \
+  --database=spec/fixtures/unitsdb
+
+# Output updated database files
+$ unitsdb qudt check --output-dir=/path/to/output \
+  --database=spec/fixtures/unitsdb
+----
+
+Options:
+
+`--database`, `-d`:: Path to UnitsDB database (required)
+
+`--ttl-dir`, `-t`:: Path to the directory containing QUDT TTL files (optional,
+downloads from QUDT.org if not specified)
+
+`--entity-type`, `-e`:: Entity type to check (units, quantities, dimensions, or
+unit_systems). If not specified, all types are checked.
+
+`--direction`, `-r`:: Direction to check: `to_qudt` (UnitsDB→QUDT), `from_qudt`
+(QUDT→UnitsDB), or `both` (default)
+
+`--output-dir`, `-o`:: Directory path to write updated YAML files with added
+QUDT references
+
+`--include-potential-matches`, `-p`:: Include potential matches when updating
+references (default: false)
+
+
+==== Update QUDT references
+
+[source,sh]
+----
+# Update all entity types with QUDT references
+$ unitsdb qudt update --database=spec/fixtures/unitsdb \
+  --output-dir=new_unitsdb
+
+# Update a specific entity type (units, quantities, dimensions, or unit_systems)
+$ unitsdb qudt update --entity-type=units \
+  --database=spec/fixtures/unitsdb \
+  --output-dir=new_unitsdb
+
+# Use local TTL files instead of downloading
+$ unitsdb qudt update --ttl-dir=/path/to/qudt/ttl/files \
+  --database=spec/fixtures/unitsdb \
+  --output-dir=new_unitsdb
+
+# Include potential matches when updating references (default: false)
+$ unitsdb qudt update --include-potential-matches \
+  --database=spec/fixtures/unitsdb \
+  --output-dir=new_unitsdb
+----
+
+Options:
+
+`--database`, `-d`:: Path to UnitsDB database (required)
+
+`--ttl-dir`, `-t`:: Path to the directory containing QUDT TTL files (optional,
+downloads from QUDT.org if not specified)
+
+`--entity-type`, `-e`:: Entity type to update (units, quantities, dimensions, or
+unit_systems). If not specified, all types are updated
+
+`--output-dir`, `-o`:: Directory path to write updated YAML files (defaults to
+database path)
 
 `--include-potential-matches`, `-p`:: Include potential matches when updating
 references (default: false)

@@ -32,8 +32,18 @@ module Unitsdb
       private
 
       def normalize_file(input, output)
+        # Read the original file content to check for schema comment
+        file_content = File.read(input)
+
+        # Check if the first line is a yaml-language-server schema comment
+        schema_comment = nil
+        lines = file_content.lines
+        if lines.first&.start_with?("# yaml-language-server:")
+          schema_comment = lines.first.chomp
+        end
+
         # Load the original YAML to work with
-        yaml = YAML.safe_load(File.read(input))
+        yaml = YAML.safe_load(file_content)
 
         # For schema 2.0.0, we need to handle the schema_version and the main collection key
         if yaml.key?("schema_version") && yaml["schema_version"] == "2.0.0"
@@ -58,8 +68,12 @@ module Unitsdb
           yaml = Unitsdb::Utils.sort_yaml_keys(yaml)
         end
 
-        # Write the normalized output
-        File.write(output, yaml.to_yaml)
+        # Write the normalized output, preserving schema comment if present
+        output_content = yaml.to_yaml
+        if schema_comment
+          output_content = "#{schema_comment}\n#{output_content}"
+        end
+        File.write(output, output_content)
       end
 
       # Sort collection items by a specific ID type (nist or unitsml)

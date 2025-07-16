@@ -31,6 +31,8 @@ Gem::Specification.new do |spec|
   spec.test_files = `git ls-files -- {spec}/*`.split("\n")
   spec.require_paths = ["lib"]
 
+  spec.add_dependency "diffy"
+  spec.add_dependency "fuzzy_match"
   spec.add_dependency "lutaml-model", "~>0.7"
   spec.add_dependency "rdf", "~> 3.1"
   spec.add_dependency "rdf-turtle", "~> 3.1"

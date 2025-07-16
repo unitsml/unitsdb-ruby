@@ -80,8 +80,39 @@ module Unitsdb
           output_dir = File.dirname(output_file)
           FileUtils.mkdir_p(output_dir) unless Dir.exist?(output_dir)
 
-          # Write to YAML file
-          File.write(output_file, output_data.to_yaml)
+          # Write to YAML file with proper formatting
+          yaml_content = output_data.to_yaml
+
+          # Preserve existing schema header or add default one
+          yaml_content = preserve_schema_header(output_file, yaml_content)
+
+          File.write(output_file, yaml_content)
+        end
+
+        # Preserve existing schema header or add default one
+        def preserve_schema_header(original_file, yaml_content)
+          schema_header = nil
+
+          # Extract existing schema header if file exists
+          if File.exist?(original_file)
+            original_content = File.read(original_file)
+            if (match = original_content.match(/^# yaml-language-server: \$schema=.+$/))
+              schema_header = match[0]
+            end
+          end
+
+          # Remove any existing schema header from new content to avoid duplication
+          yaml_content = yaml_content.gsub(/^# yaml-language-server: \$schema=.+$\n/, '')
+
+          # Add preserved or default schema header
+          if schema_header
+            "#{schema_header}\n#{yaml_content}"
+          else
+            entity_type = File.basename(original_file, '.yaml')
+            "# yaml-language-server: $schema=schemas/#{entity_type}-schema.yaml\n#{yaml_content}"
+          end
+        end
+
         end
 
         # Get entity ID (either from identifiers array or directly)

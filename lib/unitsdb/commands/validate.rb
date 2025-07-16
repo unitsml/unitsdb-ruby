@@ -35,6 +35,16 @@ module Unitsdb
 
         Commands::Validate::SiReferences.new(options).run
       end
+
+      desc "ucum_references", "Validate that each UCUM reference is unique per entity type"
+      option :database, type: :string, required: true, aliases: "-d",
+                        desc: "Path to UnitsDB database (required)"
+
+      def ucum_references
+        require_relative "validate/ucum_references"
+
+        Commands::Validate::UcumReferences.new(options).run
+      end
     end
   end
 end

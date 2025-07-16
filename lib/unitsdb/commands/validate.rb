@@ -36,6 +36,16 @@ module Unitsdb
         Commands::Validate::SiReferences.new(options).run
       end
 
+      desc "qudt_references", "Validate that each QUDT reference is unique per entity type"
+      option :database, type: :string, required: true, aliases: "-d",
+                        desc: "Path to UnitsDB database (required)"
+
+      def qudt_references
+        require_relative "validate/qudt_references"
+
+        Commands::Validate::QudtReferences.new(options).run
+      end
+
       desc "ucum_references", "Validate that each UCUM reference is unique per entity type"
       option :database, type: :string, required: true, aliases: "-d",
                         desc: "Path to UnitsDB database (required)"

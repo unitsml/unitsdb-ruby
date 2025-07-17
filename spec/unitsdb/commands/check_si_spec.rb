@@ -8,8 +8,12 @@ RSpec.describe Unitsdb::Commands::CheckSi do
   let(:command) { described_class.new(options) }
   let(:options) { { database: fixture_dir, ttl_dir: ttl_dir } }
   let(:output) { StringIO.new }
-  let(:fixture_dir) { File.join(File.dirname(__FILE__), "../../fixtures/unitsdb") }
-  let(:ttl_dir) { File.join(File.dirname(__FILE__), "../../fixtures/bipm-si-ttl") }
+  let(:fixture_dir) do
+    File.join(File.dirname(__FILE__), "../../fixtures/unitsdb")
+  end
+  let(:ttl_dir) do
+    File.join(File.dirname(__FILE__), "../../fixtures/bipm-si-ttl")
+  end
 
   before do
     # Redirect output for testing
@@ -28,7 +32,7 @@ RSpec.describe Unitsdb::Commands::CheckSi do
           database: fixture_dir,
           ttl_dir: ttl_dir,
           entity_type: "units",
-          direction: "both"
+          direction: "both",
         }
       end
 
@@ -45,7 +49,7 @@ RSpec.describe Unitsdb::Commands::CheckSi do
                                     database: fixture_dir,
                                     ttl_dir: ttl_dir,
                                     entity_type: "units",
-                                    direction: "from_si"
+                                    direction: "from_si",
                                   })
 
         expect(cmd).to receive(:check_from_si).once
@@ -58,7 +62,7 @@ RSpec.describe Unitsdb::Commands::CheckSi do
                                     database: fixture_dir,
                                     ttl_dir: ttl_dir,
                                     entity_type: "units",
-                                    direction: "to_si"
+                                    direction: "to_si",
                                   })
 
         expect(cmd).not_to receive(:check_from_si)

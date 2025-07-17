@@ -24,7 +24,8 @@ module Unitsdb
     desc "_modify SUBCOMMAND", "Commands that modify the database"
     subcommand "_modify", Commands::ModifyCommand
 
-    desc "validate SUBCOMMAND", "Validate database files for different conditions"
+    desc "validate SUBCOMMAND",
+         "Validate database files for different conditions"
     subcommand "validate", Commands::ValidateCommand
 
     desc "search QUERY", "Search for entities containing the given text"
@@ -56,7 +57,8 @@ module Unitsdb
       Commands::Get.new(options).get(id)
     end
 
-    desc "check_si", "Check and update SI digital framework references in UnitsDB"
+    desc "check_si",
+         "Check and update SI digital framework references in UnitsDB"
     option :entity_type, type: :string, aliases: "-e",
                          desc: "Entity type to check (units, quantities, or prefixes). If not specified, all types are checked"
     option :ttl_dir, type: :string, required: true, aliases: "-t",

@@ -57,7 +57,8 @@ module Unitsdb
             when "nist", "unitsml"
               # Sort by ID (nist or unitsml)
               id_type = @options[:sort]
-              yaml[collection_key] = sort_by_id_type(yaml[collection_key], id_type)
+              yaml[collection_key] =
+                sort_by_id_type(yaml[collection_key], id_type)
             else # default to "short"
               # Use the existing sort_yaml_keys method for default sorting
               yaml[collection_key] = Unitsdb::Utils.sort_yaml_keys(yaml[collection_key])

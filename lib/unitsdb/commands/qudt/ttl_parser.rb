@@ -17,7 +17,7 @@ module Unitsdb
           quantitykinds: "http://qudt.org/3.1.2/vocab/quantitykind",
           dimensionvectors: "http://qudt.org/3.1.2/vocab/dimensionvector",
           sou: "http://qudt.org/3.1.2/vocab/sou",
-          prefixes: "http://qudt.org/3.1.2/vocab/prefix"
+          prefixes: "http://qudt.org/3.1.2/vocab/prefix",
         }.freeze
 
         # QUDT predicates
@@ -42,7 +42,7 @@ module Unitsdb
           prefix_multiplier_sn: RDF::URI("http://qudt.org/schema/qudt/prefixMultiplierSN"),
           ucum_code: RDF::URI("http://qudt.org/schema/qudt/ucumCode"),
           rdf_type: RDF::URI("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
-          dc_description: RDF::URI("http://purl.org/dc/terms/description")
+          dc_description: RDF::URI("http://purl.org/dc/terms/description"),
         }.freeze
 
         class << self
@@ -54,10 +54,10 @@ module Unitsdb
               puts "Parsing #{vocab_type} vocabulary..."
 
               ttl_content = if source_type == :file && ttl_dir
-                            read_ttl_file(ttl_dir, vocab_type)
-                          else
-                            download_ttl_content(url)
-                          end
+                              read_ttl_file(ttl_dir, vocab_type)
+                            else
+                              download_ttl_content(url)
+                            end
 
               graph = parse_ttl_content(ttl_content)
               entities = extract_entities(graph, vocab_type, url)
@@ -109,7 +109,7 @@ module Unitsdb
               quantitykinds: "quantitykind.ttl",
               dimensionvectors: "dimensionvector.ttl",
               sou: "sou.ttl",
-              prefixes: "prefix.ttl"
+              prefixes: "prefix.ttl",
             }
 
             filename = filename_map[vocab_type] || "#{vocab_type}.ttl"
@@ -129,22 +129,23 @@ module Unitsdb
             redirects = 0
 
             loop do
-              Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == 'https') do |http|
+              Net::HTTP.start(uri.host, uri.port,
+                              use_ssl: uri.scheme == "https") do |http|
                 request = Net::HTTP::Get.new(uri)
-                request['Accept'] = 'text/turtle'
+                request["Accept"] = "text/turtle"
 
                 response = http.request(request)
 
                 case response.code
-                when '200'
+                when "200"
                   return response.body
-                when '301', '302', '303', '307', '308'
+                when "301", "302", "303", "307", "308"
                   redirects += 1
                   if redirects > max_redirects
                     raise "Too many redirects for #{url}"
                   end
 
-                  location = response['location']
+                  location = response["location"]
                   if location.nil?
                     raise "Redirect response missing location header for #{url}"
                   end
@@ -185,7 +186,7 @@ module Unitsdb
           end
 
           # Find subjects that belong to the vocabulary
-          def find_vocabulary_subjects(graph, vocab_type, base_url)
+          def find_vocabulary_subjects(graph, _vocab_type, base_url)
             subjects = Set.new
 
             # Get all subjects that have properties from this vocabulary
@@ -193,7 +194,8 @@ module Unitsdb
               subject_uri = statement.subject.to_s
 
               # Check if subject URI starts with the vocabulary base URL
-              if subject_uri.start_with?(base_url.sub("/3.1.2/vocab/", "/vocab/"))
+              if subject_uri.start_with?(base_url.sub("/3.1.2/vocab/",
+                                                      "/vocab/"))
                 subjects << statement.subject
               end
             end
@@ -337,7 +339,8 @@ module Unitsdb
             prefix.uri = subject.to_s
 
             # Determine prefix type from RDF type
-            graph.query([subject, QUDT_PREDICATES[:rdf_type], nil]) do |statement|
+            graph.query([subject, QUDT_PREDICATES[:rdf_type],
+                         nil]) do |statement|
               type_uri = statement.object.to_s
               if type_uri.include?("DecimalPrefix")
                 prefix.prefix_type = "DecimalPrefix"

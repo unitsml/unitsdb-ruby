@@ -10,7 +10,8 @@ module Unitsdb
       module_function
 
       # Display TTL → DB results
-      def display_si_results(entity_type, matches, missing_matches, unmatched_ttl)
+      def display_si_results(entity_type, matches, missing_matches,
+unmatched_ttl)
         puts "\n=== #{entity_type.capitalize} with matching SI references ==="
         if matches.empty?
           puts "None"
@@ -20,18 +21,18 @@ module Unitsdb
             si_suffix = SiTtlParser.extract_identifying_suffix(match[:si_uri])
             rows << [
               "UnitsDB: #{match[:entity_id]}",
-              "(#{match[:entity_name] || "unnamed"})"
+              "(#{match[:entity_name] || 'unnamed'})",
             ]
             rows << [
               "SI TTL:  #{si_suffix}",
-              "(#{match[:si_label] || match[:si_name] || "unnamed"})"
+              "(#{match[:si_label] || match[:si_name] || 'unnamed'})",
             ]
             rows << :separator unless match == matches.last
           end
 
           table = Terminal::Table.new(
             title: "Valid SI Reference Mappings",
-            rows: rows
+            rows: rows,
           )
           puts table
         end
@@ -69,7 +70,7 @@ module Unitsdb
               # First row: UnitsDB entity
               rows << [
                 "UnitsDB: #{match[:entity_id]}",
-                "(#{match[:entity_name] || "unnamed"})"
+                "(#{match[:entity_name] || 'unnamed'})",
               ]
 
               # Handle multiple SI matches in a single cell if present
@@ -91,15 +92,15 @@ module Unitsdb
                 end
 
                 rows << [
-                  "SI TTL:  #{si_text_parts.join(", ")}",
-                  "(#{si_label_parts.join(", ")})"
+                  "SI TTL:  #{si_text_parts.join(', ')}",
+                  "(#{si_label_parts.join(', ')})",
                 ]
               else
                 # Second row: SI TTL suffix and label/name
                 si_suffix = SiTtlParser.extract_identifying_suffix(match[:si_uri])
                 rows << [
                   "SI TTL:  #{si_suffix}",
-                  "(#{match[:si_label] || match[:si_name] || "unnamed"})"
+                  "(#{match[:si_label] || match[:si_name] || 'unnamed'})",
                 ]
               end
 
@@ -111,14 +112,14 @@ module Unitsdb
 
               rows << [
                 "Status: #{status_text}",
-                "✗"
+                "✗",
               ]
               rows << :separator unless match == exact_matches.last
             end
 
             table = Terminal::Table.new(
               title: "Exact Match Missing SI References",
-              rows: rows
+              rows: rows,
             )
             puts table
           end
@@ -133,7 +134,7 @@ module Unitsdb
               # First row: UnitsDB entity
               rows << [
                 "UnitsDB: #{match[:entity_id]}",
-                "(#{match[:entity_name] || "unnamed"})"
+                "(#{match[:entity_name] || 'unnamed'})",
               ]
 
               # Handle multiple SI matches in a single cell if present
@@ -153,15 +154,15 @@ module Unitsdb
                 end
 
                 rows << [
-                  "SI TTL:  #{si_text_parts.join(", ")}",
-                  ""
+                  "SI TTL:  #{si_text_parts.join(', ')}",
+                  "",
                 ]
               else
                 # Single TTL entity
                 si_suffix = SiTtlParser.extract_identifying_suffix(match[:si_uri])
                 rows << [
                   "SI TTL:  #{si_suffix}",
-                  "(#{match[:si_label] || match[:si_name] || "unnamed"})"
+                  "(#{match[:si_label] || match[:si_name] || 'unnamed'})",
                 ]
               end
 
@@ -173,14 +174,14 @@ module Unitsdb
 
               rows << [
                 "Status: #{status_text}",
-                "✗"
+                "✗",
               ]
               rows << :separator unless match == potential_matches.last
             end
 
             table = Terminal::Table.new(
               title: "Potential Match Missing SI References",
-              rows: rows
+              rows: rows,
             )
             puts table
           end
@@ -204,19 +205,20 @@ module Unitsdb
           unique_entities.each do |entity|
             # Create the SI TTL row
             si_suffix = SiTtlParser.extract_identifying_suffix(entity[:uri])
-            ttl_row = ["SI TTL:  #{si_suffix}", "(#{entity[:label] || entity[:name] || "unnamed"})"]
+            ttl_row = ["SI TTL:  #{si_suffix}",
+                       "(#{entity[:label] || entity[:name] || 'unnamed'})"]
 
             rows << ttl_row
             rows << [
               "Status: No matching UnitsDB entity",
-              "?"
+              "?",
             ]
             rows << :separator unless entity == unique_entities.last
           end
 
           table = Terminal::Table.new(
             title: "Unmapped SI Entities",
-            rows: rows
+            rows: rows,
           )
           puts table
         end
@@ -243,18 +245,18 @@ module Unitsdb
 
             rows << [
               "UnitsDB: #{entity_id}",
-              "(#{entity_name})"
+              "(#{entity_name})",
             ]
             rows << [
               "SI TTL:  #{si_suffix}",
-              "(#{ttl_label})"
+              "(#{ttl_label})",
             ]
             rows << :separator unless match == matches.last
           end
 
           table = Terminal::Table.new(
             title: "Valid SI References",
-            rows: rows
+            rows: rows,
           )
           puts table
         end
@@ -310,11 +312,11 @@ module Unitsdb
 
                 rows << [
                   "UnitsDB: #{entity_id}",
-                  "(#{entity_name})"
+                  "(#{entity_name})",
                 ]
                 rows << [
                   "SI TTL:  #{si_suffix}",
-                  "(#{ttl_entity[:label] || ttl_entity[:name] || "unnamed"})"
+                  "(#{ttl_entity[:label] || ttl_entity[:name] || 'unnamed'})",
                 ]
               else
                 # Multiple TTL entities, combine them - ensure no duplicates
@@ -328,18 +330,18 @@ module Unitsdb
                   seen_uris[uri] = true
 
                   suffix = SiTtlParser.extract_identifying_suffix(uri)
-                  si_text_parts << "#{suffix} (#{ttl_entity[:label] || ttl_entity[:name] || "unnamed"})"
+                  si_text_parts << "#{suffix} (#{ttl_entity[:label] || ttl_entity[:name] || 'unnamed'})"
                 end
 
                 si_text = si_text_parts.join(", ")
 
                 rows << [
                   "UnitsDB: #{entity_id}",
-                  "(#{entity_name})"
+                  "(#{entity_name})",
                 ]
                 rows << [
                   "SI TTL:  #{si_text}",
-                  ""
+                  "",
                 ]
               end
 
@@ -354,14 +356,14 @@ module Unitsdb
               status_text = match_info.empty? ? "Missing reference" : "Missing reference (#{match_info})"
               rows << [
                 "Status: #{status_text}",
-                "✗"
+                "✗",
               ]
               rows << :separator unless match == exact_matches.last
             end
 
             table = Terminal::Table.new(
               title: "Exact Match Missing SI References",
-              rows: rows
+              rows: rows,
             )
             puts table
           end
@@ -386,11 +388,11 @@ module Unitsdb
 
                 rows << [
                   "UnitsDB: #{entity_id}",
-                  "(#{entity_name})"
+                  "(#{entity_name})",
                 ]
                 rows << [
                   "SI TTL:  #{si_suffix}",
-                  "(#{ttl_entity[:label] || ttl_entity[:name] || "unnamed"})"
+                  "(#{ttl_entity[:label] || ttl_entity[:name] || 'unnamed'})",
                 ]
               else
                 # Multiple TTL entities, combine them - ensure no duplicates
@@ -404,18 +406,18 @@ module Unitsdb
                   seen_uris[uri] = true
 
                   suffix = SiTtlParser.extract_identifying_suffix(uri)
-                  si_text_parts << "#{suffix} (#{ttl_entity[:label] || ttl_entity[:name] || "unnamed"})"
+                  si_text_parts << "#{suffix} (#{ttl_entity[:label] || ttl_entity[:name] || 'unnamed'})"
                 end
 
                 si_text = si_text_parts.join(", ")
 
                 rows << [
                   "UnitsDB: #{entity_id}",
-                  "(#{entity_name})"
+                  "(#{entity_name})",
                 ]
                 rows << [
                   "SI TTL:  #{si_text}",
-                  ""
+                  "",
                 ]
               end
 
@@ -430,14 +432,14 @@ module Unitsdb
               status_text = match_info.empty? ? "Missing reference" : "Missing reference (#{match_info})"
               rows << [
                 "Status: #{status_text}",
-                "✗"
+                "✗",
               ]
               rows << :separator unless match == potential_matches.last
             end
 
             table = Terminal::Table.new(
               title: "Potential Match Missing SI References",
-              rows: rows
+              rows: rows,
             )
             puts table
           end
@@ -477,7 +479,7 @@ module Unitsdb
           "name_to_label" => "name → label",
           "name_to_alt_label" => "name → alt_label",
           "symbol_match" => "symbol → symbol",
-          "partial_match" => "partial match"
+          "partial_match" => "partial match",
         }[match_desc] || ""
       end
     end

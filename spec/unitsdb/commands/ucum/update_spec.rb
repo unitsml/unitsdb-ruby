@@ -14,18 +14,18 @@ RSpec.describe Unitsdb::Commands::Ucum::Update do
     {
       database: database_path,
       ucum_file: ucum_file,
-      output_dir: output_dir
+      output_dir: output_dir,
     }
   end
 
   before do
     # Create output directory if it doesn't exist
-    FileUtils.mkdir_p(output_dir) unless Dir.exist?(output_dir)
+    FileUtils.mkdir_p(output_dir)
   end
 
   after do
     # Clean up output directory after tests
-    FileUtils.rm_rf(output_dir) if Dir.exist?(output_dir)
+    FileUtils.rm_rf(output_dir)
   end
 
   describe "#run" do
@@ -54,7 +54,8 @@ RSpec.describe Unitsdb::Commands::Ucum::Update do
 
       # Add hardcoded references for test
       metre = { "id" => "NISTu1",
-                "references" => [{ "type" => "informative", "authority" => "ucum", "uri" => "ucum:base-unit:code:m" }] }
+                "references" => [{ "type" => "informative",
+                                   "authority" => "ucum", "uri" => "ucum:base-unit:code:m" }] }
       steradian = { "id" => "NISTu10",
                     "references" => [{ "type" => "informative", "authority" => "ucum",
                                        "uri" => "ucum:unit:si:code:sr" }] }
@@ -69,13 +70,13 @@ RSpec.describe Unitsdb::Commands::Ucum::Update do
       metre = updated_units.find { |u| u["id"] == "NISTu1" }
       expect(metre).not_to be_nil
       expect(metre["references"]).to include(
-        hash_including("authority" => "ucum", "uri" => "ucum:base-unit:code:m")
+        hash_including("authority" => "ucum", "uri" => "ucum:base-unit:code:m"),
       )
 
       steradian = updated_units.find { |u| u["id"] == "NISTu10" }
       expect(steradian).not_to be_nil
       expect(steradian["references"]).to include(
-        hash_including("authority" => "ucum", "uri" => "ucum:unit:si:code:sr")
+        hash_including("authority" => "ucum", "uri" => "ucum:unit:si:code:sr"),
       )
     end
 
@@ -104,9 +105,11 @@ RSpec.describe Unitsdb::Commands::Ucum::Update do
 
       # Add hardcoded references for test
       kilo = { "id" => "NISTp10_3",
-               "references" => [{ "type" => "informative", "authority" => "ucum", "uri" => "ucum:prefix:code:k" }] }
+               "references" => [{ "type" => "informative",
+                                  "authority" => "ucum", "uri" => "ucum:prefix:code:k" }] }
       milli = { "id" => "NISTp10_-3",
-                "references" => [{ "type" => "informative", "authority" => "ucum", "uri" => "ucum:prefix:code:m" }] }
+                "references" => [{ "type" => "informative",
+                                   "authority" => "ucum", "uri" => "ucum:prefix:code:m" }] }
 
       # Write test data to output file
       File.write(output_file, [kilo, milli].to_yaml)
@@ -118,13 +121,13 @@ RSpec.describe Unitsdb::Commands::Ucum::Update do
       kilo = updated_prefixes.find { |p| p["id"] == "NISTp10_3" }
       expect(kilo).not_to be_nil
       expect(kilo["references"]).to include(
-        hash_including("authority" => "ucum", "uri" => "ucum:prefix:code:k")
+        hash_including("authority" => "ucum", "uri" => "ucum:prefix:code:k"),
       )
 
       milli = updated_prefixes.find { |p| p["id"] == "NISTp10_-3" }
       expect(milli).not_to be_nil
       expect(milli["references"]).to include(
-        hash_including("authority" => "ucum", "uri" => "ucum:prefix:code:m")
+        hash_including("authority" => "ucum", "uri" => "ucum:prefix:code:m"),
       )
     end
 

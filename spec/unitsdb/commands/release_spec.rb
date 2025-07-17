@@ -11,8 +11,13 @@ RSpec.describe Unitsdb::Commands::Release do
   let(:database_path) { "spec/fixtures/unitsdb" }
   let(:output_dir) { "tmp/release_test" }
   let(:release_version) { "2.0.0" }
-  let(:options) { { database: database_path, output_dir: output_dir, version: release_version } }
-  let(:schema_version) { YAML.load_file(File.join(database_path, "units.yaml"))["schema_version"] }
+  let(:options) do
+    { database: database_path, output_dir: output_dir,
+      version: release_version }
+  end
+  let(:schema_version) do
+    YAML.load_file(File.join(database_path, "units.yaml"))["schema_version"]
+  end
 
   before do
     FileUtils.mkdir_p(output_dir)
@@ -61,7 +66,10 @@ RSpec.describe Unitsdb::Commands::Release do
     end
 
     context "with yaml format only" do
-      let(:options) { { database: database_path, output_dir: output_dir, format: "yaml", version: release_version } }
+      let(:options) do
+        { database: database_path, output_dir: output_dir, format: "yaml",
+          version: release_version }
+      end
 
       it "creates only unified YAML file" do
         command = described_class.new(options)
@@ -78,7 +86,10 @@ RSpec.describe Unitsdb::Commands::Release do
     end
 
     context "with zip format only" do
-      let(:options) { { database: database_path, output_dir: output_dir, format: "zip", version: release_version } }
+      let(:options) do
+        { database: database_path, output_dir: output_dir, format: "zip",
+          version: release_version }
+      end
 
       it "creates only ZIP archive" do
         command = described_class.new(options)
@@ -96,7 +107,10 @@ RSpec.describe Unitsdb::Commands::Release do
 
     context "with custom version" do
       let(:custom_version) { "2.1.0" }
-      let(:options) { { database: database_path, output_dir: output_dir, version: custom_version } }
+      let(:options) do
+        { database: database_path, output_dir: output_dir,
+          version: custom_version }
+      end
 
       it "creates files with custom version in filename" do
         command = described_class.new(options)
@@ -119,7 +133,10 @@ RSpec.describe Unitsdb::Commands::Release do
 
     context "with missing files" do
       let(:invalid_path) { "spec/fixtures/nonexistent" }
-      let(:options) { { database: invalid_path, output_dir: output_dir, version: release_version } }
+      let(:options) do
+        { database: invalid_path, output_dir: output_dir,
+          version: release_version }
+      end
 
       it "exits with an error" do
         command = described_class.new(options)
@@ -129,14 +146,18 @@ RSpec.describe Unitsdb::Commands::Release do
 
     context "with inconsistent schema versions" do
       let(:temp_db_path) { "tmp/inconsistent_db" }
-      let(:options) { { database: temp_db_path, output_dir: output_dir, version: release_version } }
+      let(:options) do
+        { database: temp_db_path, output_dir: output_dir,
+          version: release_version }
+      end
 
       before do
         FileUtils.mkdir_p(temp_db_path)
 
         # Copy original files
         Unitsdb::Utils::DEFAULT_YAML_FILES.each do |file|
-          FileUtils.cp(File.join(database_path, file), File.join(temp_db_path, file))
+          FileUtils.cp(File.join(database_path, file),
+                       File.join(temp_db_path, file))
         end
 
         # Modify one file to have a different schema version

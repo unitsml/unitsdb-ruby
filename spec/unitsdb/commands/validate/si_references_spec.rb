@@ -6,7 +6,7 @@ require "unitsdb/commands/validate/si_references"
 RSpec.describe Unitsdb::Commands::Validate::SiReferences do
   let(:options) do
     {
-      database: "spec/fixtures/unitsdb"
+      database: "spec/fixtures/unitsdb",
     }
   end
 

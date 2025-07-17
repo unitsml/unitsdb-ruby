@@ -18,12 +18,15 @@ module Unitsdb
 
           # Process each UCUM entity
           ucum_entities.each do |ucum_entity|
-            match_data = find_db_match_for_ucum(ucum_entity, db_entities, entity_type)
+            match_data = find_db_match_for_ucum(ucum_entity, db_entities,
+                                                entity_type)
 
             if match_data[:match]
-              matches << { ucum_entity: ucum_entity, db_entity: match_data[:match] }
+              matches << { ucum_entity: ucum_entity,
+                           db_entity: match_data[:match] }
             elsif match_data[:potential_match]
-              missing_matches << { ucum_entity: ucum_entity, db_entity: match_data[:potential_match] }
+              missing_matches << { ucum_entity: ucum_entity,
+                                   db_entity: match_data[:potential_match] }
             else
               unmatched_ucum << ucum_entity
             end
@@ -45,14 +48,18 @@ module Unitsdb
           db_entities.send(entity_type).each do |db_entity|
             # Skip entities that already have UCUM references
             if has_ucum_reference?(db_entity)
-              matches << { db_entity: db_entity, ucum_entity: find_referenced_ucum_entity(db_entity, ucum_entities) }
+              matches << { db_entity: db_entity,
+                           ucum_entity: find_referenced_ucum_entity(db_entity,
+                                                                    ucum_entities) }
               next
             end
 
-            match_data = find_ucum_match_for_db(db_entity, ucum_entities, entity_type)
+            match_data = find_ucum_match_for_db(db_entity, ucum_entities,
+                                                entity_type)
 
             if match_data[:match]
-              missing_refs << { db_entity: db_entity, ucum_entity: match_data[:match] }
+              missing_refs << { db_entity: db_entity,
+                                ucum_entity: match_data[:match] }
             else
               unmatched_db << db_entity
             end
@@ -166,7 +173,9 @@ module Unitsdb
 
           # Try exact name match first
           if db_prefix.names && !db_prefix.names.empty?
-            db_prefix_names = db_prefix.names.map { |name_obj| name_obj.value.downcase }
+            db_prefix_names = db_prefix.names.map do |name_obj|
+              name_obj.value.downcase
+            end
 
             name_match = ucum_prefixes.find do |ucum_prefix|
               db_prefix_names.include?(ucum_prefix.name.downcase)
@@ -249,7 +258,10 @@ module Unitsdb
               end
             end
 
-            result[:potential_match] = property_matches.first if property_matches.any?
+            if property_matches.any?
+              result[:potential_match] =
+                property_matches.first
+            end
           end
 
           result
@@ -261,7 +273,9 @@ module Unitsdb
 
           # Try name match first
           if db_unit.names && !db_unit.names.empty?
-            db_unit_names = db_unit.names.map { |name_obj| name_obj.value.downcase }
+            db_unit_names = db_unit.names.map do |name_obj|
+              name_obj.value.downcase
+            end
 
             name_match = ucum_units.find do |ucum_unit|
               case ucum_unit

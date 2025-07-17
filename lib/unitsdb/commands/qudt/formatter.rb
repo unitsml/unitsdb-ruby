@@ -13,7 +13,8 @@ module Unitsdb
         end
 
         # Display results for QUDT → UnitsDB matching
-        def display_qudt_results(entity_type, matches, missing_matches, unmatched_qudt)
+        def display_qudt_results(entity_type, matches, missing_matches,
+unmatched_qudt)
           puts "\nResults for #{entity_type.capitalize} (QUDT → UnitsDB):"
           puts "  Matched: #{matches.size}"
           puts "  Missing matches (could be added): #{missing_matches.size}"
@@ -49,7 +50,7 @@ module Unitsdb
         def display_missing_qudt_entities(entity_type, unmatched_qudt)
           return if unmatched_qudt.empty?
 
-          puts "\n" + "=" * 60
+          puts "\n#{'=' * 60}"
           puts "MISSING QUDT ENTITIES ANALYSIS"
           puts "=" * 60
           puts "\nQUDT #{entity_type.capitalize} that don't exist in UnitsDB (#{unmatched_qudt.size} total):"
@@ -60,7 +61,7 @@ module Unitsdb
             puts "\n#{index + 1}. #{format_qudt_entity_details(entity)}"
           end
 
-          puts "\n" + "-" * 60
+          puts "\n#{'-' * 60}"
           puts "RECOMMENDATION: Review these entities to determine if any should be added to UnitsDB."
           puts "Focus on commonly used #{entity_type} that would benefit the UnitsDB community."
           puts "-" * 60

@@ -32,7 +32,9 @@ RSpec.describe "unitsdb executable" do
   it "contains code that calls CLI.start with ARGV" do
     content = File.read(executable_path)
     # Check that the last significant line is the CLI.start call
-    significant_lines = content.lines.map(&:strip).reject { |line| line.empty? || line.start_with?("#") }
+    significant_lines = content.lines.map(&:strip).reject do |line|
+      line.empty? || line.start_with?("#")
+    end
     expect(significant_lines.last).to eq("Unitsdb::CLI.start(ARGV)")
   end
 end

@@ -65,7 +65,7 @@ module Unitsdb
         if entity.identifiers&.any?
           puts "  - Identifiers:"
           entity.identifiers.each do |id|
-            puts "      - #{id.id} (Type: #{id.type || "N/A"})"
+            puts "      - #{id.id} (Type: #{id.type || 'N/A'})"
           end
         else
           puts "  - Identifiers: None"
@@ -75,7 +75,11 @@ module Unitsdb
         case entity
         when Unitsdb::Unit
           puts "  - Symbols:" if entity.respond_to?(:symbols) && entity.symbols&.any?
-          entity.symbols.each { |s| puts "      - #{s}" } if entity.respond_to?(:symbols) && entity.symbols&.any?
+          if entity.respond_to?(:symbols) && entity.symbols&.any?
+            entity.symbols.each do |s|
+              puts "      - #{s}"
+            end
+          end
 
           puts "  - Definition: #{entity.definition}" if entity.respond_to?(:definition) && entity.definition
 

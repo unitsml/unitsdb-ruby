@@ -38,7 +38,8 @@ module Unitsdb
 
         namespace = RDF::Vocabulary.new(namespace_uri)
         entities = extract_base_entities(graph, namespace, skos)
-        add_symbols_to_entities(entities, graph, si) if %w[units prefixes].include?(entity_type)
+        add_symbols_to_entities(entities, graph, si) if %w[units
+                                                           prefixes].include?(entity_type)
         entities
       end
 
@@ -48,7 +49,7 @@ module Unitsdb
         processed_uris = {}
 
         RDF::Query.new({ entity: { skos.prefLabel => :label } })
-                  .execute(graph).each do |solution|
+          .execute(graph).each do |solution|
           entity_uri = solution.entity.to_s
           next unless entity_uri.start_with?(namespace.to_s)
           next if processed_uris[entity_uri]
@@ -57,15 +58,15 @@ module Unitsdb
 
           entity_name = entity_uri.split("/").last
           label = RDF::Query.new({ RDF::URI(entity_uri) => { skos.prefLabel => :value } })
-                            .execute(graph).first&.value&.to_s
+            .execute(graph).first&.value&.to_s
           alt_label = RDF::Query.new({ RDF::URI(entity_uri) => { skos.altLabel => :value } })
-                                .execute(graph).first&.value&.to_s
+            .execute(graph).first&.value&.to_s
 
           entities << {
             uri: entity_uri,
             name: entity_name,
             label: label,
-            alt_label: alt_label
+            alt_label: alt_label,
           }
         end
 
@@ -76,7 +77,7 @@ module Unitsdb
       def add_symbols_to_entities(entities, graph, si)
         entities.each do |entity|
           symbol = RDF::Query.new({ RDF::URI(entity[:uri]) => { si.hasSymbol => :value } })
-                             .execute(graph).first&.value&.to_s
+            .execute(graph).first&.value&.to_s
           entity[:symbol] = symbol if symbol
         end
       end
@@ -89,7 +90,7 @@ module Unitsdb
         # This helps format the comma-separated multi-units correctly
         if uri.include?("/units/")
           # Return units/name format for units (without duplicating "units/")
-          "units/#{uri.split("/").last}"
+          "units/#{uri.split('/').last}"
         else
           # Otherwise strip the prefix
           uri.gsub(SI_URI_PREFIX, "")

@@ -88,7 +88,8 @@ module Unitsdb
 
   # Container for all QUDT vocabularies
   class QudtVocabularies
-    attr_accessor :units, :quantity_kinds, :dimension_vectors, :systems_of_units, :prefixes
+    attr_accessor :units, :quantity_kinds, :dimension_vectors,
+                  :systems_of_units, :prefixes
 
     def initialize
       @units = []

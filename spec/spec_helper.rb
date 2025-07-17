@@ -42,7 +42,7 @@ RSpec::Matchers.define :be_yaml_equivalent_to do |expected|
     case obj
     when Hash
       obj.transform_values { |v| sort_yaml_keys(v) }
-         .sort.to_h
+        .sort.to_h
     when Array
       obj.map { |item| sort_yaml_keys(item) }
     else
@@ -57,7 +57,7 @@ RSpec::Matchers.define :be_yaml_equivalent_to do |expected|
                            diff_options: "-u")
 
     "expected YAML to be equivalent\n\n" \
-      "Diff:\n" +
+    "Diff:\n" +
       diff.to_s(:color)
   end
 end

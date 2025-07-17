@@ -2,7 +2,7 @@
 
 RSpec.describe Unitsdb::Quantity do
   file_path = File.join(__dir__, "../fixtures/unitsdb/quantities.yaml")
-  quantities_yaml = YAML.safe_load(IO.read(file_path))
+  quantities_yaml = YAML.safe_load_file(file_path)
 
   quantities_yaml["quantities"].each do |quantity_hash|
     identifier = quantity_hash["identifiers"]&.first || {}

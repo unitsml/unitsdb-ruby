@@ -49,6 +49,7 @@ RSpec.describe Unitsdb::Commands::Search do
 
     context "when specifying entity type" do
       let(:options) { { database: fixtures_dir, type: "prefixes" } }
+
       it "limits search to that type" do
         # Redirect stdout to capture output
         original_stdout = $stdout
@@ -68,6 +69,7 @@ RSpec.describe Unitsdb::Commands::Search do
 
     context "when searching by id" do
       let(:options) { { database: fixtures_dir, id: "NISTu1" } }
+
       it "finds the entity with the matching id" do
         # Redirect stdout to capture output
         original_stdout = $stdout
@@ -89,7 +91,10 @@ RSpec.describe Unitsdb::Commands::Search do
     end
 
     context "when searching by id with type filter" do
-      let(:options) { { database: fixtures_dir, id: "NISTu1", id_type: "nist" } }
+      let(:options) do
+        { database: fixtures_dir, id: "NISTu1", id_type: "nist" }
+      end
+
       it "finds the entity with the matching id and type" do
         # Redirect stdout to capture output
         original_stdout = $stdout
@@ -109,6 +114,7 @@ RSpec.describe Unitsdb::Commands::Search do
 
     context "when searching by id that doesn't exist" do
       let(:options) { { database: fixtures_dir, id: "NonExistentID" } }
+
       it "indicates that no entity was found" do
         # Redirect stdout to capture output
         original_stdout = $stdout
@@ -129,7 +135,9 @@ RSpec.describe Unitsdb::Commands::Search do
     context "when an error occurs" do
       it "handles the error gracefully" do
         # Create a test database that will raise an error when loaded
-        allow(command).to receive(:load_database).and_raise(Unitsdb::Errors::DatabaseError, "Test error")
+        allow(command).to receive(:load_database).and_raise(
+          Unitsdb::Errors::DatabaseError, "Test error"
+        )
 
         # Expect exit to be called with status 1
         expect(command).to receive(:exit).with(1)

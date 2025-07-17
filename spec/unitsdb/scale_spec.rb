@@ -2,7 +2,7 @@
 
 RSpec.describe Unitsdb::Scale do
   file_path = File.join(__dir__, "../fixtures/unitsdb/scales.yaml")
-  scales_yaml = YAML.safe_load(IO.read(file_path))
+  scales_yaml = YAML.safe_load_file(file_path)
 
   scales_yaml["scales"].each do |scale_hash|
     identifier = scale_hash["identifiers"]&.first || {}

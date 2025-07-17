@@ -43,6 +43,7 @@ RSpec.describe Unitsdb::Commands::Validate::References do
 
       context "with --print_valid option" do
         let(:options) { { database: fixtures_dir, print_valid: true } }
+
         it "prints valid references when --print_valid is specified" do
           output = capture_output do
             command.run
@@ -63,17 +64,16 @@ RSpec.describe Unitsdb::Commands::Validate::References do
         db = test_database
 
         # Mock the load_database method to avoid file access errors
-        allow(command).to receive(:load_database).and_return(db)
 
         # Create a known registry
         mock_registry = {
           "units" => { "NISTu1" => "index:0", "nist:NISTu1" => "index:0" },
           "dimensions" => { "NISTd1" => "index:0", "nist:NISTd1" => "index:0" },
-          "unit_systems" => { "si-base" => "index:0", "unitsml:si-base" => "index:0" }
+          "unit_systems" => { "si-base" => "index:0",
+                              "unitsml:si-base" => "index:0" },
         }
 
         # Mock the build_id_registry method
-        allow(command).to receive(:build_id_registry).and_return(mock_registry)
 
         # Mock the check_references method
         invalid_refs = {
@@ -81,11 +81,12 @@ RSpec.describe Unitsdb::Commands::Validate::References do
             "units:index:0:unit_system_reference[0]" => {
               id: "invalid-system",
               type: "unitsml",
-              ref_type: "unit_systems"
-            }
-          }
+              ref_type: "unit_systems",
+            },
+          },
         }
-        allow(command).to receive(:check_references).and_return(invalid_refs)
+        allow(command).to receive_messages(load_database: db,
+                                           build_id_registry: mock_registry, check_references: invalid_refs)
 
         # Allow the Unitsdb::Utils.find_similar_ids method to work normally
         similar_ids = ["si-base"]
@@ -150,45 +151,48 @@ RSpec.describe Unitsdb::Commands::Validate::References do
     dimensions = [
       {
         "identifiers" => [
-          { "id" => "NISTd1", "type" => "nist" }
+          { "id" => "NISTd1", "type" => "nist" },
         ],
         "dimension_name" => ["length"],
-        "short" => "L"
-      }
+        "short" => "L",
+      },
     ]
 
     # Create units.yaml
     units = [
       {
         "identifiers" => [
-          { "id" => "NISTu1", "type" => "nist" }
+          { "id" => "NISTu1", "type" => "nist" },
         ],
         "names" => ["meter"],
         "short" => "meter",
         "dimension_reference" => { "id" => "NISTd1", "type" => "nist" },
         "unit_system_reference" => if valid_references
-                                     [{ "id" => "si-base", "type" => "unitsml" }]
+                                     [{ "id" => "si-base",
+                                        "type" => "unitsml" }]
                                    else
-                                     [{ "id" => "invalid-system", "type" => "unitsml" }]
-                                   end
-      }
+                                     [{ "id" => "invalid-system",
+                                        "type" => "unitsml" }]
+                                   end,
+      },
     ]
 
     # Create unit_systems.yaml
     unit_systems = [
       {
         "identifiers" => [
-          { "id" => "si-base", "type" => "unitsml" }
+          { "id" => "si-base", "type" => "unitsml" },
         ],
         "unit_system_name" => ["SI base"],
-        "short" => "SI"
-      }
+        "short" => "SI",
+      },
     ]
 
     # Write fixture files
     File.write(File.join(fixtures_dir, "dimensions.yaml"), dimensions.to_yaml)
     File.write(File.join(fixtures_dir, "units.yaml"), units.to_yaml)
-    File.write(File.join(fixtures_dir, "unit_systems.yaml"), unit_systems.to_yaml)
+    File.write(File.join(fixtures_dir, "unit_systems.yaml"),
+               unit_systems.to_yaml)
   end
 
   def test_database
@@ -220,12 +224,12 @@ RSpec.describe Unitsdb::Commands::Validate::References do
                   dimension_reference: dimension_ref,
                   unit_system_reference: [unit_system_ref])
     allow(unit).to receive(:respond_to?).with(any_args).and_return(true)
-    allow(unit).to receive(:root_units).and_return(nil)
-    allow(unit).to receive(:quantity_references).and_return(nil)
+    allow(unit).to receive_messages(root_units: nil, quantity_references: nil)
 
     units = [unit]
 
-    unit_system_identifier = double("Identifier", id: "si-base", type: "unitsml")
+    unit_system_identifier = double("Identifier", id: "si-base",
+                                                  type: "unitsml")
     allow(unit_system_identifier).to receive(:respond_to?).with(any_args).and_return(true)
 
     unit_system = double("UnitSystem",
@@ -239,11 +243,8 @@ RSpec.describe Unitsdb::Commands::Validate::References do
     prefixes = []
 
     db = double("Database")
-    allow(db).to receive(:dimensions).and_return(dimensions)
-    allow(db).to receive(:units).and_return(units)
-    allow(db).to receive(:unit_systems).and_return(unit_systems)
-    allow(db).to receive(:quantities).and_return(quantities)
-    allow(db).to receive(:prefixes).and_return(prefixes)
+    allow(db).to receive_messages(dimensions: dimensions, units: units,
+                                  unit_systems: unit_systems, quantities: quantities, prefixes: prefixes)
 
     db
   end

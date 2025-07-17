@@ -14,7 +14,7 @@ RSpec.describe Unitsdb::CLI do
 
   describe "validate subcommand" do
     it "registers the ValidateCommand as a subcommand" do
-      expect(Unitsdb::CLI.subcommand_classes["validate"]).to eq(Unitsdb::Commands::ValidateCommand)
+      expect(described_class.subcommand_classes["validate"]).to eq(Unitsdb::Commands::ValidateCommand)
     end
   end
 end

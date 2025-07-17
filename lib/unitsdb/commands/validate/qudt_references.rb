@@ -35,7 +35,8 @@ module Unitsdb
           check_entity_qudt_references(db.dimensions, "dimensions", duplicates)
 
           # Check unit_systems
-          check_entity_qudt_references(db.unit_systems, "unit_systems", duplicates)
+          check_entity_qudt_references(db.unit_systems, "unit_systems",
+                                       duplicates)
 
           duplicates
         end
@@ -65,7 +66,7 @@ module Unitsdb
               qudt_refs[ref.uri] << {
                 entity_id: entity_id,
                 entity_name: entity.respond_to?(:names) ? entity.names.first : entity.short,
-                index: index
+                index: index,
               }
             end
           end

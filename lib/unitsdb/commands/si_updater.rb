@@ -12,9 +12,12 @@ module Unitsdb
       module_function
 
       # Update references in YAML file (TTL → DB direction)
-      def update_references(entity_type, missing_matches, db_entities, output_file, include_potential = false)
+      def update_references(entity_type, missing_matches, db_entities,
+output_file, include_potential = false)
         # Use the database objects to access the data directly
-        original_yaml_file = db_entities.first.send(:yaml_file) if db_entities&.first.respond_to?(:yaml_file, true)
+        original_yaml_file = db_entities.first.send(:yaml_file) if db_entities&.first.respond_to?(
+          :yaml_file, true
+        )
 
         # If we can't get the path from the database object, use the output file path as a fallback
         if original_yaml_file.nil? || !File.exist?(original_yaml_file)
@@ -80,7 +83,7 @@ module Unitsdb
                 entity["references"] << {
                   "uri" => si_data[:uri],
                   "type" => "normative",
-                  "authority" => SI_AUTHORITY
+                  "authority" => SI_AUTHORITY,
                 }
               end
             else
@@ -93,7 +96,7 @@ module Unitsdb
               entity["references"] << {
                 "uri" => match[:si_uri],
                 "type" => "normative",
-                "authority" => SI_AUTHORITY
+                "authority" => SI_AUTHORITY,
               }
             end
           end
@@ -103,10 +106,13 @@ module Unitsdb
       end
 
       # Update references in YAML file (DB → TTL direction)
-      def update_db_references(entity_type, missing_refs, output_file, include_potential = false)
+      def update_db_references(entity_type, missing_refs, output_file,
+include_potential = false)
         # Try to get the original YAML file from the first entity
         first_entity = missing_refs.first&.dig(:db_entity)
-        original_yaml_file = first_entity.send(:yaml_file) if first_entity.respond_to?(:yaml_file, true)
+        original_yaml_file = first_entity.send(:yaml_file) if first_entity.respond_to?(
+          :yaml_file, true
+        )
 
         # If we can't get the path from the database object, use the output file path as a fallback
         if original_yaml_file.nil? || !File.exist?(original_yaml_file)
@@ -139,7 +145,8 @@ module Unitsdb
             match_pair_key = "#{entity_id}:#{ttl_entity[:uri]}"
             match_details = Unitsdb::Commands::SiMatcher.instance_variable_get(:@match_details)&.dig(match_pair_key)
 
-            if match_details && %w[symbol_match partial_match].include?(match_details[:match_desc])
+            if match_details && %w[symbol_match
+                                   partial_match].include?(match_details[:match_desc])
               include_potential
             else
               match_type == "Exact match" || include_potential
@@ -156,7 +163,7 @@ module Unitsdb
             missing_refs_by_id[entity_id] << {
               uri: ttl_entity[:uri],
               type: "normative",
-              authority: SI_AUTHORITY
+              authority: SI_AUTHORITY,
             }
           end
         end
@@ -183,14 +190,14 @@ module Unitsdb
             # Check if this reference already exists
             next if entity_yaml["references"].any? do |existing_ref|
               existing_ref["uri"] == ref[:uri] &&
-              existing_ref["authority"] == ref[:authority]
+                existing_ref["authority"] == ref[:authority]
             end
 
             # Add the reference
             entity_yaml["references"] << {
               "uri" => ref[:uri],
               "type" => ref[:type],
-              "authority" => ref[:authority]
+              "authority" => ref[:authority],
             }
           end
         end
@@ -202,7 +209,7 @@ module Unitsdb
       def write_yaml_file(output_file, output_data)
         # Ensure the output directory exists
         output_dir = File.dirname(output_file)
-        FileUtils.mkdir_p(output_dir) unless Dir.exist?(output_dir)
+        FileUtils.mkdir_p(output_dir)
 
         # Write to YAML file with proper formatting
         yaml_content = output_data.to_yaml
@@ -226,13 +233,15 @@ module Unitsdb
         end
 
         # Remove any existing schema header from new content to avoid duplication
-        yaml_content = yaml_content.gsub(/^# yaml-language-server: \$schema=.+$\n/, '')
+        yaml_content = yaml_content.gsub(
+          /^# yaml-language-server: \$schema=.+$\n/, ""
+        )
 
         # Add preserved or default schema header
         if schema_header
           "#{schema_header}\n#{yaml_content}"
         else
-          entity_type = File.basename(original_file, '.yaml')
+          entity_type = File.basename(original_file, ".yaml")
           "# yaml-language-server: $schema=schemas/#{entity_type}-schema.yaml\n#{yaml_content}"
         end
       end

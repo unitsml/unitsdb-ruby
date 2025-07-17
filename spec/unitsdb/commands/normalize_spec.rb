@@ -31,18 +31,18 @@ RSpec.describe Unitsdb::Commands::Normalize do
           "identifiers" => [
             { "id" => "id2", "type" => "type2" },
             { "id" => "nist2", "type" => "nist" },
-            { "id" => "unitsml1", "type" => "unitsml" }
-          ]
+            { "id" => "unitsml1", "type" => "unitsml" },
+          ],
         },
         {
           "short" => "a_unit",
           "identifiers" => [
             { "id" => "id1", "type" => "type1" },
             { "id" => "nist1", "type" => "nist" },
-            { "id" => "unitsml2", "type" => "unitsml" }
-          ]
-        }
-      ]
+            { "id" => "unitsml2", "type" => "unitsml" },
+          ],
+        },
+      ],
     }
   end
 
@@ -72,7 +72,8 @@ RSpec.describe Unitsdb::Commands::Normalize do
 
     it "respects sort option when 'none' for schema 2.0.0" do
       # Create command with sort:'none'
-      no_sort_command = described_class.new({ database: "./test_dir", sort: "none" })
+      no_sort_command = described_class.new({ database: "./test_dir",
+                                              sort: "none" })
 
       # Write test YAML to input file
       File.write(input_file.path, schema_2_yaml.to_yaml)
@@ -114,7 +115,8 @@ RSpec.describe Unitsdb::Commands::Normalize do
 
     it "sorts by nist ID when sort option is 'nist'" do
       # Create command with sort:'nist'
-      nist_sort_command = described_class.new({ database: "./test_dir", sort: "nist" })
+      nist_sort_command = described_class.new({ database: "./test_dir",
+                                                sort: "nist" })
 
       # Write test YAML to input file
       File.write(input_file.path, schema_2_yaml.to_yaml)
@@ -126,13 +128,18 @@ RSpec.describe Unitsdb::Commands::Normalize do
       result = YAML.load_file(output_file.path)
 
       # Validate units are sorted by nist ID
-      expect(result["units"][0]["identifiers"].find { |id| id["type"] == "nist" }["id"]).to eq("nist1")
-      expect(result["units"][1]["identifiers"].find { |id| id["type"] == "nist" }["id"]).to eq("nist2")
+      expect(result["units"][0]["identifiers"].find do |id|
+        id["type"] == "nist"
+      end["id"]).to eq("nist1")
+      expect(result["units"][1]["identifiers"].find do |id|
+        id["type"] == "nist"
+      end["id"]).to eq("nist2")
     end
 
     it "sorts by unitsml ID when sort option is 'unitsml'" do
       # Create command with sort:'unitsml'
-      unitsml_sort_command = described_class.new({ database: "./test_dir", sort: "unitsml" })
+      unitsml_sort_command = described_class.new({ database: "./test_dir",
+                                                   sort: "unitsml" })
 
       # Write test YAML to input file
       File.write(input_file.path, schema_2_yaml.to_yaml)
@@ -144,8 +151,12 @@ RSpec.describe Unitsdb::Commands::Normalize do
       result = YAML.load_file(output_file.path)
 
       # Validate units are sorted by unitsml ID
-      expect(result["units"][0]["identifiers"].find { |id| id["type"] == "unitsml" }["id"]).to eq("unitsml1")
-      expect(result["units"][1]["identifiers"].find { |id| id["type"] == "unitsml" }["id"]).to eq("unitsml2")
+      expect(result["units"][0]["identifiers"].find do |id|
+        id["type"] == "unitsml"
+      end["id"]).to eq("unitsml1")
+      expect(result["units"][1]["identifiers"].find do |id|
+        id["type"] == "unitsml"
+      end["id"]).to eq("unitsml2")
     end
 
     it "handles --all option correctly" do
@@ -159,7 +170,8 @@ RSpec.describe Unitsdb::Commands::Normalize do
         end
 
         # Create command with --all option
-        all_command = described_class.new({ all: true, database: test_dir, sort: "short" })
+        all_command = described_class.new({ all: true, database: test_dir,
+                                            sort: "short" })
 
         # Capture standard output
         original_stdout = $stdout
@@ -180,7 +192,11 @@ RSpec.describe Unitsdb::Commands::Normalize do
           # Check that files were actually sorted
           result = YAML.load_file(path)
           if result["units"] # Some files might have different collection keys
-            expect(result["units"].map { |u| u["short"] }).to eq(result["units"].map { |u| u["short"] }.sort)
+            expect(result["units"].map do |u|
+              u["short"]
+            end).to eq(result["units"].map { |u|
+                      u["short"]
+                    }.sort)
           end
         end
 

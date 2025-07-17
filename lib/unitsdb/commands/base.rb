@@ -15,11 +15,15 @@ module Unitsdb
 
       def load_database(path = nil)
         path ||= @options[:database]
-        raise Unitsdb::Errors::DatabaseError, "Database path not specified" unless path
+        unless path
+          raise Unitsdb::Errors::DatabaseError,
+                "Database path not specified"
+        end
 
         Unitsdb::Database.from_db(path)
       rescue StandardError => e
-        raise Unitsdb::Errors::DatabaseError, "Failed to load database: #{e.message}"
+        raise Unitsdb::Errors::DatabaseError,
+              "Failed to load database: #{e.message}"
       end
     end
   end

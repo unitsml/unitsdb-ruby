@@ -7,11 +7,15 @@ RSpec.describe Unitsdb::Database do
     parsed = described_class.from_db(dir_path)
     generated = parsed.to_yaml
 
-    prefixes_hash = YAML.safe_load(IO.read(File.join(dir_path, "prefixes.yaml")))
-    dimensions_hash = YAML.safe_load(IO.read(File.join(dir_path, "dimensions.yaml")))
-    units_hash = YAML.safe_load(IO.read(File.join(dir_path, "units.yaml")))
-    quantities_hash = YAML.safe_load(IO.read(File.join(dir_path, "quantities.yaml")))
-    unit_systems_hash = YAML.safe_load(IO.read(File.join(dir_path, "unit_systems.yaml")))
+    prefixes_hash = YAML.safe_load_file(File.join(dir_path,
+                                                  "prefixes.yaml"))
+    dimensions_hash = YAML.safe_load_file(File.join(dir_path,
+                                                    "dimensions.yaml"))
+    units_hash = YAML.safe_load_file(File.join(dir_path, "units.yaml"))
+    quantities_hash = YAML.safe_load_file(File.join(dir_path,
+                                                    "quantities.yaml"))
+    unit_systems_hash = YAML.safe_load_file(File.join(dir_path,
+                                                      "unit_systems.yaml"))
 
     prefixes_version = prefixes_hash["schema_version"]
 
@@ -21,7 +25,7 @@ RSpec.describe Unitsdb::Database do
       "dimensions" => dimensions_hash["dimensions"],
       "units" => units_hash["units"],
       "quantities" => quantities_hash["quantities"],
-      "unit_systems" => unit_systems_hash["unit_systems"]
+      "unit_systems" => unit_systems_hash["unit_systems"],
     }.to_yaml
 
     # puts generated

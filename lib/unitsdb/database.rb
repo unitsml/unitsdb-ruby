@@ -25,7 +25,11 @@ module Unitsdb
     # @return [Object, nil] the first entity with matching identifier or nil if not found
     def find_by_type(id:, type:)
       collection = send(type.to_s)
-      collection.find { |entity| entity.identifiers&.any? { |identifier| identifier.id == id } }
+      collection.find do |entity|
+        entity.identifiers&.any? do |identifier|
+          identifier.id == id
+        end
+      end
     end
 
     # Find an entity by its identifier id across all entity types
@@ -33,7 +37,8 @@ module Unitsdb
     # @param type [String, nil] optional identifier type to match
     # @return [Object, nil] the first entity with matching identifier or nil if not found
     def get_by_id(id:, type: nil)
-      %w[units prefixes quantities dimensions unit_systems].each do |collection_name|
+      %w[units prefixes quantities dimensions
+         unit_systems].each do |collection_name|
         next unless respond_to?(collection_name)
 
         collection = send(collection_name)
@@ -63,7 +68,12 @@ module Unitsdb
       results = []
 
       # Define which collections to search based on type parameter
-      collections = type ? [type.to_s] : %w[units prefixes quantities dimensions unit_systems]
+      collections = if type
+                      [type.to_s]
+                    else
+                      %w[units prefixes quantities
+                         dimensions unit_systems]
+                    end
 
       collections.each do |collection_name|
         next unless respond_to?(collection_name)
@@ -71,7 +81,9 @@ module Unitsdb
         collection = send(collection_name)
         collection.each do |entity|
           # Search in identifiers
-          if entity.identifiers&.any? { |identifier| identifier.id.to_s.downcase.include?(text.downcase) }
+          if entity.identifiers&.any? do |identifier|
+            identifier.id.to_s.downcase.include?(text.downcase)
+          end
             results << entity
             next
           end
@@ -86,14 +98,14 @@ module Unitsdb
 
           # Search in short description
           if entity.respond_to?(:short) && entity.short &&
-             entity.short.to_s.downcase.include?(text.downcase)
+              entity.short.to_s.downcase.include?(text.downcase)
             results << entity
             next
           end
 
           # Special case for prefix name (prefixes don't have names array)
           next unless collection_name == "prefixes" && entity.respond_to?(:name) &&
-                      entity.name.to_s.downcase.include?(text.downcase)
+            entity.name.to_s.downcase.include?(text.downcase)
 
           results << entity
           next
@@ -116,7 +128,8 @@ module Unitsdb
       collections = entity_type ? [entity_type.to_s] : %w[units prefixes]
 
       collections.each do |collection_name|
-        next unless respond_to?(collection_name) && %w[units prefixes].include?(collection_name)
+        next unless respond_to?(collection_name) && %w[units
+                                                       prefixes].include?(collection_name)
 
         collection = send(collection_name)
         collection.each do |entity|
@@ -158,11 +171,16 @@ module Unitsdb
 
       result = {
         exact: [],
-        symbol_match: []
+        symbol_match: [],
       }
 
       # Define collections to search based on entity_type parameter
-      collections = entity_type ? [entity_type.to_s] : %w[units prefixes quantities dimensions unit_systems]
+      collections = if entity_type
+                      [entity_type.to_s]
+                    else
+                      %w[units prefixes
+                         quantities dimensions unit_systems]
+                    end
 
       collections.each do |collection_name|
         next unless respond_to?(collection_name)
@@ -174,23 +192,25 @@ module Unitsdb
           if %w[exact all].include?(match_type)
             # Match by short
             if entity.respond_to?(:short) && entity.short &&
-               entity.short.downcase == value.downcase
+                entity.short.downcase == value.downcase
               result[:exact] << {
                 entity: entity,
                 match_desc: "short_to_name",
-                details: "UnitsDB short '#{entity.short}' matches '#{value}'"
+                details: "UnitsDB short '#{entity.short}' matches '#{value}'",
               }
               next
             end
 
             # Match by names
             if entity.respond_to?(:names) && entity.names
-              matching_name = entity.names.find { |name| name.value.to_s.downcase == value.downcase }
+              matching_name = entity.names.find do |name|
+                name.value.to_s.downcase == value.downcase
+              end
               if matching_name
                 result[:exact] << {
                   entity: entity,
                   match_desc: "name_to_name",
-                  details: "UnitsDB name '#{matching_name.value}' (#{matching_name.lang}) matches '#{value}'"
+                  details: "UnitsDB name '#{matching_name.value}' (#{matching_name.lang}) matches '#{value}'",
                 }
                 next
               end
@@ -199,7 +219,7 @@ module Unitsdb
 
           # For symbol matches - only applicable to units and prefixes
           if %w[symbol all].include?(match_type) &&
-             %w[units prefixes].include?(collection_name)
+              %w[units prefixes].include?(collection_name)
             if collection_name == "units" && entity.respond_to?(:symbols) && entity.symbols
               # Units can have multiple symbols
               matching_symbol = entity.symbols.find do |sym|
@@ -211,7 +231,7 @@ module Unitsdb
                 result[:symbol_match] << {
                   entity: entity,
                   match_desc: "symbol_match",
-                  details: "UnitsDB symbol '#{matching_symbol.ascii}' matches '#{value}'"
+                  details: "UnitsDB symbol '#{matching_symbol.ascii}' matches '#{value}'",
                 }
               end
             elsif collection_name == "prefixes" && entity.respond_to?(:symbols) && entity.symbols
@@ -225,7 +245,7 @@ module Unitsdb
                 result[:symbol_match] << {
                   entity: entity,
                   match_desc: "symbol_match",
-                  details: "UnitsDB symbol '#{matching_symbol.ascii}' matches '#{value}'"
+                  details: "UnitsDB symbol '#{matching_symbol.ascii}' matches '#{value}'",
                 }
               end
             end
@@ -243,7 +263,7 @@ module Unitsdb
     def validate_uniqueness
       results = {
         short: {},
-        id: {}
+        id: {},
       }
 
       # Validate short names for applicable collections
@@ -283,18 +303,24 @@ module Unitsdb
       puts "Database directory path: #{db_path}"
 
       # Check if the directory exists
-      raise Errors::DatabaseNotFoundError, "Database directory not found: #{db_path}" unless Dir.exist?(db_path)
+      unless Dir.exist?(db_path)
+        raise Errors::DatabaseNotFoundError,
+              "Database directory not found: #{db_path}"
+      end
 
       # Define required files
-      required_files = %w[prefixes.yaml dimensions.yaml units.yaml quantities.yaml unit_systems.yaml]
+      required_files = %w[prefixes.yaml dimensions.yaml units.yaml
+                          quantities.yaml unit_systems.yaml]
       yaml_files = required_files.map { |file| File.join(dir_path, file) }
 
       # Check if all required files exist
-      missing_files = required_files.reject { |file| File.exist?(File.join(dir_path, file)) }
+      missing_files = required_files.reject do |file|
+        File.exist?(File.join(dir_path, file))
+      end
 
       if missing_files.any?
         raise Errors::DatabaseFileNotFoundError,
-              "Missing required database files: #{missing_files.join(", ")}"
+              "Missing required database files: #{missing_files.join(', ')}"
       end
 
       # Ensure we have path properly joined with filenames
@@ -316,15 +342,17 @@ module Unitsdb
 
       # Load YAML files with better error handling
       begin
-        prefixes_hash = YAML.safe_load(File.read(prefixes_yaml))
-        dimensions_hash = YAML.safe_load(File.read(dimensions_yaml))
-        units_hash = YAML.safe_load(File.read(units_yaml))
-        quantities_hash = YAML.safe_load(File.read(quantities_yaml))
-        unit_systems_hash = YAML.safe_load(File.read(unit_systems_yaml))
+        prefixes_hash = YAML.safe_load_file(prefixes_yaml)
+        dimensions_hash = YAML.safe_load_file(dimensions_yaml)
+        units_hash = YAML.safe_load_file(units_yaml)
+        quantities_hash = YAML.safe_load_file(quantities_yaml)
+        unit_systems_hash = YAML.safe_load_file(unit_systems_yaml)
       rescue Errno::ENOENT => e
-        raise Errors::DatabaseFileNotFoundError, "Failed to read database file: #{e.message}"
+        raise Errors::DatabaseFileNotFoundError,
+              "Failed to read database file: #{e.message}"
       rescue Psych::SyntaxError => e
-        raise Errors::DatabaseFileInvalidError, "Invalid YAML in database file: #{e.message}"
+        raise Errors::DatabaseFileInvalidError,
+              "Invalid YAML in database file: #{e.message}"
       rescue StandardError => e
         raise Errors::DatabaseLoadError, "Error loading database: #{e.message}"
       end
@@ -339,7 +367,7 @@ module Unitsdb
 
       if missing_schema.any?
         raise Errors::DatabaseFileInvalidError,
-              "Missing schema_version in files: #{missing_schema.join(", ")}"
+              "Missing schema_version in files: #{missing_schema.join(', ')}"
       end
 
       # Extract versions from each file
@@ -355,7 +383,7 @@ module Unitsdb
         dimensions_version,
         units_version,
         quantities_version,
-        unit_systems_version
+        unit_systems_version,
       ]
 
       unless versions.uniq.size == 1
@@ -364,9 +392,10 @@ module Unitsdb
           "dimensions.yaml" => dimensions_version,
           "units.yaml" => units_version,
           "quantities.yaml" => quantities_version,
-          "unit_systems.yaml" => unit_systems_version
+          "unit_systems.yaml" => unit_systems_version,
         }
-        raise Errors::VersionMismatchError, "Version mismatch in database files: #{version_info.inspect}"
+        raise Errors::VersionMismatchError,
+              "Version mismatch in database files: #{version_info.inspect}"
       end
 
       # Check if the version is supported
@@ -382,7 +411,7 @@ module Unitsdb
         "dimensions" => dimensions_hash["dimensions"],
         "units" => units_hash["units"],
         "quantities" => quantities_hash["quantities"],
-        "unit_systems" => unit_systems_hash["unit_systems"]
+        "unit_systems" => unit_systems_hash["unit_systems"],
       }.to_yaml
 
       from_yaml(combined_yaml)
@@ -533,7 +562,8 @@ module Unitsdb
         ref_type = "dimensions"
         ref_path = "dimensions:index:#{index}:dimension_reference"
 
-        validate_reference(ref_id, ref_type, ref_path, registry, invalid_refs, "dimensions")
+        validate_reference(ref_id, ref_type, ref_path, registry, invalid_refs,
+                           "dimensions")
       end
     end
 
@@ -545,7 +575,8 @@ module Unitsdb
           ref_type = "unit_systems"
           ref_path = "units:index:#{index}:unit_system_reference[#{idx}]"
 
-          validate_reference(ref_id, ref_type, ref_path, registry, invalid_refs, "units")
+          validate_reference(ref_id, ref_type, ref_path, registry,
+                             invalid_refs, "units")
         end
       end
     end
@@ -558,7 +589,8 @@ module Unitsdb
           ref_type = "quantities"
           ref_path = "units:index:#{index}:quantity_references[#{idx}]"
 
-          validate_reference(ref_id, ref_type, ref_path, registry, invalid_refs, "units")
+          validate_reference(ref_id, ref_type, ref_path, registry,
+                             invalid_refs, "units")
         end
       end
     end
@@ -575,7 +607,8 @@ module Unitsdb
           ref_type = "units"
           ref_path = "units:index:#{index}:root_units.#{idx}.unit_reference"
 
-          validate_reference(ref_id, ref_type, ref_path, registry, invalid_refs, "units")
+          validate_reference(ref_id, ref_type, ref_path, registry,
+                             invalid_refs, "units")
 
           # Check prefix reference if present
           next unless root_unit.respond_to?(:prefix_reference) && root_unit.prefix_reference
@@ -584,12 +617,14 @@ module Unitsdb
           ref_type = "prefixes"
           ref_path = "units:index:#{index}:root_units.#{idx}.prefix_reference"
 
-          validate_reference(ref_id, ref_type, ref_path, registry, invalid_refs, "units")
+          validate_reference(ref_id, ref_type, ref_path, registry,
+                             invalid_refs, "units")
         end
       end
     end
 
-    def validate_reference(ref_id, ref_type, ref_path, registry, invalid_refs, file_type)
+    def validate_reference(ref_id, ref_type, ref_path, registry, invalid_refs,
+file_type)
       # Handle references that are objects with id and type (could be a hash or an object)
       if ref_id.respond_to?(:id) && ref_id.respond_to?(:type)
         id = ref_id.id
@@ -608,8 +643,12 @@ module Unitsdb
         # 3. Try alternate ID formats for unit systems (e.g., SI_base vs si-base)
         if !valid && type == "unitsml" && ref_type == "unit_systems" && registry.key?(ref_type) && (
             registry[ref_type].keys.any? { |k| k.end_with?(":#{id}") } ||
-            registry[ref_type].keys.any? { |k| k.end_with?(":SI_#{id.sub("si-", "")}") } ||
-            registry[ref_type].keys.any? { |k| k.end_with?(":non-SI_#{id.sub("nonsi-", "")}") }
+            registry[ref_type].keys.any? do |k|
+              k.end_with?(":SI_#{id.sub('si-', '')}")
+            end ||
+            registry[ref_type].keys.any? do |k|
+              k.end_with?(":non-SI_#{id.sub('nonsi-', '')}")
+            end
           )
           # Special handling for unit_systems between unitsml and nist types
           valid = true
@@ -617,7 +656,8 @@ module Unitsdb
 
         unless valid
           invalid_refs[file_type] ||= {}
-          invalid_refs[file_type][ref_path] = { id: id, type: type, ref_type: ref_type }
+          invalid_refs[file_type][ref_path] =
+            { id: id, type: type, ref_type: ref_type }
         end
       # Handle references that are objects with id and type in a hash
       elsif ref_id.is_a?(Hash) && ref_id.key?("id") && ref_id.key?("type")
@@ -637,8 +677,12 @@ module Unitsdb
         # 3. Try alternate ID formats for unit systems (e.g., SI_base vs si-base)
         if !valid && type == "unitsml" && ref_type == "unit_systems" && registry.key?(ref_type) && (
             registry[ref_type].keys.any? { |k| k.end_with?(":#{id}") } ||
-            registry[ref_type].keys.any? { |k| k.end_with?(":SI_#{id.sub("si-", "")}") } ||
-            registry[ref_type].keys.any? { |k| k.end_with?(":non-SI_#{id.sub("nonsi-", "")}") }
+            registry[ref_type].keys.any? do |k|
+              k.end_with?(":SI_#{id.sub('si-', '')}")
+            end ||
+            registry[ref_type].keys.any? do |k|
+              k.end_with?(":non-SI_#{id.sub('nonsi-', '')}")
+            end
           )
           # Special handling for unit_systems between unitsml and nist types
           valid = true
@@ -646,7 +690,8 @@ module Unitsdb
 
         unless valid
           invalid_refs[file_type] ||= {}
-          invalid_refs[file_type][ref_path] = { id: id, type: type, ref_type: ref_type }
+          invalid_refs[file_type][ref_path] =
+            { id: id, type: type, ref_type: ref_type }
         end
       else
         # Handle plain string references (legacy format)

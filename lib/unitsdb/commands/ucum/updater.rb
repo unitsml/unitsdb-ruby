@@ -13,7 +13,8 @@ module Unitsdb
         module_function
 
         # Update references in UnitsDB entities with UCUM references
-        def update_references(entity_type, matches, db_entities, output_file, include_potential = false)
+        def update_references(entity_type, matches, db_entities, output_file,
+include_potential = false)
           puts "Updating UCUM references for #{entity_type}..."
 
           # Create a map of entity IDs to their UCUM references
@@ -35,7 +36,7 @@ module Unitsdb
             entity_references[entity_id] = ExternalReference.new(
               uri: ucum_entity.identifier,
               type: "informative",
-              authority: UCUM_AUTHORITY
+              authority: UCUM_AUTHORITY,
             )
           end
 
@@ -57,7 +58,9 @@ module Unitsdb
 
             # Add new references
             if (ext_ref = entity_references[entity_id])
-              if entity.references.detect { |ref| ref.uri == ext_ref.uri && ref.authority == ext_ref.authority }
+              if entity.references.detect do |ref|
+                ref.uri == ext_ref.uri && ref.authority == ext_ref.authority
+              end
                 # Skip if reference already exists
                 puts "Reference already exists for entity ID: #{entity_id}"
               else
@@ -78,7 +81,7 @@ module Unitsdb
         def write_yaml_file(output_file, output_data)
           # Ensure the output directory exists
           output_dir = File.dirname(output_file)
-          FileUtils.mkdir_p(output_dir) unless Dir.exist?(output_dir)
+          FileUtils.mkdir_p(output_dir)
 
           # Write to YAML file with proper formatting
           yaml_content = output_data.to_yaml
@@ -102,17 +105,17 @@ module Unitsdb
           end
 
           # Remove any existing schema header from new content to avoid duplication
-          yaml_content = yaml_content.gsub(/^# yaml-language-server: \$schema=.+$\n/, '')
+          yaml_content = yaml_content.gsub(
+            /^# yaml-language-server: \$schema=.+$\n/, ""
+          )
 
           # Add preserved or default schema header
           if schema_header
             "#{schema_header}\n#{yaml_content}"
           else
-            entity_type = File.basename(original_file, '.yaml')
+            entity_type = File.basename(original_file, ".yaml")
             "# yaml-language-server: $schema=schemas/#{entity_type}-schema.yaml\n#{yaml_content}"
           end
-        end
-
         end
 
         # Get entity ID (either from identifiers array or directly)

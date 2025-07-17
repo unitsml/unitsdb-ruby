@@ -37,17 +37,19 @@ module Unitsdb
             return 1
           end
           puts "Using UCUM file: #{ucum_file}"
-          puts "Include potential matches: #{include_potential ? "Yes" : "No"}"
+          puts "Include potential matches: #{include_potential ? 'Yes' : 'No'}"
 
           # Parse UCUM XML file
           ucum_data = XmlParser.parse_ucum_file(ucum_file)
 
           # Process entity types
           if entity_type && ENTITY_TYPES.include?(entity_type)
-            process_entity_type(entity_type, ucum_data, output_dir, include_potential)
+            process_entity_type(entity_type, ucum_data, output_dir,
+                                include_potential)
           else
             ENTITY_TYPES.each do |type|
-              process_entity_type(type, ucum_data, output_dir, include_potential)
+              process_entity_type(type, ucum_data, output_dir,
+                                  include_potential)
             end
           end
 
@@ -56,7 +58,8 @@ module Unitsdb
 
         private
 
-        def process_entity_type(entity_type, ucum_data, output_dir, include_potential)
+        def process_entity_type(entity_type, ucum_data, output_dir,
+include_potential)
           puts "\n========== Processing #{entity_type.upcase} References =========="
 
           # Get entities
@@ -64,19 +67,22 @@ module Unitsdb
           yaml_path = File.join(@options[:database], "#{entity_type}.yaml")
           entity_collection = klass.from_yaml(File.read(yaml_path))
 
-          ucum_entities = XmlParser.get_entities_from_ucum(entity_type, ucum_data)
+          ucum_entities = XmlParser.get_entities_from_ucum(entity_type,
+                                                           ucum_data)
 
           return if ucum_entities.nil? || ucum_entities.empty?
 
           # Match entities
-          _, missing_refs, = Matcher.match_db_to_ucum(entity_type, ucum_entities, entity_collection)
+          _, missing_refs, = Matcher.match_db_to_ucum(entity_type,
+                                                      ucum_entities, entity_collection)
 
           # Create output directory if it doesn't exist
-          FileUtils.mkdir_p(output_dir) unless Dir.exist?(output_dir)
+          FileUtils.mkdir_p(output_dir)
 
           # Update references in UnitsDB entities
           output_file = File.join(output_dir, "#{entity_type}.yaml")
-          Updater.update_references(entity_type, missing_refs, entity_collection, output_file, include_potential)
+          Updater.update_references(entity_type, missing_refs,
+                                    entity_collection, output_file, include_potential)
         end
       end
     end

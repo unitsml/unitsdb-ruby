@@ -13,7 +13,8 @@ module Unitsdb
         end
 
         # Display results for UCUM → UnitsDB matching
-        def display_ucum_results(entity_type, matches, missing_matches, unmatched_ucum)
+        def display_ucum_results(entity_type, matches, missing_matches,
+unmatched_ucum)
           puts "\nResults for #{entity_type.capitalize} (UCUM → UnitsDB):"
           puts "  Matched: #{matches.size}"
           puts "  Missing matches (could be added): #{missing_matches.size}"

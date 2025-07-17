@@ -25,4 +25,3 @@ require_relative "unitsdb/utils"
 
 # CLI-related requires
 require_relative "unitsdb/cli" if defined?(Thor)
-

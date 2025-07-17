@@ -38,7 +38,7 @@ module Unitsdb
               si_label: ttl_entity[:label],
               si_alt_label: ttl_entity[:alt_label],
               si_symbol: ttl_entity[:symbol],
-              entity: entity
+              entity: entity,
             }
           end
         end
@@ -47,7 +47,8 @@ module Unitsdb
         ttl_entities.each do |ttl_entity|
           next if matched_ttl_uris.include?(ttl_entity[:uri])
 
-          matching_entities = find_matching_entities(entity_type, ttl_entity, db_entities)
+          matching_entities = find_matching_entities(entity_type, ttl_entity,
+                                                     db_entities)
           next if matching_entities.empty?
 
           matched_ttl_uris << ttl_entity[:uri]
@@ -85,7 +86,7 @@ module Unitsdb
               entity: entity,
               match_type: match_result[:match_type],
               match_details: match_result,
-              match_types: { ttl_entity[:uri] => match_result[:match_type] }
+              match_types: { ttl_entity[:uri] => match_result[:match_type] },
             }
 
             if has_reference
@@ -96,11 +97,13 @@ module Unitsdb
               entity_matches[entity_id] << {
                 uri: ttl_entity[:uri],
                 name: ttl_entity[:name],
-                label: ttl_entity[:label]
+                label: ttl_entity[:label],
               }
 
               # Add first occurrence of this entity to missing_matches
-              missing_matches << match_data unless missing_matches.any? { |m| m[:entity_id] == entity_id }
+              missing_matches << match_data unless missing_matches.any? do |m|
+                m[:entity_id] == entity_id
+              end
             end
           end
         end
@@ -174,7 +177,7 @@ module Unitsdb
                 entity_id: display_id,
                 db_entity: db_entity,
                 ttl_uri: ref.uri,
-                ttl_entity: ttl_entity
+                ttl_entity: ttl_entity,
               }
             end
           end
@@ -190,7 +193,8 @@ module Unitsdb
           match_types = {}
 
           ttl_entities.each do |ttl_entity|
-            match_result = match_entity_names?(entity_type, db_entity, ttl_entity)
+            match_result = match_entity_names?(entity_type, db_entity,
+                                               ttl_entity)
             next unless match_result[:match]
 
             matching_ttl << ttl_entity
@@ -208,12 +212,14 @@ module Unitsdb
             entity_id: display_id,
             db_entity: db_entity,
             ttl_entities: matching_ttl,
-            match_types: match_types
+            match_types: match_types,
           }
         end
 
         # Find unmatched db entities
-        unmatched_db = db_entities.reject { |entity| matched_db_ids.include?(find_entity_id(entity)) }
+        unmatched_db = db_entities.reject do |entity|
+          matched_db_ids.include?(find_entity_id(entity))
+        end
 
         [matches, missing_refs, unmatched_db]
       end
@@ -222,7 +228,7 @@ module Unitsdb
       def find_entity_id(entity)
         return entity.id if entity.respond_to?(:id) && entity.id
         return entity.identifiers.first.id if entity.respond_to?(:identifiers) && !entity.identifiers.empty? &&
-                                              entity.identifiers.first.respond_to?(:id)
+          entity.identifiers.first.respond_to?(:id)
 
         entity.short
       end
@@ -273,7 +279,7 @@ module Unitsdb
         units.each do |unit|
           # Match by short
           if unit.short&.downcase == ttl_unit[:name]&.downcase ||
-             unit.short&.downcase == ttl_unit[:label]&.downcase
+              unit.short&.downcase == ttl_unit[:label]&.downcase
             matching_units << unit
             next
           end
@@ -281,7 +287,7 @@ module Unitsdb
           # Match by name
           if unit.respond_to?(:names) && unit.names&.any? do |name|
             name.downcase == ttl_unit[:name]&.downcase ||
-            name.downcase == ttl_unit[:label]&.downcase
+                name.downcase == ttl_unit[:label]&.downcase
           end
             matching_units << unit
             next
@@ -305,8 +311,8 @@ module Unitsdb
         quantities.each do |quantity|
           # Match by short
           if quantity.short&.downcase == ttl_quantity[:name]&.downcase ||
-             quantity.short&.downcase == ttl_quantity[:label]&.downcase ||
-             quantity.short&.downcase == ttl_quantity[:alt_label]&.downcase
+              quantity.short&.downcase == ttl_quantity[:label]&.downcase ||
+              quantity.short&.downcase == ttl_quantity[:alt_label]&.downcase
             matching_quantities << quantity
             next
           end
@@ -314,8 +320,8 @@ module Unitsdb
           # Match by name
           next unless quantity.respond_to?(:names) && quantity.names&.any? do |name|
             name.downcase == ttl_quantity[:name]&.downcase ||
-            name.downcase == ttl_quantity[:label]&.downcase ||
-            name.downcase == ttl_quantity[:alt_label]&.downcase
+              name.downcase == ttl_quantity[:label]&.downcase ||
+              name.downcase == ttl_quantity[:alt_label]&.downcase
           end
 
           matching_quantities << quantity
@@ -331,7 +337,7 @@ module Unitsdb
         prefixes.each do |prefix|
           # Match by short
           if prefix.short&.downcase == ttl_prefix[:name]&.downcase ||
-             prefix.short&.downcase == ttl_prefix[:label]&.downcase
+              prefix.short&.downcase == ttl_prefix[:label]&.downcase
             matching_prefixes << prefix
             next
           end
@@ -339,7 +345,7 @@ module Unitsdb
           # Match by name
           if prefix.respond_to?(:names) && prefix.names&.any? do |name|
             name.downcase == ttl_prefix[:name]&.downcase ||
-            name.downcase == ttl_prefix[:label]&.downcase
+                name.downcase == ttl_prefix[:label]&.downcase
           end
             matching_prefixes << prefix
             next
@@ -347,8 +353,8 @@ module Unitsdb
 
           # Match by symbol
           next unless ttl_prefix[:symbol] && prefix.respond_to?(:symbol) && prefix.symbol &&
-                      prefix.symbol.respond_to?(:ascii) && prefix.symbol.ascii &&
-                      prefix.symbol.ascii.downcase == ttl_prefix[:symbol].downcase
+            prefix.symbol.respond_to?(:ascii) && prefix.symbol.ascii &&
+            prefix.symbol.ascii.downcase == ttl_prefix[:symbol].downcase
 
           matching_prefixes << prefix
         end
@@ -367,7 +373,7 @@ module Unitsdb
             exact: true,
             match_type: "Exact match",
             match_desc: "short_to_name",
-            details: "UnitsDB short '#{db_entity.short}' matches SI name '#{ttl_entity[:name]}'"
+            details: "UnitsDB short '#{db_entity.short}' matches SI name '#{ttl_entity[:name]}'",
           }
         # Match by short to label
         elsif db_entity.short && ttl_entity[:label] && db_entity.short.downcase == ttl_entity[:label].downcase
@@ -376,44 +382,50 @@ module Unitsdb
             exact: true,
             match_type: "Exact match",
             match_desc: "short_to_label",
-            details: "UnitsDB short '#{db_entity.short}' matches SI label '#{ttl_entity[:label]}'"
+            details: "UnitsDB short '#{db_entity.short}' matches SI label '#{ttl_entity[:label]}'",
           }
         # Match by names - EXACT match
         elsif db_entity.respond_to?(:names) && db_entity.names
           # Match by TTL name
-          db_name_match = db_entity.names.find { |name| name.downcase == ttl_entity[:name].downcase }
+          db_name_match = db_entity.names.find do |name|
+            name.downcase == ttl_entity[:name].downcase
+          end
           if db_name_match
             match_details = {
               match: true,
               exact: true,
               match_type: "Exact match",
               match_desc: "name_to_name",
-              details: "UnitsDB name '#{db_name_match}' matches SI name '#{ttl_entity[:name]}'"
+              details: "UnitsDB name '#{db_name_match}' matches SI name '#{ttl_entity[:name]}'",
             }
           # Match by TTL label
           elsif ttl_entity[:label]
-            db_name_match = db_entity.names.find { |name| name.downcase == ttl_entity[:label].downcase }
+            db_name_match = db_entity.names.find do |name|
+              name.downcase == ttl_entity[:label].downcase
+            end
             if db_name_match
               match_details = {
                 match: true,
                 exact: true,
                 match_type: "Exact match",
                 match_desc: "name_to_label",
-                details: "UnitsDB name '#{db_name_match}' matches SI label '#{ttl_entity[:label]}'"
+                details: "UnitsDB name '#{db_name_match}' matches SI label '#{ttl_entity[:label]}'",
               }
             end
           end
 
           # Match by TTL alt_label
           if !match_details[:match] && ttl_entity[:alt_label]
-            db_name_match = db_entity.names.find { |name| name.downcase == ttl_entity[:alt_label].downcase }
+            db_name_match = db_entity.names.find do |name|
+              name.downcase == ttl_entity[:alt_label].downcase
+            end
             if db_name_match
               match_details = {
                 match: true,
                 exact: true,
                 match_type: "Exact match",
                 match_desc: "name_to_alt_label",
-                details: "UnitsDB name '#{db_name_match}' matches SI alt_label '#{ttl_entity[:alt_label]}'"
+                details: "UnitsDB name '#{db_name_match}' matches SI alt_label '#{ttl_entity[:alt_label]}'",
               }
             end
           end
@@ -421,18 +433,19 @@ module Unitsdb
 
         # Special validation for "sidereal_" units
         if match_details[:match] && match_details[:exact] && db_entity.short&.include?("sidereal_") &&
-           !(ttl_entity[:name]&.include?("sidereal") || ttl_entity[:label]&.include?("sidereal"))
+            !(ttl_entity[:name]&.include?("sidereal") || ttl_entity[:label]&.include?("sidereal"))
           match_details = {
             match: true,
             exact: false,
             match_type: "Potential match",
             match_desc: "partial_match",
-            details: "UnitsDB '#{db_entity.short}' partially matches SI '#{ttl_entity[:name]}'"
+            details: "UnitsDB '#{db_entity.short}' partially matches SI '#{ttl_entity[:name]}'",
           }
         end
 
         # Match by symbol if available (units and prefixes) - POTENTIAL match
-        if !match_details[:match] && %w[units prefixes].include?(entity_type) && ttl_entity[:symbol]
+        if !match_details[:match] && %w[units
+                                        prefixes].include?(entity_type) && ttl_entity[:symbol]
           if entity_type == "units" && db_entity.respond_to?(:symbols) && db_entity.symbols
             matching_symbol = db_entity.symbols.find do |sym|
               sym.respond_to?(:ascii) && sym.ascii && sym.ascii.downcase == ttl_entity[:symbol].downcase
@@ -444,20 +457,20 @@ module Unitsdb
                 exact: false,
                 match_type: "Potential match",
                 match_desc: "symbol_match",
-                details: "UnitsDB symbol '#{matching_symbol.ascii}' matches SI symbol '#{ttl_entity[:symbol]}'"
+                details: "UnitsDB symbol '#{matching_symbol.ascii}' matches SI symbol '#{ttl_entity[:symbol]}'",
               }
             end
           elsif entity_type == "prefixes" && db_entity.respond_to?(:symbol) && db_entity.symbol
             if db_entity.symbol.respond_to?(:ascii) &&
-               db_entity.symbol.ascii &&
-               db_entity.symbol.ascii.downcase == ttl_entity[:symbol].downcase
+                db_entity.symbol.ascii &&
+                db_entity.symbol.ascii.downcase == ttl_entity[:symbol].downcase
 
               match_details = {
                 match: true,
                 exact: false,
                 match_type: "Potential match",
                 match_desc: "symbol_match",
-                details: "UnitsDB symbol '#{db_entity.symbol.ascii}' matches SI symbol '#{ttl_entity[:symbol]}'"
+                details: "UnitsDB symbol '#{db_entity.symbol.ascii}' matches SI symbol '#{ttl_entity[:symbol]}'",
               }
             end
           end

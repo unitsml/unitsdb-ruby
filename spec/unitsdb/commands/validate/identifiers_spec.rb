@@ -6,7 +6,7 @@ require "unitsdb/commands/validate/identifiers"
 RSpec.describe Unitsdb::Commands::Validate::Identifiers do
   let(:options) do
     {
-      database: "spec/fixtures/unitsdb"
+      database: "spec/fixtures/unitsdb",
     }
   end
 

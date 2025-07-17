@@ -48,10 +48,8 @@ RSpec.describe Unitsdb::Commands::Validate::QudtReferences do
       dimensions = [double("dimension", references: nil)]
       unit_systems = [double("unit_system", references: [])]
 
-      allow(db).to receive(:units).and_return(units)
-      allow(db).to receive(:quantities).and_return(quantities)
-      allow(db).to receive(:dimensions).and_return(dimensions)
-      allow(db).to receive(:unit_systems).and_return(unit_systems)
+      allow(db).to receive_messages(units: units, quantities: quantities,
+                                    dimensions: dimensions, unit_systems: unit_systems)
 
       # Should run without errors
       expect { command.run }.not_to raise_error

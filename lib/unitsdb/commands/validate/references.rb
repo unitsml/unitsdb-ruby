@@ -99,7 +99,8 @@ module Unitsdb
             # Also track unit systems by short name
             if unit_system.respond_to?(:short) && unit_system.short
               registry["unit_systems_short"] ||= {}
-              registry["unit_systems_short"][unit_system.short] = "index:#{index}"
+              registry["unit_systems_short"][unit_system.short] =
+                "index:#{index}"
             end
           end
 
@@ -143,7 +144,8 @@ module Unitsdb
             ref_type = "dimensions"
             ref_path = "dimensions:index:#{index}:dimension_reference"
 
-            validate_reference(ref_id, ref_type, ref_path, registry, invalid_refs, "dimensions")
+            validate_reference(ref_id, ref_type, ref_path, registry,
+                               invalid_refs, "dimensions")
           end
         end
 
@@ -155,7 +157,8 @@ module Unitsdb
               ref_type = "unit_systems"
               ref_path = "units:index:#{index}:unit_system_reference[#{idx}]"
 
-              validate_reference(ref_id, ref_type, ref_path, registry, invalid_refs, "units")
+              validate_reference(ref_id, ref_type, ref_path, registry,
+                                 invalid_refs, "units")
             end
           end
         end
@@ -168,7 +171,8 @@ module Unitsdb
               ref_type = "quantities"
               ref_path = "units:index:#{index}:quantity_references[#{idx}]"
 
-              validate_reference(ref_id, ref_type, ref_path, registry, invalid_refs, "units")
+              validate_reference(ref_id, ref_type, ref_path, registry,
+                                 invalid_refs, "units")
             end
           end
         end
@@ -185,7 +189,8 @@ module Unitsdb
               ref_type = "units"
               ref_path = "units:index:#{index}:root_units.#{idx}.unit_reference"
 
-              validate_reference(ref_id, ref_type, ref_path, registry, invalid_refs, "units")
+              validate_reference(ref_id, ref_type, ref_path, registry,
+                                 invalid_refs, "units")
 
               # Check prefix reference if present
               next unless root_unit.respond_to?(:prefix_reference) && root_unit.prefix_reference
@@ -194,12 +199,14 @@ module Unitsdb
               ref_type = "prefixes"
               ref_path = "units:index:#{index}:root_units.#{idx}.prefix_reference"
 
-              validate_reference(ref_id, ref_type, ref_path, registry, invalid_refs, "units")
+              validate_reference(ref_id, ref_type, ref_path, registry,
+                                 invalid_refs, "units")
             end
           end
         end
 
-        def validate_reference(ref_id, ref_type, ref_path, registry, invalid_refs, file_type)
+        def validate_reference(ref_id, ref_type, ref_path, registry,
+invalid_refs, file_type)
           # Handle references that are objects with id and type (could be a hash or an object)
           if ref_id.respond_to?(:id) && ref_id.respond_to?(:type)
             id = ref_id.id
@@ -218,8 +225,12 @@ module Unitsdb
             # 3. Try alternate ID formats for unit systems (e.g., SI_base vs si-base)
             if !valid && type == "unitsml" && ref_type == "unit_systems" && registry.key?(ref_type) && (
                 registry[ref_type].keys.any? { |k| k.end_with?(":#{id}") } ||
-                registry[ref_type].keys.any? { |k| k.end_with?(":SI_#{id.sub("si-", "")}") } ||
-                registry[ref_type].keys.any? { |k| k.end_with?(":non-SI_#{id.sub("nonsi-", "")}") }
+                registry[ref_type].keys.any? do |k|
+                  k.end_with?(":SI_#{id.sub('si-', '')}")
+                end ||
+                registry[ref_type].keys.any? do |k|
+                  k.end_with?(":non-SI_#{id.sub('nonsi-', '')}")
+                end
               )
               # Special handling for unit_systems between unitsml and nist types
               valid = true
@@ -229,7 +240,8 @@ module Unitsdb
               puts "Valid reference: #{id} (#{type}) at #{file_type}:#{ref_path}" if @options[:print_valid]
             else
               invalid_refs[file_type] ||= {}
-              invalid_refs[file_type][ref_path] = { id: id, type: type, ref_type: ref_type }
+              invalid_refs[file_type][ref_path] =
+                { id: id, type: type, ref_type: ref_type }
             end
           # Handle references that are objects with id and type in a hash
           elsif ref_id.is_a?(Hash) && ref_id.key?("id") && ref_id.key?("type")
@@ -249,8 +261,12 @@ module Unitsdb
             # 3. Try alternate ID formats for unit systems (e.g., SI_base vs si-base)
             if !valid && type == "unitsml" && ref_type == "unit_systems" && registry.key?(ref_type) && (
                 registry[ref_type].keys.any? { |k| k.end_with?(":#{id}") } ||
-                registry[ref_type].keys.any? { |k| k.end_with?(":SI_#{id.sub("si-", "")}") } ||
-                registry[ref_type].keys.any? { |k| k.end_with?(":non-SI_#{id.sub("nonsi-", "")}") }
+                registry[ref_type].keys.any? do |k|
+                  k.end_with?(":SI_#{id.sub('si-', '')}")
+                end ||
+                registry[ref_type].keys.any? do |k|
+                  k.end_with?(":non-SI_#{id.sub('nonsi-', '')}")
+                end
               )
               # Special handling for unit_systems between unitsml and nist types
               valid = true
@@ -260,7 +276,8 @@ module Unitsdb
               puts "Valid reference: #{id} (#{type}) at #{file_type}:#{ref_path}" if @options[:print_valid]
             else
               invalid_refs[file_type] ||= {}
-              invalid_refs[file_type][ref_path] = { id: id, type: type, ref_type: ref_type }
+              invalid_refs[file_type][ref_path] =
+                { id: id, type: type, ref_type: ref_type }
             end
           else
             # Handle plain string references (legacy format)
@@ -292,7 +309,8 @@ module Unitsdb
 
               puts "  #{type}:"
               ids.each do |id, location|
-                puts "    #{id}: {type: #{type.sub("s", "")}, source: #{location}}"
+                puts "    #{id}: {type: #{type.sub('s',
+                                                   '')}, source: #{location}}"
               end
             end
           end
@@ -304,7 +322,8 @@ module Unitsdb
               # Suggest corrections
               next unless registry.key?(ref[:ref_type])
 
-              similar_ids = Unitsdb::Utils.find_similar_ids(ref[:id], registry[ref[:ref_type]].keys)
+              similar_ids = Unitsdb::Utils.find_similar_ids(ref[:id],
+                                                            registry[ref[:ref_type]].keys)
               if similar_ids.any?
                 puts "      Did you mean one of these?"
                 similar_ids.each { |id| puts "        - #{id}" }

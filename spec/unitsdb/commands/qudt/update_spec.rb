@@ -12,18 +12,18 @@ RSpec.describe Unitsdb::Commands::Qudt::Update do
   let(:options) do
     {
       database: database_path,
-      output_dir: output_dir
+      output_dir: output_dir,
     }
   end
 
   before do
     # Create output directory if it doesn't exist
-    FileUtils.mkdir_p(output_dir) unless Dir.exist?(output_dir)
+    FileUtils.mkdir_p(output_dir)
   end
 
   after do
     # Clean up output directory after tests
-    FileUtils.rm_rf(output_dir) if Dir.exist?(output_dir)
+    FileUtils.rm_rf(output_dir)
   end
 
   describe "#run" do

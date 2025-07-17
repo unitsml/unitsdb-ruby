@@ -62,7 +62,7 @@ module Unitsdb
               si_refs[ref.uri] << {
                 entity_id: entity_id,
                 entity_name: entity.respond_to?(:names) ? entity.names.first : entity.short,
-                index: index
+                index: index,
               }
             end
           end

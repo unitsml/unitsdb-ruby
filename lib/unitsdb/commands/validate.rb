@@ -6,10 +6,12 @@ module Unitsdb
   module Commands
     class ValidateCommand < Thor
       desc "references", "Validate that all references exist"
-      option :debug_registry, type: :boolean, desc: "Show registry contents for debugging"
+      option :debug_registry, type: :boolean,
+                              desc: "Show registry contents for debugging"
       option :database, type: :string, required: true, aliases: "-d",
                         desc: "Path to UnitsDB database (required)"
-      option :print_valid, type: :boolean, default: false, desc: "Print valid references too"
+      option :print_valid, type: :boolean, default: false,
+                           desc: "Print valid references too"
       def references
         require_relative "validate/references"
 
@@ -26,7 +28,8 @@ module Unitsdb
         Commands::Validate::Identifiers.new(options).run
       end
 
-      desc "si_references", "Validate that each SI digital framework reference is unique per entity type"
+      desc "si_references",
+           "Validate that each SI digital framework reference is unique per entity type"
       option :database, type: :string, required: true, aliases: "-d",
                         desc: "Path to UnitsDB database (required)"
 
@@ -36,7 +39,8 @@ module Unitsdb
         Commands::Validate::SiReferences.new(options).run
       end
 
-      desc "qudt_references", "Validate that each QUDT reference is unique per entity type"
+      desc "qudt_references",
+           "Validate that each QUDT reference is unique per entity type"
       option :database, type: :string, required: true, aliases: "-d",
                         desc: "Path to UnitsDB database (required)"
 
@@ -46,7 +50,8 @@ module Unitsdb
         Commands::Validate::QudtReferences.new(options).run
       end
 
-      desc "ucum_references", "Validate that each UCUM reference is unique per entity type"
+      desc "ucum_references",
+           "Validate that each UCUM reference is unique per entity type"
       option :database, type: :string, required: true, aliases: "-d",
                         desc: "Path to UnitsDB database (required)"
 

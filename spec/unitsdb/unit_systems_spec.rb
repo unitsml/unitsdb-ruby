@@ -6,7 +6,7 @@ RSpec.describe Unitsdb::UnitSystems do
   file_path = File.join(__dir__, "../fixtures/unitsdb/unit_systems.yaml")
 
   it "parses the unit systems collection" do
-    raw_string = IO.read(file_path)
+    raw_string = File.read(file_path)
     parsed = described_class.from_yaml(raw_string)
     generated = parsed.to_yaml
 

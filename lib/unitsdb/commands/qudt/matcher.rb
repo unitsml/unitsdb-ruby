@@ -18,12 +18,15 @@ module Unitsdb
 
           # Process each QUDT entity
           qudt_entities.each do |qudt_entity|
-            match_data = find_db_match_for_qudt(qudt_entity, db_entities, entity_type)
+            match_data = find_db_match_for_qudt(qudt_entity, db_entities,
+                                                entity_type)
 
             if match_data[:match]
-              matches << { qudt_entity: qudt_entity, db_entity: match_data[:match] }
+              matches << { qudt_entity: qudt_entity,
+                           db_entity: match_data[:match] }
             elsif match_data[:potential_match]
-              missing_matches << { qudt_entity: qudt_entity, db_entity: match_data[:potential_match] }
+              missing_matches << { qudt_entity: qudt_entity,
+                                   db_entity: match_data[:potential_match] }
             else
               unmatched_qudt << qudt_entity
             end
@@ -45,14 +48,18 @@ module Unitsdb
           db_entities.each do |db_entity|
             # Skip entities that already have QUDT references
             if has_qudt_reference?(db_entity)
-              matches << { db_entity: db_entity, qudt_entity: find_referenced_qudt_entity(db_entity, qudt_entities) }
+              matches << { db_entity: db_entity,
+                           qudt_entity: find_referenced_qudt_entity(db_entity,
+                                                                    qudt_entities) }
               next
             end
 
-            match_data = find_qudt_match_for_db(db_entity, qudt_entities, entity_type)
+            match_data = find_qudt_match_for_db(db_entity, qudt_entities,
+                                                entity_type)
 
             if match_data[:match]
-              missing_refs << { db_entity: db_entity, qudt_entity: match_data[:match] }
+              missing_refs << { db_entity: db_entity,
+                                qudt_entity: match_data[:match] }
             else
               unmatched_db << db_entity
             end
@@ -132,7 +139,8 @@ module Unitsdb
 
           # PRIORITY 0: Try SI exact match first (highest confidence)
           if qudt_unit.si_exact_match
-            si_match = find_unit_by_si_reference(qudt_unit.si_exact_match, db_units)
+            si_match = find_unit_by_si_reference(qudt_unit.si_exact_match,
+                                                 db_units)
             if si_match
               result[:match] = si_match
               return result
@@ -191,7 +199,10 @@ module Unitsdb
               end
             end
 
-            result[:potential_match] = partial_matches.first if partial_matches.any?
+            if partial_matches.any?
+              result[:potential_match] =
+                partial_matches.first
+            end
           end
 
           result
@@ -218,7 +229,9 @@ module Unitsdb
 
           # PRIORITY 2: Try exact name match
           if db_unit.names && !db_unit.names.empty?
-            db_unit_names = db_unit.names.map { |name_obj| name_obj.value.downcase }
+            db_unit_names = db_unit.names.map do |name_obj|
+              name_obj.value.downcase
+            end
 
             name_match = qudt_units.find do |qudt_unit|
               qudt_unit.label && db_unit_names.include?(qudt_unit.label.downcase)
@@ -297,7 +310,10 @@ module Unitsdb
               end
             end
 
-            result[:potential_match] = partial_matches.first if partial_matches.any?
+            if partial_matches.any?
+              result[:potential_match] =
+                partial_matches.first
+            end
           end
 
           result
@@ -309,7 +325,9 @@ module Unitsdb
 
           # Try name match first
           if db_quantity.names && !db_quantity.names.empty?
-            db_quantity_names = db_quantity.names.map { |name_obj| name_obj.value.downcase }
+            db_quantity_names = db_quantity.names.map do |name_obj|
+              name_obj.value.downcase
+            end
 
             name_match = qudt_quantities.find do |qudt_quantity|
               qudt_quantity.label && db_quantity_names.include?(qudt_quantity.label.downcase)
@@ -379,7 +397,9 @@ module Unitsdb
 
           # Try name match as fallback
           if db_dimension.names && !db_dimension.names.empty?
-            db_dimension_names = db_dimension.names.map { |name_obj| name_obj.value.downcase }
+            db_dimension_names = db_dimension.names.map do |name_obj|
+              name_obj.value.downcase
+            end
 
             name_match = qudt_dimensions.find do |qudt_dimension|
               qudt_dimension.label && db_dimension_names.include?(qudt_dimension.label.downcase)
@@ -461,7 +481,9 @@ module Unitsdb
 
           # Try name match first
           if db_system.names && !db_system.names.empty?
-            db_system_names = db_system.names.map { |name_obj| name_obj.value.downcase }
+            db_system_names = db_system.names.map do |name_obj|
+              name_obj.value.downcase
+            end
 
             name_match = qudt_systems.find do |qudt_system|
               (qudt_system.label && db_system_names.include?(qudt_system.label.downcase)) ||
@@ -476,14 +498,13 @@ module Unitsdb
             # Try smart matching for known systems
             smart_match = qudt_systems.find do |qudt_system|
               db_system_names.any? do |db_name|
-                case
-                when db_name.include?("si") && qudt_system.abbreviation&.downcase == "si"
+                if db_name.include?("si") && qudt_system.abbreviation&.downcase == "si"
                   true
-                when db_name.include?("cgs") && qudt_system.abbreviation&.downcase == "cgs"
+                elsif db_name.include?("cgs") && qudt_system.abbreviation&.downcase == "cgs"
                   true
-                when db_name.include?("imperial") && qudt_system.abbreviation&.downcase == "imperial"
+                elsif db_name.include?("imperial") && qudt_system.abbreviation&.downcase == "imperial"
                   true
-                when (db_name.include?("us") || db_name.include?("customary")) && qudt_system.abbreviation&.downcase == "us customary"
+                elsif (db_name.include?("us") || db_name.include?("customary")) && qudt_system.abbreviation&.downcase == "us customary"
                   true
                 else
                   false
@@ -509,7 +530,7 @@ module Unitsdb
             electric_current: qudt_dimension.dimension_exponent_for_electric_current || 0,
             thermodynamic_temperature: qudt_dimension.dimension_exponent_for_thermodynamic_temperature || 0,
             amount_of_substance: qudt_dimension.dimension_exponent_for_amount_of_substance || 0,
-            luminous_intensity: qudt_dimension.dimension_exponent_for_luminous_intensity || 0
+            luminous_intensity: qudt_dimension.dimension_exponent_for_luminous_intensity || 0,
           }
 
           # Get UnitsDB dimension exponents from direct properties
@@ -517,10 +538,14 @@ module Unitsdb
             length: get_dimension_power(db_dimension, :length),
             mass: get_dimension_power(db_dimension, :mass),
             time: get_dimension_power(db_dimension, :time),
-            electric_current: get_dimension_power(db_dimension, :electric_current),
-            thermodynamic_temperature: get_dimension_power(db_dimension, :thermodynamic_temperature),
-            amount_of_substance: get_dimension_power(db_dimension, :amount_of_substance),
-            luminous_intensity: get_dimension_power(db_dimension, :luminous_intensity)
+            electric_current: get_dimension_power(db_dimension,
+                                                  :electric_current),
+            thermodynamic_temperature: get_dimension_power(db_dimension,
+                                                           :thermodynamic_temperature),
+            amount_of_substance: get_dimension_power(db_dimension,
+                                                     :amount_of_substance),
+            luminous_intensity: get_dimension_power(db_dimension,
+                                                    :luminous_intensity),
           }
 
           # Compare all dimension exponents
@@ -532,7 +557,7 @@ module Unitsdb
           return 0 unless db_dimension.respond_to?(dimension_type)
 
           dimension_property = db_dimension.send(dimension_type)
-          return 0 unless dimension_property && dimension_property.respond_to?(:power)
+          return 0 unless dimension_property.respond_to?(:power)
 
           dimension_property.power || 0
         end
@@ -542,12 +567,12 @@ module Unitsdb
           return "" unless name
 
           name.downcase
-              .gsub(/\s+/, " ")           # normalize whitespace
-              .gsub(/[-_]/, " ")          # convert dashes/underscores to spaces
-              .gsub(/[()\\[\\]]/, "")     # remove parentheses and brackets
-              .gsub(/\bof\b/, "")         # remove "of"
-              .gsub(/\bper\b/, "/")       # convert "per" to "/"
-              .strip
+            .gsub(/\s+/, " ")           # normalize whitespace
+            .gsub(/[-_]/, " ")          # convert dashes/underscores to spaces
+            .gsub(/[()\\[\\]]/, "")     # remove parentheses and brackets
+            .gsub(/\bof\b/, "")         # remove "of"
+            .gsub(/\bper\b/, "/")       # convert "per" to "/"
+            .strip
         end
 
         # Find a UnitsDB unit that has an SI reference matching the given SI URI
@@ -556,7 +581,7 @@ module Unitsdb
 
           # Extract the SI unit identifier from the URI
           # Example: "http://qudt.org/vocab/unit/M" -> "M"
-          si_identifier = si_uri.split('/').last
+          si_identifier = si_uri.split("/").last
 
           # Look for a UnitsDB unit that has an SI reference with this identifier
           db_units.find do |db_unit|
@@ -668,7 +693,9 @@ module Unitsdb
 
           # PRIORITY 2: Try exact name match
           if db_prefix.names && !db_prefix.names.empty?
-            db_prefix_names = db_prefix.names.map { |name_obj| name_obj.value.downcase }
+            db_prefix_names = db_prefix.names.map do |name_obj|
+              name_obj.value.downcase
+            end
 
             name_match = qudt_prefixes.find do |qudt_prefix|
               qudt_prefix.label && db_prefix_names.include?(qudt_prefix.label.downcase)
@@ -709,7 +736,9 @@ module Unitsdb
         def manually_verified?(entity)
           return false unless entity.respond_to?(:references) && entity.references
 
-          entity.references.any? { |ref| ref.authority == "qudt" && ref.respond_to?(:verified) && ref.verified }
+          entity.references.any? do |ref|
+            ref.authority == "qudt" && ref.respond_to?(:verified) && ref.verified
+          end
         end
       end
     end

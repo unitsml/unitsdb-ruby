@@ -7,7 +7,7 @@ RSpec.describe Unitsdb::Commands::Get do
   let(:options) do
     {
       database: "spec/fixtures/unitsdb",
-      format: "text"
+      format: "text",
     }
   end
 

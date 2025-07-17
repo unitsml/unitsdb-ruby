@@ -46,8 +46,7 @@ RSpec.describe Unitsdb::Commands::Validate::UcumReferences do
       units = [double("unit", external_references: nil)]
       prefixes = [double("prefix", external_references: [])]
 
-      allow(db).to receive(:units).and_return(units)
-      allow(db).to receive(:prefixes).and_return(prefixes)
+      allow(db).to receive_messages(units: units, prefixes: prefixes)
 
       # Should run without errors
       expect { command.run }.not_to raise_error

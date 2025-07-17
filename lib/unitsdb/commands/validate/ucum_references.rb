@@ -60,7 +60,7 @@ module Unitsdb
               ucum_refs[ref.code] << {
                 entity_id: entity_id,
                 entity_name: entity_name,
-                index: index
+                index: index,
               }
             end
           end

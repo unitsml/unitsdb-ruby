@@ -4,18 +4,18 @@ require "spec_helper"
 
 RSpec.describe Unitsdb::Database do
   let(:fixtures_dir) { File.join("spec", "fixtures", "unitsdb") }
-  let(:database) { Unitsdb::Database.from_db(fixtures_dir) }
+  let(:database) { described_class.from_db(fixtures_dir) }
 
   describe "search and lookup functionality" do
     it "finds entities using search by text with type filters" do
       # Generic text search
       results = database.search(text: "meter")
       expect(results).not_to be_empty
-      expect(results.any? { |entity| entity.is_a?(Unitsdb::Unit) }).to be(true)
+      expect(results.any?(Unitsdb::Unit)).to be(true)
 
       # Search with type filter
       results = database.search(text: "kilo", type: "prefixes")
-      expect(results.all? { |entity| entity.is_a?(Unitsdb::Prefix) }).to be(true)
+      expect(results.all?(Unitsdb::Prefix)).to be(true)
 
       # Handling non-existent terms and nil values
       expect(database.search(text: "nonexistentterm123456")).to be_empty
@@ -28,7 +28,8 @@ RSpec.describe Unitsdb::Database do
       expect(entity).to be_a(Unitsdb::Unit)
 
       # Returns nil for non-existent entities
-      expect(database.find_by_type(id: "NonExistentID", type: "units")).to be_nil
+      expect(database.find_by_type(id: "NonExistentID",
+                                   type: "units")).to be_nil
 
       # Find by id across all types
       entity = database.get_by_id(id: "NISTu1")

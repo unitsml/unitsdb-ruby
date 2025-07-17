@@ -13,7 +13,8 @@ module Unitsdb
         module_function
 
         # Update references in UnitsDB entities with QUDT references
-        def update_references(entity_type, matches, db_entities, output_file, include_potential = false)
+        def update_references(entity_type, matches, db_entities, output_file,
+include_potential = false)
           puts "Updating QUDT references for #{entity_type}..."
 
           # Get the original YAML file path from the database entities
@@ -48,7 +49,7 @@ module Unitsdb
             entity_references[entity_id] = {
               "uri" => qudt_entity.uri,
               "type" => "informative",
-              "authority" => QUDT_AUTHORITY
+              "authority" => QUDT_AUTHORITY,
             }
           end
 
@@ -70,12 +71,14 @@ module Unitsdb
 
             # Add new references
             if (ext_ref = entity_references[entity_id])
-              if entity_yaml["references"].any? { |ref| ref["uri"] == ext_ref["uri"] && ref["authority"] == ext_ref["authority"] }
+              if entity_yaml["references"].any? do |ref|
+                ref["uri"] == ext_ref["uri"] && ref["authority"] == ext_ref["authority"]
+              end
                 # Skip if reference already exists
                 puts "Reference already exists for entity ID: #{entity_id}"
               else
                 # Add the reference
-                puts "Adding reference for entity ID: #{entity_id}, URI: #{ext_ref["uri"]}, Authority: #{ext_ref["authority"]}"
+                puts "Adding reference for entity ID: #{entity_id}, URI: #{ext_ref['uri']}, Authority: #{ext_ref['authority']}"
                 entity_yaml["references"] << ext_ref
               end
             end
@@ -91,7 +94,7 @@ module Unitsdb
         def write_yaml_file(output_file, output_data)
           # Ensure the output directory exists
           output_dir = File.dirname(output_file)
-          FileUtils.mkdir_p(output_dir) unless Dir.exist?(output_dir)
+          FileUtils.mkdir_p(output_dir)
 
           # Write to YAML file with proper formatting
           yaml_content = output_data.to_yaml
@@ -115,40 +118,44 @@ module Unitsdb
           end
 
           # Remove any existing schema header from new content to avoid duplication
-          yaml_content = yaml_content.gsub(/^# yaml-language-server: \$schema=.+$\n/, '')
+          yaml_content = yaml_content.gsub(
+            /^# yaml-language-server: \$schema=.+$\n/, ""
+          )
 
           # Add preserved or default schema header
           if schema_header
             "#{schema_header}\n#{yaml_content}"
           else
-            entity_type = File.basename(original_file, '.yaml')
+            entity_type = File.basename(original_file, ".yaml")
             "# yaml-language-server: $schema=schemas/#{entity_type}-schema.yaml\n#{yaml_content}"
           end
         end
 
         # Get the original YAML file path
-        def get_original_yaml_file(db_entities, output_file)
+        def get_original_yaml_file(_db_entities, output_file)
           # The database path should be available from the update command
           # We need to construct the path to the original YAML file
-          entity_type = File.basename(output_file, '.yaml')
+          entity_type = File.basename(output_file, ".yaml")
 
           # Try to find the original file in the database directory
           # Look for it relative to where we expect it to be
           database_dir = nil
 
           # Try to get database directory from environment or assume it's the fixtures
-          if ENV['UNITSDB_DATABASE_PATH']
-            database_dir = ENV['UNITSDB_DATABASE_PATH']
+          if ENV["UNITSDB_DATABASE_PATH"]
+            database_dir = ENV["UNITSDB_DATABASE_PATH"]
           else
             # Default to the fixtures directory for testing
-            database_dir = File.join(File.dirname(__FILE__), '../../../spec/fixtures/unitsdb')
+            database_dir = File.join(File.dirname(__FILE__),
+                                     "../../../spec/fixtures/unitsdb")
           end
 
           original_yaml_file = File.join(database_dir, "#{entity_type}.yaml")
 
           # If that doesn't exist, try to find it relative to the current working directory
           unless File.exist?(original_yaml_file)
-            original_yaml_file = File.join('spec/fixtures/unitsdb', "#{entity_type}.yaml")
+            original_yaml_file = File.join("spec/fixtures/unitsdb",
+                                           "#{entity_type}.yaml")
           end
 
           # If still not found, create a fallback
@@ -176,7 +183,9 @@ module Unitsdb
         def manually_verified?(entity)
           return false unless entity.respond_to?(:references) && entity.references
 
-          entity.references.any? { |ref| ref.authority == QUDT_AUTHORITY && ref.respond_to?(:verified) && ref.verified }
+          entity.references.any? do |ref|
+            ref.authority == QUDT_AUTHORITY && ref.respond_to?(:verified) && ref.verified
+          end
         end
       end
     end

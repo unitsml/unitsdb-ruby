@@ -139,16 +139,12 @@ include_potential = false)
 
           # Try to find the original file in the database directory
           # Look for it relative to where we expect it to be
-          database_dir = nil
+          # nil
 
           # Try to get database directory from environment or assume it's the fixtures
-          if ENV["UNITSDB_DATABASE_PATH"]
-            database_dir = ENV["UNITSDB_DATABASE_PATH"]
-          else
-            # Default to the fixtures directory for testing
-            database_dir = File.join(File.dirname(__FILE__),
-                                     "../../../spec/fixtures/unitsdb")
-          end
+          database_dir = ENV["UNITSDB_DATABASE_PATH"] ||
+            File.join(File.dirname(__FILE__),
+                      "../../../spec/fixtures/unitsdb")
 
           original_yaml_file = File.join(database_dir, "#{entity_type}.yaml")
 

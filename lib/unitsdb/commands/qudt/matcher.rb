@@ -569,7 +569,7 @@ module Unitsdb
           name.downcase
             .gsub(/\s+/, " ")           # normalize whitespace
             .gsub(/[-_]/, " ")          # convert dashes/underscores to spaces
-            .gsub(/[()\\[\\]]/, "")     # remove parentheses and brackets
+            .gsub(/[()\\]/, "") # remove parentheses and brackets
             .gsub(/\bof\b/, "")         # remove "of"
             .gsub(/\bper\b/, "/")       # convert "per" to "/"
             .strip

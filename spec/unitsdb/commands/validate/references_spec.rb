@@ -53,6 +53,19 @@ RSpec.describe Unitsdb::Commands::Validate::References do
           expect(output[:output]).to include("All references are valid!")
         end
       end
+
+      context "with debug_registry option" do
+        let(:options) { { database: fixtures_dir, debug_registry: true } }
+
+        it "shows registry contents when --debug_registry is specified" do
+          output = capture_output do
+            command.run
+          end
+
+          expect(output[:output]).to include("Registry contents:")
+          expect(output[:output]).to include("All references are valid!")
+        end
+      end
     end
 
     context "with invalid references" do
@@ -108,38 +121,6 @@ RSpec.describe Unitsdb::Commands::Validate::References do
         end
 
         expect(output[:output]).to include("Did you mean one of these?")
-      end
-
-      context "with debug_registry option" do
-        let(:options) { { database: fixtures_dir, debug_registry: true } }
-
-        it "shows registry contents when --debug_registry is specified" do
-          # Need a special mock for this test that includes registry debugging
-          # Can't combine with(any_args) and and_return with a block
-          allow(command).to receive(:check).and_wrap_original do |_original_method, *_args|
-            # Print the expected error messages and registry contents
-            puts "Found invalid references:"
-            puts "  units:index:0:unit_system_reference[0]"
-            puts "    ID: invalid-system"
-            puts "    Type: unitsml"
-            puts "    Did you mean one of these?"
-            puts "      si-base"
-
-            # Add the registry contents when debug_registry is true
-            puts "\nRegistry contents:"
-            puts "  unitsml:"
-            puts "    si-base: {type: unit_system, source: unit_systems:index:0}"
-            puts "  nist:"
-            puts "    NISTd1: {type: dimension, source: dimensions:index:0}"
-            1 # Return 1 to indicate errors found
-          end
-
-          output = capture_output do
-            command.run
-          end
-
-          expect(output[:output]).to include("Registry contents:")
-        end
       end
     end
   end

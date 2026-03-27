@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-
 # "NISTu10":
 #   dimension_url: "#NISTd9"
 #   short: steradian

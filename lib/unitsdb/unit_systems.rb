@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-
 module Unitsdb
   class UnitSystems < Lutaml::Model::Serializable
     # model Config.model_for(:unit_systems)

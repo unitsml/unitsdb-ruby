@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-
 # si_derived_bases:
 # - power: 2
 #   unit_reference:

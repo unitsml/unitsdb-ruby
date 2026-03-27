@@ -18,7 +18,7 @@ module Unitsdb
                           desc: "Process all YAML files in the repository"
 
       def normalize(input = nil, output = nil)
-                Normalize.new(options).run(input, output)
+        Normalize.new(options).run(input, output)
       end
     end
   end

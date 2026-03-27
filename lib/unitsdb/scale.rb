@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-
 module Unitsdb
   class Scale < Lutaml::Model::Serializable
     # model Config.model_for(:quantity)

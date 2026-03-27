@@ -3,7 +3,6 @@
 require "lutaml/model"
 
 module Unitsdb
-
   autoload :CLI, "unitsdb/cli"
   autoload :Config, "unitsdb/config"
   autoload :Commands, "unitsdb/commands"

@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-
 module Unitsdb
   module Commands
     module Ucum

@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-
 module Unitsdb
   module Commands
     module CheckSi
@@ -64,7 +63,9 @@ include_potential = false)
         puts "\n========== Processing #{entity_type.upcase} References ==========\n"
 
         db_entities = @db.send(entity_type)
-        ttl_entities = ::Unitsdb::Commands::CheckSi::SiTtlParser.extract_entities_from_ttl(entity_type, graph)
+        ttl_entities = ::Unitsdb::Commands::CheckSi::SiTtlParser.extract_entities_from_ttl(
+          entity_type, graph
+        )
 
         puts "Found #{ttl_entities.size} #{entity_type} in SI digital framework"
         puts "Found #{db_entities.size} #{entity_type} in database"
@@ -105,14 +106,14 @@ include_potential = false)
 
         # Print results
         ::Unitsdb::Commands::CheckSi::SiFormatter.display_si_results(entity_type, matches, missing_matches,
-                                       unmatched_ttl)
+                                                                     unmatched_ttl)
 
         # Update references if needed
         return unless output_dir && !missing_matches.empty?
 
         output_file = File.join(output_dir, "#{entity_type}.yaml")
         ::Unitsdb::Commands::CheckSi::SiUpdater.update_references(entity_type, missing_matches, db_entities, output_file, include_potential,
-                                    database_path)
+                                                                  database_path)
         puts "\nUpdated references written to #{output_file}"
       end
 
@@ -127,14 +128,14 @@ include_potential = false)
 
         # Print results
         ::Unitsdb::Commands::CheckSi::SiFormatter.display_db_results(entity_type, matches, missing_refs,
-                                       unmatched_db)
+                                                                     unmatched_db)
 
         # Update references if needed
         return unless output_dir && !missing_refs.empty?
 
         output_file = File.join(output_dir, "#{entity_type}.yaml")
         ::Unitsdb::Commands::CheckSi::SiUpdater.update_db_references(entity_type, missing_refs, output_file,
-                                       include_potential, @options[:database])
+                                                                     include_potential, @options[:database])
         puts "\nUpdated references written to #{output_file}"
       end
     end

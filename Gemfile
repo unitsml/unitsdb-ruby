@@ -5,6 +5,7 @@ source "https://rubygems.org"
 # Specify your gem's dependencies in suma.gemspec
 gemspec
 
+gem "canon"
 gem "lutaml-model", github: "lutaml/lutaml-model", branch: "main"
 gem "nokogiri"
 gem "rake"

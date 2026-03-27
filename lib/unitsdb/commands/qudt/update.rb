@@ -1,11 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "../base"
-require_relative "../../database"
-require_relative "../../errors"
-require_relative "ttl_parser"
-require_relative "matcher"
-require_relative "updater"
 require "fileutils"
 
 module Unitsdb

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "spec_helper"
-require "unitsdb/cli"
+require_relative "../../lib/unitsdb/cli"
 require "stringio"
 
 RSpec.describe Unitsdb::CLI do

@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 require "terminal-table"
-require_relative "si_ttl_parser"
 
 module Unitsdb
   module Commands
+    module CheckSi
     # Formatter for SI check results
     module SiFormatter
       module_function
@@ -279,7 +279,7 @@ unmatched_ttl)
             # Get match description if available
             entity_id = match[:db_entity].short
             match_pair_key = "#{entity_id}:#{ttl_entities.first[:uri]}"
-            match_details = Unitsdb::Commands::SiMatcher.instance_variable_get(:@match_details)&.dig(match_pair_key)
+            match_details = Unitsdb::Commands::CheckSi::SiMatcher.instance_variable_get(:@match_details)&.dig(match_pair_key)
             match_desc = match_details[:match_desc] if match_details && match_details[:match_desc]
 
             # Symbol matches and partial matches should always be potential matches
@@ -347,7 +347,7 @@ unmatched_ttl)
 
               # Get match details for this match
               match_pair_key = "#{db_entity.short}:#{ttl_entities.first[:uri]}"
-              match_details = Unitsdb::Commands::SiMatcher.instance_variable_get(:@match_details)&.dig(match_pair_key)
+              match_details = Unitsdb::Commands::CheckSi::SiMatcher.instance_variable_get(:@match_details)&.dig(match_pair_key)
 
               # Format match info
               match_info = ""
@@ -423,7 +423,7 @@ unmatched_ttl)
 
               # Get match details
               match_pair_key = "#{db_entity.short}:#{ttl_entities.first[:uri]}"
-              match_details = Unitsdb::Commands::SiMatcher.instance_variable_get(:@match_details)&.dig(match_pair_key)
+              match_details = Unitsdb::Commands::CheckSi::SiMatcher.instance_variable_get(:@match_details)&.dig(match_pair_key)
 
               # Format match info
               match_info = ""
@@ -484,4 +484,5 @@ unmatched_ttl)
       end
     end
   end
+end
 end

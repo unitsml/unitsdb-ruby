@@ -5,6 +5,7 @@ require "rdf/turtle"
 
 module Unitsdb
   module Commands
+    module CheckSi
     # Parser for SI TTL files
     module SiTtlParser
       SI_URI_PREFIX = "http://si-digital-framework.org/SI/"
@@ -98,4 +99,5 @@ module Unitsdb
       end
     end
   end
+end
 end

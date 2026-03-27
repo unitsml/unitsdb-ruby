@@ -1,10 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "../base"
-require_relative "../../database"
-require_relative "xml_parser"
-require_relative "matcher"
-require_relative "updater"
 require "fileutils"
 
 module Unitsdb

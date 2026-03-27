@@ -2,26 +2,51 @@
 
 require "lutaml/model"
 
-# Configure XML adapter for lutaml-model
-Lutaml::Model::Config.configure do |config|
-  require "lutaml/model/xml/nokogiri_adapter"
-  config.xml_adapter = Lutaml::Model::Xml::NokogiriAdapter
-end
-
 module Unitsdb
+
+  autoload :CLI, "unitsdb/cli"
+  autoload :Config, "unitsdb/config"
+  autoload :Commands, "unitsdb/commands"
+  autoload :Database, "unitsdb/database"
+  autoload :Dimension, "unitsdb/dimension"
+  autoload :DimensionDetails, "unitsdb/dimension_details"
+  autoload :DimensionReference, "unitsdb/dimension_reference"
+  autoload :Dimensions, "unitsdb/dimensions"
+  autoload :Errors, "unitsdb/errors"
+  autoload :ExternalReference, "unitsdb/external_reference"
+  autoload :Identifier, "unitsdb/identifier"
+  autoload :LocalizedString, "unitsdb/localized_string"
+  autoload :Prefix, "unitsdb/prefix"
+  autoload :PrefixReference, "unitsdb/prefix_reference"
+  autoload :Prefixes, "unitsdb/prefixes"
+  autoload :Quantities, "unitsdb/quantities"
+  autoload :Quantity, "unitsdb/quantity"
+  autoload :QuantityReference, "unitsdb/quantity_reference"
+  autoload :QudtUnit, "unitsdb/qudt"
+  autoload :QudtQuantityKind, "unitsdb/qudt"
+  autoload :QudtDimensionVector, "unitsdb/qudt"
+  autoload :QudtSystemOfUnits, "unitsdb/qudt"
+  autoload :QudtPrefix, "unitsdb/qudt"
+  autoload :QudtVocabularies, "unitsdb/qudt"
+  autoload :RootUnitReference, "unitsdb/root_unit_reference"
+  autoload :Scale, "unitsdb/scale"
+  autoload :ScaleProperties, "unitsdb/scale_properties"
+  autoload :ScaleReference, "unitsdb/scale_reference"
+  autoload :Scales, "unitsdb/scales"
+  autoload :SiDerivedBase, "unitsdb/si_derived_base"
+  autoload :SymbolPresentations, "unitsdb/symbol_presentations"
+  autoload :UcumBaseUnit, "unitsdb/ucum"
+  autoload :UcumPrefixValue, "unitsdb/ucum"
+  autoload :UcumPrefix, "unitsdb/ucum"
+  autoload :UcumUnitValueFunction, "unitsdb/ucum"
+  autoload :UcumUnitValue, "unitsdb/ucum"
+  autoload :UcumUnit, "unitsdb/ucum"
+  autoload :UcumFile, "unitsdb/ucum"
+  autoload :Unit, "unitsdb/unit"
+  autoload :UnitReference, "unitsdb/unit_reference"
+  autoload :UnitSystem, "unitsdb/unit_system"
+  autoload :UnitSystemReference, "unitsdb/unit_system_reference"
+  autoload :UnitSystems, "unitsdb/unit_systems"
+  autoload :Units, "unitsdb/units"
+  autoload :Utils, "unitsdb/utils"
 end
-
-require_relative "unitsdb/version"
-require_relative "unitsdb/config"
-require_relative "unitsdb/errors"
-require_relative "unitsdb/database"
-require_relative "unitsdb/dimensions"
-require_relative "unitsdb/prefixes"
-require_relative "unitsdb/quantities"
-require_relative "unitsdb/unit_systems"
-require_relative "unitsdb/scales"
-require_relative "unitsdb/units"
-require_relative "unitsdb/utils"
-
-# CLI-related requires
-require_relative "unitsdb/cli" if defined?(Thor)

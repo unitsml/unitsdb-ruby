@@ -4,6 +4,15 @@ require "thor"
 
 module Unitsdb
   module Commands
+    module Ucum
+      autoload :Check, "unitsdb/commands/ucum/check"
+      autoload :Update, "unitsdb/commands/ucum/update"
+      autoload :Formatter, "unitsdb/commands/ucum/formatter"
+      autoload :Matcher, "unitsdb/commands/ucum/matcher"
+      autoload :Updater, "unitsdb/commands/ucum/updater"
+      autoload :XmlParser, "unitsdb/commands/ucum/xml_parser"
+    end
+
     class UcumCommand < Thor
       desc "check", "Check UCUM references in UnitsDB"
       option :entity_type, type: :string, aliases: "-e",
@@ -19,7 +28,6 @@ module Unitsdb
       option :database, type: :string, required: true, aliases: "-d",
                         desc: "Path to UnitsDB database (required)"
       def check
-        require_relative "ucum/check"
         Ucum::Check.new(options).run
       end
 
@@ -35,7 +43,6 @@ module Unitsdb
       option :database, type: :string, required: true, aliases: "-d",
                         desc: "Path to UnitsDB database (required)"
       def update
-        require_relative "ucum/update"
         Ucum::Update.new(options).run
       end
     end

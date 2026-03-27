@@ -4,7 +4,7 @@ require "spec_helper"
 require "unitsdb/commands/check_si"
 require "stringio"
 
-RSpec.describe Unitsdb::Commands::CheckSi do
+RSpec.describe Unitsdb::Commands::CheckSiCommand do
   let(:command) { described_class.new(options) }
   let(:options) { { database: fixture_dir, ttl_dir: ttl_dir } }
   let(:output) { StringIO.new }

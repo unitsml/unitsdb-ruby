@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "quantity"
 
 module Unitsdb
   class Quantities < Lutaml::Model::Serializable

@@ -1,10 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "identifier"
-require_relative "unit_reference"
-require_relative "dimension_reference"
-require_relative "external_reference"
-require_relative "localized_string"
 
 module Unitsdb
   class Quantity < Lutaml::Model::Serializable

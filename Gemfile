@@ -5,7 +5,7 @@ source "https://rubygems.org"
 # Specify your gem's dependencies in suma.gemspec
 gemspec
 
-gem "diffy"
+gem "lutaml-model", github: "lutaml/lutaml-model", branch: "main"
 gem "nokogiri"
 gem "rake"
 gem "rspec"

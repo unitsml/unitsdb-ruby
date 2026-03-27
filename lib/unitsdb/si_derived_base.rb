@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "root_unit_reference"
 
 # si_derived_bases:
 # - power: 2

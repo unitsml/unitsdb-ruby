@@ -1,14 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "symbol_presentations"
-require_relative "unit_system_reference"
-require_relative "root_unit_reference"
-require_relative "si_derived_base"
-require_relative "quantity_reference"
-require_relative "dimension_reference"
-require_relative "external_reference"
-require_relative "localized_string"
-require_relative "scale_reference"
 
 # "NISTu10":
 #   dimension_url: "#NISTd9"

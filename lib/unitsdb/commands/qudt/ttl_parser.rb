@@ -5,7 +5,6 @@ require "uri"
 require "set"
 require "rdf"
 require "rdf/turtle"
-require_relative "../../qudt"
 
 module Unitsdb
   module Commands

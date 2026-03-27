@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "identifier"
-require_relative "localized_string"
-require_relative "scale_properties"
 
 module Unitsdb
   class Scale < Lutaml::Model::Serializable

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "lutaml/model"
-
 module Unitsdb
   # QUDT Unit from units vocabulary
   # Example: http://qudt.org/vocab/unit/M (meter)

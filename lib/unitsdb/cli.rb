@@ -1,11 +1,6 @@
 # frozen_string_literal: true
 
 require "thor"
-require_relative "commands/base"
-require_relative "commands/validate"
-require_relative "commands/_modify"
-require_relative "commands/ucum"
-require_relative "commands/qudt"
 require "fileutils"
 
 module Unitsdb
@@ -41,7 +36,6 @@ module Unitsdb
                       desc: "Path to UnitsDB database (required)"
 
     def search(query)
-      require_relative "commands/search"
       Commands::Search.new(options).run(query)
     end
 
@@ -53,7 +47,6 @@ module Unitsdb
     option :database, type: :string, required: true, aliases: "-d",
                       desc: "Path to UnitsDB database (required)"
     def get(id)
-      require_relative "commands/get"
       Commands::Get.new(options).get(id)
     end
 
@@ -73,8 +66,7 @@ module Unitsdb
                       desc: "Path to UnitsDB database (required)"
 
     def check_si
-      require_relative "commands/check_si"
-      Commands::CheckSi.new(options).run
+      Commands::CheckSiCommand.new(options).run
     end
 
     desc "release", "Create release files (unified YAML and/or ZIP archive)"
@@ -87,7 +79,6 @@ module Unitsdb
     option :database, type: :string, required: true, aliases: "-d",
                       desc: "Path to UnitsDB database (required)"
     def release
-      require_relative "commands/release"
       Commands::Release.new(options).run
     end
   end

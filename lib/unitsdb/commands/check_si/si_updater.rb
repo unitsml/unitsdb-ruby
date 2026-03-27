@@ -5,6 +5,7 @@ require "fileutils"
 
 module Unitsdb
   module Commands
+    module CheckSi
     # Updater for SI references in YAML
     module SiUpdater
       SI_AUTHORITY = "si-digital-framework"
@@ -143,7 +144,7 @@ include_potential = false)
             # Check if it's an exact match or if we're including potential matches
             match_type = match_types[ttl_entity[:uri]] || "Exact match" # Default to exact match
             match_pair_key = "#{entity_id}:#{ttl_entity[:uri]}"
-            match_details = Unitsdb::Commands::SiMatcher.instance_variable_get(:@match_details)&.dig(match_pair_key)
+            match_details = Unitsdb::Commands::CheckSi::SiMatcher.instance_variable_get(:@match_details)&.dig(match_pair_key)
 
             if match_details && %w[symbol_match
                                    partial_match].include?(match_details[:match_desc])
@@ -247,4 +248,5 @@ include_potential = false)
       end
     end
   end
+end
 end

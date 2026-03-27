@@ -1,11 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "unit"
-require_relative "prefix"
-require_relative "quantity"
-require_relative "dimension"
-require_relative "unit_system"
-require_relative "errors"
 
 module Unitsdb
   class Database < Lutaml::Model::Serializable

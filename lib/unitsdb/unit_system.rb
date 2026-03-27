@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "identifier"
-require_relative "localized_string"
-require_relative "external_reference"
 
 module Unitsdb
   class UnitSystem < Lutaml::Model::Serializable

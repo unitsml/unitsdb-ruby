@@ -4,6 +4,14 @@ require "thor"
 
 module Unitsdb
   module Commands
+    module Qudt
+      autoload :Check, "unitsdb/commands/qudt/check"
+      autoload :Formatter, "unitsdb/commands/qudt/formatter"
+      autoload :TtlParser, "unitsdb/commands/qudt/ttl_parser"
+      autoload :Update, "unitsdb/commands/qudt/update"
+      autoload :Updater, "unitsdb/commands/qudt/updater"
+    end
+
     class QudtCommand < Thor
       desc "check", "Check QUDT references in UnitsDB"
       option :entity_type, type: :string, aliases: "-e",
@@ -19,7 +27,6 @@ module Unitsdb
       option :database, type: :string, required: true, aliases: "-d",
                         desc: "Path to UnitsDB database (required)"
       def check
-        require_relative "qudt/check"
         Qudt::Check.new(options).run
       end
 
@@ -35,7 +42,6 @@ module Unitsdb
       option :database, type: :string, required: true, aliases: "-d",
                         desc: "Path to UnitsDB database (required)"
       def update
-        require_relative "qudt/update"
         Qudt::Update.new(options).run
       end
     end

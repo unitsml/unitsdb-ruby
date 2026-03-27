@@ -33,10 +33,10 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "diffy"
   spec.add_dependency "fuzzy_match"
-  spec.add_dependency "lutaml-model", "~>0.7"
+  spec.add_dependency "lutaml-model", "~> 0.8.0"
   spec.add_dependency "rdf", "~> 3.1"
   spec.add_dependency "rdf-turtle", "~> 3.1"
   spec.add_dependency "rubyzip", "~> 2.3"
-  spec.add_dependency "terminal-table"
+  spec.add_dependency "table_tennis", "~> 0.0.7"
   spec.add_dependency "thor", "~> 1.0"
 end

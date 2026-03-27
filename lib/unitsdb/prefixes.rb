@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "prefix"
 # ---
 # NISTp10_30:
 #   name: quetta

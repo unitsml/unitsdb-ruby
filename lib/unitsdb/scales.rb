@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "scale"
 
 module Unitsdb
   class Scales < Lutaml::Model::Serializable

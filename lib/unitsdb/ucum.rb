@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "lutaml/model"
-
 module Unitsdb
   # <base-unit Code="s" CODE="S" dim="T">
   #   <name>second</name>
@@ -17,7 +15,7 @@ module Unitsdb
     attribute :property, :string
 
     xml do
-      root "base-unit"
+      element "base-unit"
       map_attribute "Code", to: :code_sensitive
       map_attribute "CODE", to: :code
       map_attribute "dim", to: :dimension
@@ -43,7 +41,7 @@ module Unitsdb
     attribute :content, :string
 
     xml do
-      root "value"
+      element "value"
       map_attribute "value", to: :value
       map_content to: :content
     end
@@ -57,7 +55,7 @@ module Unitsdb
     attribute :value, UcumPrefixValue
 
     xml do
-      root "prefix"
+      element "prefix"
       map_attribute "Code", to: :code_sensitive
       map_attribute "CODE", to: :code
       map_element "name", to: :name
@@ -110,7 +108,7 @@ module Unitsdb
     attribute :unit_sensitive, :string
 
     xml do
-      root "function"
+      element "function"
       map_attribute "name", to: :name
       map_attribute "value", to: :value
       map_attribute "Unit", to: :unit_sensitive
@@ -125,7 +123,7 @@ module Unitsdb
     attribute :content, :string
 
     xml do
-      root "value"
+      element "value"
       map_attribute "Unit", to: :unit_sensitive
       map_attribute "UNIT", to: :unit
       map_attribute "value", to: :value
@@ -147,7 +145,7 @@ module Unitsdb
     attribute :value, UcumUnitValue
 
     xml do
-      root "unit"
+      element "unit"
       map_attribute "Code", to: :code_sensitive
       map_attribute "CODE", to: :code
       map_attribute "isMetric", to: :is_metric
@@ -168,6 +166,11 @@ module Unitsdb
     end
   end
 
+  class UcumNamespace < Lutaml::Xml::Namespace
+    uri "http://unitsofmeasure.org/ucum-essence"
+    prefix_default "ucum"
+  end
+
   # This is the root element of the UCUM XML "ucum-essence.xml" file.
   #
   # <root xmlns="http://unitsofmeasure.org/ucum-essence" version="2.2" revision="N/A"
@@ -182,8 +185,9 @@ module Unitsdb
     attribute :units, UcumUnit, collection: true
 
     xml do
-      root "root"
-      namespace "http://unitsofmeasure.org/ucum-essence"
+      element "root"
+      namespace UcumNamespace
+
       map_attribute "version", to: :version
       map_attribute "revision", to: :revision
       map_attribute "revision-date", to: :revision_date

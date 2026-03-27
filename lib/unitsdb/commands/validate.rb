@@ -4,6 +4,14 @@ require "thor"
 
 module Unitsdb
   module Commands
+    module Validate
+      autoload :Identifiers, "unitsdb/commands/validate/identifiers"
+      autoload :QudtReferences, "unitsdb/commands/validate/qudt_references"
+      autoload :References, "unitsdb/commands/validate/references"
+      autoload :SiReferences, "unitsdb/commands/validate/si_references"
+      autoload :UcumReferences, "unitsdb/commands/validate/ucum_references"
+    end
+
     class ValidateCommand < Thor
       desc "references", "Validate that all references exist"
       option :debug_registry, type: :boolean,
@@ -13,8 +21,6 @@ module Unitsdb
       option :print_valid, type: :boolean, default: false,
                            desc: "Print valid references too"
       def references
-        require_relative "validate/references"
-
         Commands::Validate::References.new(options).run
       end
 
@@ -23,8 +29,6 @@ module Unitsdb
                         desc: "Path to UnitsDB database (required)"
 
       def identifiers
-        require_relative "validate/identifiers"
-
         Commands::Validate::Identifiers.new(options).run
       end
 
@@ -34,8 +38,6 @@ module Unitsdb
                         desc: "Path to UnitsDB database (required)"
 
       def si_references
-        require_relative "validate/si_references"
-
         Commands::Validate::SiReferences.new(options).run
       end
 
@@ -45,8 +47,6 @@ module Unitsdb
                         desc: "Path to UnitsDB database (required)"
 
       def qudt_references
-        require_relative "validate/qudt_references"
-
         Commands::Validate::QudtReferences.new(options).run
       end
 
@@ -56,8 +56,6 @@ module Unitsdb
                         desc: "Path to UnitsDB database (required)"
 
       def ucum_references
-        require_relative "validate/ucum_references"
-
         Commands::Validate::UcumReferences.new(options).run
       end
     end

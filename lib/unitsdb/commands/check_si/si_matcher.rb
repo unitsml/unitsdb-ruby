@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require_relative "si_ttl_parser"
 
 module Unitsdb
   module Commands
+    module CheckSi
     # Matcher for SI entities and UnitsDB entities
     module SiMatcher
       SI_AUTHORITY = "si-digital-framework"
@@ -480,4 +480,6 @@ module Unitsdb
       end
     end
   end
+end
+
 end

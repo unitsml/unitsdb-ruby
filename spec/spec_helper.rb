@@ -16,7 +16,7 @@ RSpec.configure do |config|
 end
 
 require "yaml"
-require "diffy"
+require "canon"
 
 # Define a helper method for capturing standard output/error
 def capture_output
@@ -29,37 +29,6 @@ def capture_output
 ensure
   $stdout = original_stdout
   $stderr = original_stderr
-end
-
-RSpec::Matchers.define :be_yaml_equivalent_to do |expected|
-  match do |actual|
-    @actual_sorted = sort_yaml_keys(YAML.safe_load(actual)).to_yaml
-    @expected_sorted = sort_yaml_keys(YAML.safe_load(expected)).to_yaml
-    @actual_sorted == @expected_sorted
-  end
-
-  def sort_yaml_keys(obj)
-    case obj
-    when Hash
-      obj.transform_values { |v| sort_yaml_keys(v) }
-        .sort.to_h
-    when Array
-      obj.map { |item| sort_yaml_keys(item) }
-    else
-      obj
-    end
-  end
-
-  failure_message do |_actual|
-    diff = Diffy::Diff.new(@expected_sorted, @actual_sorted,
-                           include_diff_info: false,
-                           include_plus_and_minus_in_html: true,
-                           diff_options: "-u")
-
-    "expected YAML to be equivalent\n\n" \
-    "Diff:\n" +
-      diff.to_s(:color)
-  end
 end
 
 # Configure LutaML adapters

@@ -6,7 +6,7 @@ require "unitsdb/commands/get"
 RSpec.describe Unitsdb::Commands::Get do
   let(:options) do
     {
-      database: "spec/fixtures/unitsdb",
+      database: "data",
       format: "text",
     }
   end

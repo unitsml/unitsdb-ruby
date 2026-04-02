@@ -7,7 +7,7 @@ require "unitsdb"
 require "unitsdb/commands/qudt/update"
 
 RSpec.describe Unitsdb::Commands::Qudt::Update do
-  let(:database_path) { "spec/fixtures/unitsdb" }
+  let(:database_path) { "data" }
   let(:output_dir) { "tmp/qudt_update_test" }
   let(:options) do
     {

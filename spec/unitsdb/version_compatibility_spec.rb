@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "UnitsDB 2.0.0 Features" do
-  let(:database_path) { File.join(__dir__, "../fixtures/unitsdb/") }
+  let(:database_path) { File.join(__dir__, "../../data/") }
   let(:db) { Unitsdb::Database.from_db(database_path) }
 
   describe "version validation" do

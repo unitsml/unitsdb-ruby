@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Unitsdb::Quantity do
-  file_path = File.join(__dir__, "../fixtures/unitsdb/quantities.yaml")
+  file_path = File.join(__dir__, "../../data/quantities.yaml")
   quantities_yaml = YAML.safe_load_file(file_path)
 
   quantities_yaml["quantities"].each do |quantity_hash|

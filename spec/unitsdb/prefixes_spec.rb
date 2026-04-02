@@ -3,7 +3,7 @@
 require_relative "../../lib/unitsdb/prefixes"
 
 RSpec.describe Unitsdb::Prefixes do
-  file_path = File.join(__dir__, "../fixtures/unitsdb/prefixes.yaml")
+  file_path = File.join(__dir__, "../../data/prefixes.yaml")
 
   it "parses the prefix collection" do
     raw_string = File.read(file_path)

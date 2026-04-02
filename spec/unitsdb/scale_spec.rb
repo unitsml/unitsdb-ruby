@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Unitsdb::Scale do
-  file_path = File.join(__dir__, "../fixtures/unitsdb/scales.yaml")
+  file_path = File.join(__dir__, "../../data/scales.yaml")
   scales_yaml = YAML.safe_load_file(file_path)
 
   scales_yaml["scales"].each do |scale_hash|

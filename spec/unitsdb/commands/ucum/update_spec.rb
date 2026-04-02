@@ -7,7 +7,7 @@ require "unitsdb"
 require "unitsdb/commands/ucum/update"
 
 RSpec.describe Unitsdb::Commands::Ucum::Update do
-  let(:database_path) { "spec/fixtures/unitsdb" }
+  let(:database_path) { "data" }
   let(:ucum_file) { "spec/fixtures/ucum/ucum-essence.xml" }
   let(:output_dir) { "tmp/ucum_update_test" }
   let(:options) do

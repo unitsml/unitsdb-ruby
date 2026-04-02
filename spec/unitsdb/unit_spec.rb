@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Unitsdb::Unit do
-  file_path = File.join(__dir__, "../fixtures/unitsdb/units.yaml")
+  file_path = File.join(__dir__, "../../data/units.yaml")
   units_yaml = YAML.safe_load_file(file_path)["units"]
 
   units_yaml.each do |value|

@@ -3,7 +3,7 @@
 require_relative "../../lib/unitsdb/units"
 
 RSpec.describe Unitsdb::Units do
-  file_path = File.join(__dir__, "../fixtures/unitsdb/units.yaml")
+  file_path = File.join(__dir__, "../../data/units.yaml")
 
   it "parses the unit collection" do
     raw_string = File.read(file_path)

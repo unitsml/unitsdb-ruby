@@ -4,7 +4,7 @@ require "spec_helper"
 require "unitsdb/commands/validate/ucum_references"
 
 RSpec.describe Unitsdb::Commands::Validate::UcumReferences do
-  let(:database_path) { "spec/fixtures/unitsdb" }
+  let(:database_path) { "data" }
   let(:options) { { database: database_path } }
 
   describe "#run" do

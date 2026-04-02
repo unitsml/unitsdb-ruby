@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Unitsdb::Dimensions do
-  file_path = File.join(__dir__, "../fixtures/unitsdb/dimensions.yaml")
+  file_path = File.join(__dir__, "../../data/dimensions.yaml")
 
   it "parses the dimension collection" do
     raw_string = File.read(file_path)

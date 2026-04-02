@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Unitsdb::Database do
-  dir_path = File.join(__dir__, "../fixtures/unitsdb/")
+  dir_path = File.join(__dir__, "../../data/")
 
   it "parses the full unitsdb database" do
     parsed = described_class.from_db(dir_path)

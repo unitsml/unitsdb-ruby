@@ -9,7 +9,7 @@ RSpec.describe Unitsdb::Commands::CheckSiCommand do
   let(:options) { { database: fixture_dir, ttl_dir: ttl_dir } }
   let(:output) { StringIO.new }
   let(:fixture_dir) do
-    File.join(File.dirname(__FILE__), "../../fixtures/unitsdb")
+    File.join(File.dirname(__FILE__), "../../../data")
   end
   let(:ttl_dir) do
     File.join(File.dirname(__FILE__), "../../fixtures/bipm-si-ttl")

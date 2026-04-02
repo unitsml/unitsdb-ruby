@@ -48,4 +48,22 @@ module Unitsdb
   autoload :UnitSystems, "unitsdb/unit_systems"
   autoload :Units, "unitsdb/units"
   autoload :Utils, "unitsdb/utils"
+
+  class << self
+    # Returns the path to the bundled data directory containing YAML files
+    def data_dir
+      @data_dir ||= File.join(gem_dir, "lib", "unitsdb", "data")
+    end
+
+    # Returns a pre-loaded Database instance from the bundled data
+    def database
+      @database ||= Database.from_db(data_dir)
+    end
+
+    private
+
+    def gem_dir
+      @gem_dir ||= File.dirname(__dir__)
+    end
+  end
 end

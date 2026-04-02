@@ -27,6 +27,8 @@ Gem::Specification.new do |spec|
       f.match(%r{^(test|spec|features)/})
     end
   end
+  # Include YAML data files in the gem
+  spec.files += Dir.glob("lib/unitsdb/data/**/*.yaml")
   spec.bindir = "exe"
   spec.executables = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]

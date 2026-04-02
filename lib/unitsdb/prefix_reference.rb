@@ -6,11 +6,24 @@ module Unitsdb
     attribute :type, :string
 
     def symbolid
-      prefix.symbols.first.ascii
+      prefix_obj = lookup_prefix
+      prefix_obj&.symbols&.first&.ascii
     end
 
     def prefix
-      @prefix ||= Unitsdb.prefixes.find_by_id(id)
+      @prefix ||= lookup_prefix
+    end
+
+    private
+
+    def lookup_prefix
+      return nil unless Unitsdb.database
+
+      Unitsdb.database.prefixes.find do |p|
+        p.identifiers.any? { |i| i.id == id }
+      end
+    rescue StandardError
+      nil
     end
   end
 end

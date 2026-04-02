@@ -10,6 +10,14 @@ module Unitsdb
       prefix_obj&.symbols&.first&.ascii
     end
 
+    def base
+      prefix&.base
+    end
+
+    def power
+      prefix&.power
+    end
+
     def prefix
       @prefix ||= lookup_prefix
     end

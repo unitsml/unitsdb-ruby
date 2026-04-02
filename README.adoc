@@ -19,12 +19,24 @@ https://github.com/unitsml/unitsdb.
 This repository contains the Ruby codebase for UnitsDB, which is used
 to access and manipulate the UnitsDB content.
 
+The UnitsDB gem ships with the UnitsDB data bundled internally. When you install
+the gem, the YAML data files are included automatically, so you do not need to
+obtain or configure a separate data source. The data is accessed via
+`Unitsdb.data_dir` or the convenience method `Unitsdb.database`.
+
 == Install
 
 [source,sh]
 ----
 $ gem install unitsdb
 ----
+
+The UnitsDB gem ships with the UnitsDB YAML data files bundled inside the gem.
+Because the gem bundles immutable data, **the UnitsDB data must be released
+(tagged) before the gem can be released with updated data**. The gem version
+(`Unitsdb::VERSION`) and the data version (`Unitsdb::UNITS_DATA_VERSION`)
+are independent: the gem can be patched without changing data, and the data
+can be updated independently of the gem.
 
 
 
@@ -37,6 +49,24 @@ This library supports the UnitsDB 2.0.0 format only.
 The version of the YAML files are stored in the `version` field of the `*.yaml`
 files. The library checks this version when loading the database and raises an
 error if the version is not 2.0.0.
+
+The `unitsdb-ruby` gem version tracks the bundled data version via
+`Unitsdb::UNITS_DATA_VERSION`. For example, `unitsdb-ruby v2.1.2` bundles
+`unitsdb` data at `v2.0.0`. When the gem is released with an updated data
+submodule, both the gem version and `UNITS_DATA_VERSION` are updated together.
+
+The `data/` submodule is pinned to a specific tag in the
+https://github.com/unitsml/unitsdb[UnitsDB repository] (e.g. `refs/tags/v2.0.0`).
+This means:
+
+* Every bundled version of `unitsdb-ruby` ships with a known, immutable version
+  of the UnitsDB data.
+* A new `unitsdb-ruby` release can only be made after the upstream UnitsDB data
+  has been released (tagged) in its own repository.
+* To release a new gem with updated data: tag the new data in
+  `unitsml/unitsdb`, update the submodule's `branch` in `.gitmodules` to point
+  to `refs/tags/new-data-tag`, update `UNITS_DATA_VERSION`, then bump the gem
+  version and release.
 
 === UnitsDB 2.0.0 features
 
@@ -364,27 +394,27 @@ entities
 [source,sh]
 ----
 # Check all entity types and generate a report
-$ unitsdb check_si --database=spec/fixtures/unitsdb --ttl-dir=spec/fixtures/bipm-si-ttl
+$ unitsdb check_si --database=data --ttl-dir=spec/fixtures/bipm-si-ttl
 
 # Check a specific entity type (units, quantities, or prefixes)
 $ unitsdb check_si --entity-type=units \
-  --database=spec/fixtures/unitsdb \
+  --database=data \
   --ttl-dir=spec/fixtures/bipm-si-ttl
 
 # Check in a specific direction only
 $ unitsdb check_si --direction=from_si \
-  --database=spec/fixtures/unitsdb \
+  --database=data \
   --ttl-dir=spec/fixtures/bipm-si-ttl
 
 # Update references and write to output directory
 $ unitsdb check_si --output-updated-database=new_unitsdb \
-  --database=spec/fixtures/unitsdb \
+  --database=data \
   --ttl-dir=spec/fixtures/bipm-si-ttl
 
 # Include potential matches when updating references (default: false)
 $ unitsdb check_si --include-potential-matches \
   --output-updated-database=new_unitsdb \
-  --database=spec/fixtures/unitsdb \
+  --database=data \
   --ttl-dir=spec/fixtures/bipm-si-ttl
 ----
 
@@ -440,16 +470,16 @@ There are two commands:
 [source,sh]
 ----
 # Check all entity types and generate a report
-$ unitsdb ucum check --database=spec/fixtures/unitsdb --ucum-file=spec/fixtures/ucum/ucum-essence.xml
+$ unitsdb ucum check --database=data --ucum-file=spec/fixtures/ucum/ucum-essence.xml
 
 # Check a specific entity type (units or prefixes)
 $ unitsdb ucum check --entity-type=units \
-  --database=spec/fixtures/unitsdb \
+  --database=data \
   --ucum-file=spec/fixtures/ucum/ucum-essence.xml
 
 # Check in a specific direction only
 $ unitsdb ucum check --direction=from_ucum \
-  --database=spec/fixtures/unitsdb \
+  --database=data \
   --ucum-file=spec/fixtures/ucum/ucum-essence.xml
 ----
 
@@ -477,19 +507,19 @@ references (default: false)
 [source,sh]
 ----
 # Update all entity types with UCUM references
-$ unitsdb ucum update --database=spec/fixtures/unitsdb \
+$ unitsdb ucum update --database=data \
   --ucum-file=spec/fixtures/ucum/ucum-essence.xml \
   --output-dir=new_unitsdb
 
 # Update a specific entity type (units or prefixes)
 $ unitsdb ucum update --entity-type=units \
-  --database=spec/fixtures/unitsdb \
+  --database=data \
   --ucum-file=spec/fixtures/ucum/ucum-essence.xml \
   --output-dir=new_unitsdb
 
 # Include potential matches when updating references (default: false)
 $ unitsdb ucum update --include-potential-matches \
-  --database=spec/fixtures/unitsdb \
+  --database=data \
   --ucum-file=spec/fixtures/ucum/ucum-essence.xml \
   --output-dir=new_unitsdb
 ----
@@ -558,27 +588,27 @@ There are two commands:
 [source,sh]
 ----
 # Check all entity types and generate a report
-$ unitsdb qudt check --database=spec/fixtures/unitsdb
+$ unitsdb qudt check --database=data
 
 # Check a specific entity type (units, quantities, dimensions, or unit_systems)
 $ unitsdb qudt check --entity-type=units \
-  --database=spec/fixtures/unitsdb
+  --database=data
 
 # Use local TTL files instead of downloading from QUDT.org
 $ unitsdb qudt check --ttl-dir=/path/to/qudt/ttl/files \
-  --database=spec/fixtures/unitsdb
+  --database=data
 
 # Check in a specific direction only
 $ unitsdb qudt check --direction=from_qudt \
-  --database=spec/fixtures/unitsdb
+  --database=data
 
 # Include potential matches in the output
 $ unitsdb qudt check --include-potential-matches \
-  --database=spec/fixtures/unitsdb
+  --database=data
 
 # Output updated database files
 $ unitsdb qudt check --output-dir=/path/to/output \
-  --database=spec/fixtures/unitsdb
+  --database=data
 ----
 
 Options:
@@ -606,22 +636,22 @@ references (default: false)
 [source,sh]
 ----
 # Update all entity types with QUDT references
-$ unitsdb qudt update --database=spec/fixtures/unitsdb \
+$ unitsdb qudt update --database=data \
   --output-dir=new_unitsdb
 
 # Update a specific entity type (units, quantities, dimensions, or unit_systems)
 $ unitsdb qudt update --entity-type=units \
-  --database=spec/fixtures/unitsdb \
+  --database=data \
   --output-dir=new_unitsdb
 
 # Use local TTL files instead of downloading
 $ unitsdb qudt update --ttl-dir=/path/to/qudt/ttl/files \
-  --database=spec/fixtures/unitsdb \
+  --database=data \
   --output-dir=new_unitsdb
 
 # Include potential matches when updating references (default: false)
 $ unitsdb qudt update --include-potential-matches \
-  --database=spec/fixtures/unitsdb \
+  --database=data \
   --output-dir=new_unitsdb
 ----
 
@@ -798,15 +828,15 @@ symbol-to-symbol and partial matches always classified as potential
 
 === Loading the database
 
-The primary way to load the UnitsDB data is through the `Database.from_db`
-method, which reads data from YAML files:
+The UnitsDB gem ships with the UnitsDB data bundled inside the gem. You can load
+the database using the convenience method:
 
 [source,ruby]
 ----
 require 'unitsdb'
 
-# Load from the UnitsDB data directory
-db = Unitsdb::Database.from_db('/path/to/unitsdb/data')
+# Load the bundled UnitsDB data (all entity types pre-loaded)
+db = Unitsdb.database
 
 # Access different collections
 units = db.units
@@ -814,6 +844,19 @@ prefixes = db.prefixes
 dimensions = db.dimensions
 quantities = db.quantities
 unit_systems = db.unit_systems
+----
+
+Alternatively, you can load from a specific path using `Database.from_db`:
+
+[source,ruby]
+----
+require 'unitsdb'
+
+# Load from the bundled data directory
+db = Unitsdb::Database.from_db(Unitsdb.data_dir)
+
+# Load from an external directory
+external_db = Unitsdb::Database.from_db('/path/to/custom/unitsdb/data')
 ----
 
 === Database search methods
@@ -976,13 +1019,17 @@ The `Quantity` class represents physical quantities that can be measured:
 
 === Database files
 
-The `Database.from_db` method reads the following YAML files:
+The UnitsDB gem bundles the following YAML files from the
+https://github.com/unitsml/unitsdb[UnitsDB repository]. They are included in the
+gem under the `data/` directory and are available immediately after installation
+without any additional setup.
 
 * `prefixes.yaml` - Contains prefix definitions (e.g., kilo-, mega-)
 * `dimensions.yaml` - Contains dimension definitions (e.g., length, mass)
 * `units.yaml` - Contains unit definitions (e.g., meter, kilogram)
 * `quantities.yaml` - Contains quantity definitions (e.g., length, mass)
 * `unit_systems.yaml` - Contains unit system definitions (e.g., SI, Imperial)
+* `scales.yaml` - Contains scale definitions
 
 
 

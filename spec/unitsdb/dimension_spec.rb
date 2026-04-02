@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Unitsdb::Dimension do
-  file_path = File.join(__dir__, "../fixtures/unitsdb/dimensions.yaml")
+  file_path = File.join(__dir__, "../../data/dimensions.yaml")
   dimensions_yaml = YAML.safe_load_file(file_path)
 
   dimensions_yaml["dimensions"].each do |value|

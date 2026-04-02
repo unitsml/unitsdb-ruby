@@ -1,3 +1,4 @@
-[submodule "spec/fixtures/unitsdb"]
-	path = spec/fixtures/unitsdb
-	url = https://github.com/unitsml/unitsdb/
+[submodule "data"]
+	path = data
+	url = https://github.com/unitsml/unitsdb.git
+	branch = refs/tags/v2.0.0

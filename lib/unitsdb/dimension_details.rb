@@ -15,5 +15,9 @@ module Unitsdb
     attribute :power, :integer
     attribute :symbol, :string
     attribute :symbols, SymbolPresentations, collection: true
+
+    def dim_symbols_ids(hash, dim_id)
+      symbols&.each { |dim_sym| hash[dim_sym.id] = dim_id }
+    end
   end
 end

@@ -8,7 +8,7 @@ require "unitsdb/commands/base"
 require "unitsdb/commands/release"
 
 RSpec.describe Unitsdb::Commands::Release do
-  let(:database_path) { "spec/fixtures/unitsdb" }
+  let(:database_path) { "data" }
   let(:output_dir) { "tmp/release_test" }
   let(:release_version) { "2.0.0" }
   let(:options) do

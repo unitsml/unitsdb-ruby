@@ -144,13 +144,13 @@ include_potential = false)
           # Try to get database directory from environment or assume it's the fixtures
           database_dir = ENV["UNITSDB_DATABASE_PATH"] ||
             File.join(File.dirname(__FILE__),
-                      "../../../spec/fixtures/unitsdb")
+                      "../../../data")
 
           original_yaml_file = File.join(database_dir, "#{entity_type}.yaml")
 
           # If that doesn't exist, try to find it relative to the current working directory
           unless File.exist?(original_yaml_file)
-            original_yaml_file = File.join("spec/fixtures/unitsdb",
+            original_yaml_file = File.join("data",
                                            "#{entity_type}.yaml")
           end
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Unitsdb::Scales do
-  file_path = File.join(__dir__, "../fixtures/unitsdb/scales.yaml")
+  file_path = File.join(__dir__, "../../data/scales.yaml")
 
   it "parses the scale collection from the new array structure" do
     raw_string = File.read(file_path)

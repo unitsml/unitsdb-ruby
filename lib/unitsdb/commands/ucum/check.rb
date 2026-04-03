@@ -80,14 +80,14 @@ include_potential = false)
         # Validation helpers
         def validate_parameters(direction, ucum_file)
           unless %w[to_ucum from_ucum both].include?(direction)
-            puts "Invalid direction: #{direction}. Must be one of: to_ucum, from_ucum, both"
-            exit(1)
+            raise Unitsdb::Errors::InvalidParameterError,
+                  "Invalid direction '#{direction}': must be 'to_ucum', 'from_ucum', or 'both'"
           end
 
           return if File.exist?(ucum_file)
 
-          puts "UCUM file not found: #{ucum_file}"
-          exit(1)
+          raise Unitsdb::Errors::FileNotFoundError,
+                "UCUM file not found: #{ucum_file}"
         end
 
         # Direction handler: UCUM → UnitsDB

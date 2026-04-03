@@ -85,14 +85,14 @@ include_potential = false)
       # Validation helpers
       def validate_parameters(direction, ttl_dir)
         unless %w[to_si from_si both].include?(direction)
-          puts "Invalid direction: #{direction}. Must be one of: to_si, from_si, both"
-          exit(1)
+          raise Unitsdb::Errors::InvalidParameterError,
+                "Invalid direction '#{direction}': must be 'to_si', 'from_si', or 'both'"
         end
 
         return if Dir.exist?(ttl_dir)
 
-        puts "TTL directory not found: #{ttl_dir}"
-        exit(1)
+        raise Unitsdb::Errors::FileNotFoundError,
+              "TTL directory not found: #{ttl_dir}"
       end
 
       # Direction handler: TTL → DB

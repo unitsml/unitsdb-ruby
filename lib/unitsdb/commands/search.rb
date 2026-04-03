@@ -31,8 +31,8 @@ module Unitsdb
                 puts entity.send("to_#{format.downcase}")
                 return
               rescue NoMethodError
-                puts "Error: Unable to convert entity to #{format} format"
-                exit(1)
+                raise Unitsdb::Errors::InvalidFormatError,
+                      "Unable to convert entity to #{format.upcase} format: output format not supported for this entity type"
               end
             end
 
@@ -62,11 +62,9 @@ module Unitsdb
             print_entity_with_ids(entity)
           end
         rescue Unitsdb::Errors::DatabaseError => e
-          puts "Error: #{e.message}"
-          exit(1)
+          raise Unitsdb::Errors::DatabaseLoadError, "Failed to load database: #{e.message}"
         rescue StandardError => e
-          puts "Error searching database: #{e.message}"
-          exit(1)
+          raise Unitsdb::Errors::CLIRuntimeError, "Search failed: #{e.message}"
         end
       end
 

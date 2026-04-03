@@ -3,7 +3,7 @@
 require "spec_helper"
 
 RSpec.describe Unitsdb::Database do
-  let(:fixtures_dir) { File.join("spec", "fixtures", "unitsdb") }
+  let(:fixtures_dir) { "data" }
   let(:database) { described_class.from_db(fixtures_dir) }
 
   describe "search and lookup functionality" do

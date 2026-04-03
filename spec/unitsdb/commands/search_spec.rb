@@ -5,7 +5,7 @@ require "unitsdb/commands/search"
 require "fileutils"
 
 RSpec.describe Unitsdb::Commands::Search do
-  let(:fixtures_dir) { File.join("spec", "fixtures", "unitsdb") }
+  let(:fixtures_dir) { "data" }
   let(:command) { described_class.new(options) }
   let(:options) { { database: fixtures_dir } }
 
@@ -139,19 +139,10 @@ RSpec.describe Unitsdb::Commands::Search do
           Unitsdb::Errors::DatabaseError, "Test error"
         )
 
-        # Expect exit to be called with status 1
-        expect(command).to receive(:exit).with(1)
-
-        # Redirect stdout to capture output
-        original_stdout = $stdout
-        output = StringIO.new
-        $stdout = output
-
-        # Execute search
-        expect { command.run("test") }.to output(/Test error/).to_stdout
-
-        # Reset stdout
-        $stdout = original_stdout
+        # Expect DatabaseLoadError to be raised with the original error message
+        expect { command.run("test") }.to raise_error(Unitsdb::Errors::DatabaseLoadError) do |error|
+          expect(error.message).to include("Test error")
+        end
       end
     end
   end

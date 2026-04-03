@@ -117,8 +117,8 @@ include_potential = false)
         def validate_parameters(ttl_dir, source_type)
           return unless source_type == :file && ttl_dir && !Dir.exist?(ttl_dir)
 
-          puts "TTL directory not found: #{ttl_dir}"
-          exit(1)
+          raise Unitsdb::Errors::FileNotFoundError,
+                "TTL directory not found: #{ttl_dir}"
         end
       end
     end

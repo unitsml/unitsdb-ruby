@@ -88,14 +88,14 @@ include_potential = false)
         # Validation helpers
         def validate_parameters(direction, ttl_dir, source_type)
           unless %w[to_qudt from_qudt both].include?(direction)
-            puts "Invalid direction: #{direction}. Must be one of: to_qudt, from_qudt, both"
-            exit(1)
+            raise Unitsdb::Errors::InvalidParameterError,
+                  "Invalid direction '#{direction}': must be 'to_qudt', 'from_qudt', or 'both'"
           end
 
           return unless source_type == :file && ttl_dir && !Dir.exist?(ttl_dir)
 
-          puts "TTL directory not found: #{ttl_dir}"
-          exit(1)
+          raise Unitsdb::Errors::FileNotFoundError,
+                "TTL directory not found: #{ttl_dir}"
         end
 
         # Direction handler: QUDT → UnitsDB

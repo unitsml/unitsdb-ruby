@@ -26,15 +26,13 @@ module Unitsdb
           create_unified_yaml(db)
           create_zip_archive(db)
         else
-          puts "Invalid format option: #{@options[:format]}"
-          puts "Valid options are: 'yaml', 'zip', or 'all'"
-          exit(1)
+          raise Unitsdb::Errors::InvalidFormatError,
+                "Invalid format '#{@options[:format]}': must be 'yaml', 'zip', or 'all'"
         end
 
         puts "Release files created successfully in #{@options[:output_dir]}"
       rescue Unitsdb::Errors::DatabaseError => e
-        puts "Error: #{e.message}"
-        exit(1)
+        raise Unitsdb::Errors::DatabaseLoadError, "Failed to create release: #{e.message}"
       end
 
       private

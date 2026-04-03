@@ -9,5 +9,12 @@ module Unitsdb
     class DatabaseLoadError < DatabaseError; end
     class VersionMismatchError < DatabaseError; end
     class UnsupportedVersionError < DatabaseError; end
+
+    # CLI-specific errors
+    class CLIRuntimeError < StandardError; end
+    class InvalidParameterError < CLIRuntimeError; end
+    class FileNotFoundError < CLIRuntimeError; end
+    class ValidationError < CLIRuntimeError; end
+    class InvalidFormatError < CLIRuntimeError; end
   end
 end

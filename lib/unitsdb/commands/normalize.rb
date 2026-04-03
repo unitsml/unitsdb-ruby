@@ -7,8 +7,8 @@ module Unitsdb
     class Normalize < Base
       def run(input = nil, output = nil)
         unless @options[:all] || (input && output)
-          puts "Error: INPUT and OUTPUT are required when not using --all"
-          exit(1)
+          raise Unitsdb::Errors::InvalidParameterError,
+                "INPUT and OUTPUT files are required unless --all flag is specified"
         end
 
         if @options[:all]

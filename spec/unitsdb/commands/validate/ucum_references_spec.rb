@@ -29,9 +29,9 @@ RSpec.describe Unitsdb::Commands::Validate::UcumReferences do
       invalid_options = { database: "/nonexistent/path" }
       command = described_class.new(invalid_options)
 
-      # Should exit with error code 1 for invalid database path
-      expect { command.run }.to raise_error(SystemExit) do |error|
-        expect(error.status).to eq(1)
+      # Should raise ValidationError for invalid database path
+      expect { command.run }.to raise_error(Unitsdb::Errors::ValidationError) do |error|
+        expect(error.message).to include("Failed to validate UCUM references")
       end
     end
 

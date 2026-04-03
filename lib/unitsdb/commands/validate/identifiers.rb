@@ -10,8 +10,7 @@ module Unitsdb
 
           display_results(all_dups)
         rescue Unitsdb::Errors::DatabaseError => e
-          puts "Error: #{e.message}"
-          exit(1)
+          raise Unitsdb::Errors::ValidationError, "Failed to validate identifiers: #{e.message}"
         end
 
         private

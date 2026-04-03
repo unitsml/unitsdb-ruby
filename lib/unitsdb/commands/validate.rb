@@ -15,7 +15,7 @@ module Unitsdb
     class ValidateCommand < Thor
       # Inherit trace option from parent CLI
       class_option :trace, type: :boolean, default: false,
-                          desc: "Show full backtrace on error"
+                           desc: "Show full backtrace on error"
 
       desc "references", "Validate that all references exist"
       option :debug_registry, type: :boolean,

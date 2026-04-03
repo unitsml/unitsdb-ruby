@@ -46,7 +46,9 @@ RSpec.describe Unitsdb::Commands::Qudt::Update do
       command = described_class.new(invalid_options)
 
       # Should raise FileNotFoundError for invalid TTL directory
-      expect { command.run }.to raise_error(Unitsdb::Errors::FileNotFoundError) do |error|
+      expect do
+        command.run
+      end.to raise_error(Unitsdb::Errors::FileNotFoundError) do |error|
         expect(error.message).to include("TTL directory not found")
       end
     end

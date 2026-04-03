@@ -32,7 +32,8 @@ module Unitsdb
 
         puts "Release files created successfully in #{@options[:output_dir]}"
       rescue Unitsdb::Errors::DatabaseError => e
-        raise Unitsdb::Errors::DatabaseLoadError, "Failed to create release: #{e.message}"
+        raise Unitsdb::Errors::DatabaseLoadError,
+              "Failed to create release: #{e.message}"
       end
 
       private

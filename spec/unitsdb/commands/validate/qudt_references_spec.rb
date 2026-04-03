@@ -30,7 +30,9 @@ RSpec.describe Unitsdb::Commands::Validate::QudtReferences do
       command = described_class.new(invalid_options)
 
       # Should raise ValidationError for invalid database path
-      expect { command.run }.to raise_error(Unitsdb::Errors::ValidationError) do |error|
+      expect do
+        command.run
+      end.to raise_error(Unitsdb::Errors::ValidationError) do |error|
         expect(error.message).to include("Failed to validate QUDT references")
       end
     end

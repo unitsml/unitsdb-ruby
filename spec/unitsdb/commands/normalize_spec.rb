@@ -91,7 +91,10 @@ RSpec.describe Unitsdb::Commands::Normalize do
 
     it "handles error for missing input/output without --all" do
       # Run command with nil input/output and expect InvalidParameterError
-      expect { command.run(nil, nil) }.to raise_error(Unitsdb::Errors::InvalidParameterError) do |error|
+      expect do
+        command.run(nil,
+                    nil)
+      end.to raise_error(Unitsdb::Errors::InvalidParameterError) do |error|
         expect(error.message).to include("INPUT and OUTPUT files are required unless --all flag is specified")
       end
     end

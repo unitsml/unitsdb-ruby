@@ -7,7 +7,7 @@ module Unitsdb
     class ModifyCommand < Thor
       # Inherit trace option from parent CLI
       class_option :trace, type: :boolean, default: false,
-                          desc: "Show full backtrace on error"
+                           desc: "Show full backtrace on error"
 
       desc "normalize INPUT OUTPUT",
            "Normalize a YAML file or all YAML files with --all"

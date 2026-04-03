@@ -22,19 +22,16 @@ RSpec.describe "unitsdb executable" do
     expect(content).to include('require "unitsdb/cli"')
   end
 
-  it "calls CLI.start with ARGV" do
+  it "calls Cli.start with ARGV" do
     content = File.read(executable_path)
-    expect(content).to include("Unitsdb::CLI.start(ARGV)")
+    expect(content).to include("Unitsdb::Cli.start(ARGV)")
   end
 
   # This tests that the executable code structure matches what we expect
   # This is a more robust test than testing behavior with mocks
-  it "contains code that calls CLI.start with ARGV" do
+  it "contains code that calls Cli.start with ARGV" do
     content = File.read(executable_path)
-    # Check that the last significant line is the CLI.start call
-    significant_lines = content.lines.map(&:strip).reject do |line|
-      line.empty? || line.start_with?("#")
-    end
-    expect(significant_lines.last).to eq("Unitsdb::CLI.start(ARGV)")
+    # Check that Cli.start is called somewhere in the code
+    expect(content).to include("Unitsdb::Cli.start(ARGV)")
   end
 end

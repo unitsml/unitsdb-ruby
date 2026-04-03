@@ -40,6 +40,71 @@ can be updated independently of the gem.
 
 
 
+== How the Database Works
+
+The `Unitsdb::Database` class loads all UnitsDB YAML files and provides
+methods for searching and querying the data.
+
+[source,ruby]
+----
+require 'unitsdb'
+
+# Access the pre-loaded bundled database (recommended)
+db = Unitsdb.database
+
+# Or load from a specific path
+db = Unitsdb::Database.from_db('/path/to/data')
+----
+
+=== Lazy Loading and Caching
+
+The bundled database (`Unitsdb.database`) is loaded on first access and cached
+for subsequent calls. The path to the bundled data is available via:
+
+[source,ruby]
+----
+Unitsdb.data_dir  # => Path to the data/ directory inside the gem
+----
+
+=== Database Structure
+
+The database contains collections for each entity type:
+
+[source,ruby]
+----
+db.units        # Array of Unit objects
+db.prefixes     # Array of Prefix objects
+db.dimensions   # Array of Dimension objects
+db.quantities   # Array of Quantity objects
+db.unit_systems # Array of UnitSystem objects
+db.scales       # Array of Scale objects
+----
+
+=== Searching the Database
+
+[source,ruby]
+----
+# Search by text (searches names, identifiers, descriptions)
+results = db.search(text: "meter")
+
+# Find by exact ID
+unit = db.get_by_id(id: "NISTu1")
+
+# Find by symbol
+units = db.find_by_symbol("m")
+----
+
+=== Validation
+
+[source,ruby]
+----
+# Check identifier uniqueness
+dups = db.validate_uniqueness
+
+# Validate all references exist
+invalid_refs = db.validate_references
+----
+
 == UnitsDB version support
 
 === General

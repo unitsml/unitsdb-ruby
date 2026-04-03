@@ -90,27 +90,10 @@ RSpec.describe Unitsdb::Commands::Normalize do
     end
 
     it "handles error for missing input/output without --all" do
-      # Use StringIO to capture output
-      original_stdout = $stdout
-      output = StringIO.new
-      $stdout = output
-
-      # Stub exit to prevent test from actually exiting
-      exit_called = false
-      allow(command).to receive(:exit) { |code|
-        exit_called = true
-        code
-      }
-
-      # Run command with nil input/output
-      command.run(nil, nil)
-
-      # Reset stdout
-      $stdout = original_stdout
-
-      # Verify exit was called and error message was printed
-      expect(exit_called).to be true
-      expect(output.string).to include("Error: INPUT and OUTPUT are required when not using --all")
+      # Run command with nil input/output and expect InvalidParameterError
+      expect { command.run(nil, nil) }.to raise_error(Unitsdb::Errors::InvalidParameterError) do |error|
+        expect(error.message).to include("INPUT and OUTPUT files are required unless --all flag is specified")
+      end
     end
 
     it "sorts by nist ID when sort option is 'nist'" do

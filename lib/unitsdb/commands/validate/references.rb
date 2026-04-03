@@ -17,8 +17,7 @@ module Unitsdb
           # Display results
           display_reference_results(invalid_refs, registry)
         rescue Unitsdb::Errors::DatabaseError => e
-          puts "Error: #{e.message}"
-          exit(1)
+          raise Unitsdb::Errors::ValidationError, "Failed to validate references: #{e.message}"
         end
 
         private

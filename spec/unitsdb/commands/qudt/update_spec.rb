@@ -45,9 +45,9 @@ RSpec.describe Unitsdb::Commands::Qudt::Update do
       invalid_options = options.merge(ttl_dir: "/nonexistent/path")
       command = described_class.new(invalid_options)
 
-      # Should exit with error code 1 for invalid TTL directory
-      expect { command.run }.to raise_error(SystemExit) do |error|
-        expect(error.status).to eq(1)
+      # Should raise FileNotFoundError for invalid TTL directory
+      expect { command.run }.to raise_error(Unitsdb::Errors::FileNotFoundError) do |error|
+        expect(error.message).to include("TTL directory not found")
       end
     end
 

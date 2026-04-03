@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "unitsdb"
+require_relative "../lib/unitsdb"
 require "stringio"
 
 RSpec.configure do |config|
@@ -15,7 +15,6 @@ RSpec.configure do |config|
   end
 end
 
-require "yaml"
 require "canon"
 
 # Define a helper method for capturing standard output/error
@@ -31,6 +30,7 @@ ensure
   $stderr = original_stderr
 end
 
+require "lutaml/model"
 # Configure LutaML adapters
 Lutaml::Model::Config.configure do |config|
   config.xml_adapter_type = :nokogiri

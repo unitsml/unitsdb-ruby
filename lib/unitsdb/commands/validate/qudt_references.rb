@@ -14,8 +14,7 @@ module Unitsdb
           # Display results
           display_duplicate_results(duplicates)
         rescue Unitsdb::Errors::DatabaseError => e
-          puts "Error: #{e.message}"
-          exit(1)
+          raise Unitsdb::Errors::ValidationError, "Failed to validate QUDT references: #{e.message}"
         end
 
         private

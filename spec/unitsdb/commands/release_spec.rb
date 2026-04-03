@@ -138,9 +138,9 @@ RSpec.describe Unitsdb::Commands::Release do
           version: release_version }
       end
 
-      it "exits with an error" do
+      it "raises DatabaseLoadError" do
         command = described_class.new(options)
-        expect { command.run }.to raise_error(SystemExit)
+        expect { command.run }.to raise_error(Unitsdb::Errors::DatabaseLoadError)
       end
     end
 
@@ -171,9 +171,9 @@ RSpec.describe Unitsdb::Commands::Release do
         FileUtils.rm_rf(temp_db_path)
       end
 
-      it "exits with an error" do
+      it "raises DatabaseLoadError" do
         command = described_class.new(options)
-        expect { command.run }.to raise_error(SystemExit)
+        expect { command.run }.to raise_error(Unitsdb::Errors::DatabaseLoadError)
       end
     end
   end

@@ -8,7 +8,7 @@ module Unitsdb
     # Enable --trace globally for all subcommands
     # When enabled, Thor shows full backtraces on error
     class_option :trace, type: :boolean, default: false,
-                        desc: "Show full backtrace on error"
+                         desc: "Show full backtrace on error"
 
     # Fix Thor deprecation warning
     def self.exit_on_failure?

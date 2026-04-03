@@ -62,7 +62,8 @@ module Unitsdb
             print_entity_with_ids(entity)
           end
         rescue Unitsdb::Errors::DatabaseError => e
-          raise Unitsdb::Errors::DatabaseLoadError, "Failed to load database: #{e.message}"
+          raise Unitsdb::Errors::DatabaseLoadError,
+                "Failed to load database: #{e.message}"
         rescue StandardError => e
           raise Unitsdb::Errors::CLIRuntimeError, "Search failed: #{e.message}"
         end

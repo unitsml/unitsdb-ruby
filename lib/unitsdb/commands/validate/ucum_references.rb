@@ -14,7 +14,8 @@ module Unitsdb
           # Display results
           display_duplicate_results(duplicates)
         rescue Unitsdb::Errors::DatabaseError => e
-          raise Unitsdb::Errors::ValidationError, "Failed to validate UCUM references: #{e.message}"
+          raise Unitsdb::Errors::ValidationError,
+                "Failed to validate UCUM references: #{e.message}"
         end
 
         private

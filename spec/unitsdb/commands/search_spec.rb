@@ -140,7 +140,9 @@ RSpec.describe Unitsdb::Commands::Search do
         )
 
         # Expect DatabaseLoadError to be raised with the original error message
-        expect { command.run("test") }.to raise_error(Unitsdb::Errors::DatabaseLoadError) do |error|
+        expect do
+          command.run("test")
+        end.to raise_error(Unitsdb::Errors::DatabaseLoadError) do |error|
           expect(error.message).to include("Test error")
         end
       end

@@ -9,5 +9,5 @@ begin
 rescue SystemExit => e
   # Only print if not already handled (exit code 0 = normal exit)
   # Exit code 1 from our commands is already handled, don't duplicate
-  raise if e.status == 0
+  raise if e.status.zero?
 end

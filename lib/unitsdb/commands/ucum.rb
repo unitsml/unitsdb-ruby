@@ -16,7 +16,7 @@ module Unitsdb
     class UcumCommand < Thor
       # Inherit trace option from parent CLI
       class_option :trace, type: :boolean, default: false,
-                          desc: "Show full backtrace on error"
+                           desc: "Show full backtrace on error"
 
       desc "check", "Check UCUM references in UnitsDB"
       option :entity_type, type: :string, aliases: "-e",

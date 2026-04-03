@@ -33,7 +33,7 @@ releasing with new data: tag the data in `unitsml/unitsdb`, then update
 ### Core Classes
 
 - **`Unitsdb::Database`** — Loads all YAML files, provides `search`, `get_by_id`, `find_by_type`, `find_by_symbol`, `match_entities`, `validate_uniqueness`, `validate_references`
-- **`Unitsdb::CLI`** (Thor-based) — Command-line interface with subcommands: `validate`, `search`, `get`, `check_si`, `ucum`, `qudt`, `_modify`, `release`
+- **`Unitsdb::Cli`** (Thor-based) — Command-line interface with subcommands: `validate`, `search`, `get`, `check_si`, `ucum`, `qudt`, `_modify`, `release`
 - **`lib/unitsdb/commands/base.rb`** — Base class for commands; provides `load_database` and `@options[:database]`
 
 ### Model Pattern

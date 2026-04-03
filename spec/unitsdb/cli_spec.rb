@@ -4,7 +4,7 @@ require "spec_helper"
 require_relative "../../lib/unitsdb/cli"
 require "stringio"
 
-RSpec.describe Unitsdb::CLI do
+RSpec.describe Unitsdb::Cli do
   let(:cli) { described_class.new }
 
   # No global output capture - each test will capture output explicitly

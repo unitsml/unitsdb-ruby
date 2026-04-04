@@ -1,0 +1,874 @@
+# yaml-language-server: $schema=schemas/prefixes-schema.yaml
+---
+schema_version: 2.0.0
+prefixes:
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_-1
+  - type: unitsml
+    id: p:deci
+  names:
+  - value: deci
+    lang: en
+  power: -1
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/deci
+  - type: informative
+    authority: ucum
+    uri: ucum:prefix:code:d
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/unit/Deci
+  short: deci
+  symbols:
+  - latex: d
+    unicode: d
+    ascii: d
+    html: d
+    id: deci
+    mathml: "<mi>d</mi>"
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_-12
+  - type: unitsml
+    id: p:pico
+  names:
+  - value: pico
+    lang: en
+  power: -12
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/pico
+  - type: informative
+    authority: ucum
+    uri: ucum:prefix:code:p
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/unit/Pico
+  short: pico
+  symbols:
+  - latex: p
+    unicode: p
+    ascii: p
+    html: p
+    id: pico
+    mathml: "<mi>p</mi>"
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_-15
+  - type: unitsml
+    id: p:femto
+  names:
+  - value: femto
+    lang: en
+  power: -15
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/femto
+  - type: informative
+    authority: ucum
+    uri: ucum:prefix:code:f
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/unit/Femto
+  short: femto
+  symbols:
+  - latex: f
+    unicode: f
+    ascii: f
+    html: f
+    id: femto
+    mathml: "<mi>f</mi>"
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_-18
+  - type: unitsml
+    id: p:atto
+  names:
+  - value: atto
+    lang: en
+  power: -18
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/atto
+  - type: informative
+    authority: ucum
+    uri: ucum:prefix:code:a
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/unit/Atto
+  short: atto
+  symbols:
+  - latex: a
+    unicode: a
+    ascii: a
+    html: a
+    id: atto
+    mathml: "<mi>a</mi>"
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_-2
+  - type: unitsml
+    id: p:centi
+  names:
+  - value: centi
+    lang: en
+  power: -2
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/centi
+  - type: informative
+    authority: ucum
+    uri: ucum:prefix:code:c
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/unit/Centi
+  short: centi
+  symbols:
+  - latex: c
+    unicode: c
+    ascii: c
+    html: c
+    id: centi
+    mathml: "<mi>c</mi>"
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_-21
+  - type: unitsml
+    id: p:zepto
+  names:
+  - value: zepto
+    lang: en
+  power: -21
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/zepto
+  - type: informative
+    authority: ucum
+    uri: ucum:prefix:code:z
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/unit/Zepto
+  short: zepto
+  symbols:
+  - latex: z
+    unicode: z
+    ascii: z
+    html: z
+    id: zepto
+    mathml: "<mi>z</mi>"
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_-24
+  - type: unitsml
+    id: p:yocto
+  names:
+  - value: yocto
+    lang: en
+  power: -24
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/yocto
+  - type: informative
+    authority: ucum
+    uri: ucum:prefix:code:y
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/unit/Yocto
+  short: yocto
+  symbols:
+  - latex: "y"
+    unicode: "y"
+    ascii: "y"
+    html: "y"
+    id: yocto
+    mathml: "<mi>y</mi>"
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_-27
+  - type: unitsml
+    id: p:ronto
+  names:
+  - value: ronto
+    lang: en
+  power: -27
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/ronto
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/unit/Ronto
+  short: ronto
+  symbols:
+  - latex: r
+    unicode: r
+    ascii: r
+    html: r
+    id: ronto
+    mathml: "<mi>r</mi>"
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_-3
+  - type: unitsml
+    id: p:milli
+  names:
+  - value: milli
+    lang: en
+  power: -3
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/milli
+  - type: informative
+    authority: ucum
+    uri: ucum:prefix:code:m
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/unit/Milli
+  short: milli
+  symbols:
+  - latex: m
+    unicode: m
+    ascii: m
+    html: m
+    id: milli
+    mathml: "<mi>m</mi>"
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_-30
+  - type: unitsml
+    id: p:quecto
+  names:
+  - value: quecto
+    lang: en
+  power: -30
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/quecto
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/unit/Quecto
+  short: quecto
+  symbols:
+  - latex: q
+    unicode: q
+    ascii: q
+    html: q
+    id: quecto
+    mathml: "<mi>q</mi>"
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_-6
+  - type: unitsml
+    id: p:micro
+  names:
+  - value: micro
+    lang: en
+  power: -6
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/micro
+  - type: informative
+    authority: ucum
+    uri: ucum:prefix:code:u
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/unit/Micro
+  short: micro
+  symbols:
+  - latex: "$mu$"
+    unicode: μ
+    ascii: u
+    html: "&micro;"
+    id: micro
+    mathml: "<mi>&micro;</mi>"
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_-9
+  - type: unitsml
+    id: p:nano
+  names:
+  - value: nano
+    lang: en
+  power: -9
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/nano
+  - type: informative
+    authority: ucum
+    uri: ucum:prefix:code:n
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/unit/Nano
+  short: nano
+  symbols:
+  - latex: "n"
+    unicode: "n"
+    ascii: "n"
+    html: "n"
+    id: nano
+    mathml: "<mi>n</mi>"
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_0
+  - type: unitsml
+    id: p:none
+  names:
+  - value: none
+    lang: en
+  power: 0
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/none
+  short: none
+  symbols:
+  - latex: '1'
+    unicode: '1'
+    ascii: '1'
+    html: '1'
+    id: unity
+    mathml: "<mn>1</mn>"
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_1
+  - type: unitsml
+    id: p:deka
+  names:
+  - value: deka
+    lang: en
+  power: 1
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/deca
+  - type: informative
+    authority: ucum
+    uri: ucum:prefix:code:da
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/unit/Deca
+  short: deka
+  symbols:
+  - latex: da
+    unicode: da
+    ascii: da
+    html: da
+    id: deka
+    mathml: "<mi>da</mi>"
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_12
+  - type: unitsml
+    id: p:tera
+  names:
+  - value: tera
+    lang: en
+  power: 12
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/tera
+  - type: informative
+    authority: ucum
+    uri: ucum:prefix:code:T
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/unit/Tera
+  short: tera
+  symbols:
+  - latex: T
+    unicode: T
+    ascii: T
+    html: T
+    id: tera
+    mathml: "<mi>T</mi>"
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_15
+  - type: unitsml
+    id: p:peta
+  names:
+  - value: peta
+    lang: en
+  power: 15
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/peta
+  - type: informative
+    authority: ucum
+    uri: ucum:prefix:code:P
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/unit/Peta
+  short: peta
+  symbols:
+  - latex: P
+    unicode: P
+    ascii: P
+    html: P
+    id: peta
+    mathml: "<mi>P</mi>"
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_18
+  - type: unitsml
+    id: p:exa
+  names:
+  - value: exa
+    lang: en
+  power: 18
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/exa
+  - type: informative
+    authority: ucum
+    uri: ucum:prefix:code:E
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/unit/Exa
+  short: exa
+  symbols:
+  - latex: E
+    unicode: E
+    ascii: E
+    html: E
+    id: exa
+    mathml: "<mi>E</mi>"
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_2
+  - type: unitsml
+    id: p:hecto
+  names:
+  - value: hecto
+    lang: en
+  power: 2
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/hecto
+  - type: informative
+    authority: ucum
+    uri: ucum:prefix:code:h
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/unit/Hecto
+  short: hecto
+  symbols:
+  - latex: h
+    unicode: h
+    ascii: h
+    html: h
+    id: hecto
+    mathml: "<mi>h</mi>"
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_21
+  - type: unitsml
+    id: p:zetta
+  names:
+  - value: zetta
+    lang: en
+  power: 21
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/zetta
+  - type: informative
+    authority: ucum
+    uri: ucum:prefix:code:Z
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/unit/Zetta
+  short: zetta
+  symbols:
+  - latex: Z
+    unicode: Z
+    ascii: Z
+    html: Z
+    id: zetta
+    mathml: "<mi>Z</mi>"
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_24
+  - type: unitsml
+    id: p:yotta
+  names:
+  - value: yotta
+    lang: en
+  power: 24
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/yotta
+  - type: informative
+    authority: ucum
+    uri: ucum:prefix:code:Y
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/unit/Yotta
+  short: yotta
+  symbols:
+  - latex: Y
+    unicode: Y
+    ascii: Y
+    html: Y
+    id: yotta
+    mathml: "<mi>Y</mi>"
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_27
+  - type: unitsml
+    id: p:ronna
+  names:
+  - value: ronna
+    lang: en
+  power: 27
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/ronna
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/unit/Ronna
+  short: ronna
+  symbols:
+  - latex: R
+    unicode: R
+    ascii: R
+    html: R
+    id: ronna
+    mathml: "<mi>R</mi>"
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_3
+  - type: unitsml
+    id: p:kilo
+  names:
+  - value: kilo
+    lang: en
+  power: 3
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/kilo
+  - type: informative
+    authority: ucum
+    uri: ucum:prefix:code:k
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/unit/Kilo
+  short: kilo
+  symbols:
+  - latex: k
+    unicode: k
+    ascii: k
+    html: k
+    id: kilo
+    mathml: "<mi>k</mi>"
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_30
+  - type: unitsml
+    id: p:quetta
+  names:
+  - value: quetta
+    lang: en
+  power: 30
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/quetta
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/unit/Quetta
+  short: quetta
+  symbols:
+  - latex: Q
+    unicode: Q
+    ascii: Q
+    html: Q
+    id: quetta
+    mathml: "<mi>Q</mi>"
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_6
+  - type: unitsml
+    id: p:mega
+  names:
+  - value: mega
+    lang: en
+  power: 6
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/mega
+  - type: informative
+    authority: ucum
+    uri: ucum:prefix:code:M
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/unit/Mega
+  short: mega
+  symbols:
+  - latex: M
+    unicode: M
+    ascii: M
+    html: M
+    id: mega
+    mathml: "<mi>M</mi>"
+- base: 10
+  identifiers:
+  - type: nist
+    id: NISTp10_9
+  - type: unitsml
+    id: p:giga
+  names:
+  - value: giga
+    lang: en
+  power: 9
+  references:
+  - type: normative
+    authority: si-digital-framework
+    uri: http://si-digital-framework.org/SI/prefixes/giga
+  - type: informative
+    authority: ucum
+    uri: ucum:prefix:code:G
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/unit/Giga
+  short: giga
+  symbols:
+  - latex: G
+    unicode: G
+    ascii: G
+    html: G
+    id: giga
+    mathml: "<mi>G</mi>"
+- base: 2
+  identifiers:
+  - type: nist
+    id: NISTp2_10
+  - type: unitsml
+    id: p:kibi
+  names:
+  - value: kibi
+    lang: en
+  power: 10
+  references:
+  - type: informative
+    authority: ucum
+    uri: ucum:prefix:code:Ki
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/prefix/Kibi
+  short: kibi
+  symbols:
+  - latex: Ki
+    unicode: Ki
+    ascii: Ki
+    html: Ki
+    id: kibi
+    mathml: "<mi>Ki</mi>"
+- base: 2
+  identifiers:
+  - type: nist
+    id: NISTp2_20
+  - type: unitsml
+    id: p:mebi
+  names:
+  - value: mebi
+    lang: en
+  power: 20
+  references:
+  - type: informative
+    authority: ucum
+    uri: ucum:prefix:code:Mi
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/prefix/Mebi
+  short: mebi
+  symbols:
+  - latex: Mi
+    unicode: Mi
+    ascii: Mi
+    html: Mi
+    id: mebi
+    mathml: "<mi>Mi</mi>"
+- base: 2
+  identifiers:
+  - type: nist
+    id: NISTp2_30
+  - type: unitsml
+    id: p:gibi
+  names:
+  - value: gibi
+    lang: en
+  power: 30
+  references:
+  - type: informative
+    authority: ucum
+    uri: ucum:prefix:code:Gi
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/prefix/Gibi
+  short: gibi
+  symbols:
+  - latex: Gi
+    unicode: Gi
+    ascii: Gi
+    html: Gi
+    id: gibi
+    mathml: "<mi>Gi</mi>"
+- base: 2
+  identifiers:
+  - type: nist
+    id: NISTp2_40
+  - type: unitsml
+    id: p:tebi
+  names:
+  - value: tebi
+    lang: en
+  power: 40
+  references:
+  - type: informative
+    authority: ucum
+    uri: ucum:prefix:code:Ti
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/prefix/Tebi
+  short: tebi
+  symbols:
+  - latex: Ti
+    unicode: Ti
+    ascii: Ti
+    html: Ti
+    id: tebi
+    mathml: "<mi>Ti</mi>"
+- base: 2
+  identifiers:
+  - type: nist
+    id: NISTp2_50
+  - type: unitsml
+    id: p:pebi
+  names:
+  - value: pebi
+    lang: en
+  power: 50
+  references:
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/prefix/Pebi
+  short: pebi
+  symbols:
+  - latex: Pi
+    unicode: Pi
+    ascii: Pi
+    html: Pi
+    id: pebi
+    mathml: "<mi>Pi</mi>"
+- base: 2
+  identifiers:
+  - type: nist
+    id: NISTp2_60
+  - type: unitsml
+    id: p:exbi
+  names:
+  - value: exbi
+    lang: en
+  power: 60
+  references:
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/prefix/Exbi
+  short: exbi
+  symbols:
+  - latex: Ei
+    unicode: Ei
+    ascii: Ei
+    html: Ei
+    id: exbi
+    mathml: "<mi>Ei</mi>"
+- base: 2
+  identifiers:
+  - type: nist
+    id: NISTp2_70
+  - type: unitsml
+    id: p:zebi
+  names:
+  - value: zebi
+    lang: en
+  power: 70
+  references:
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/prefix/Zebi
+  short: zebi
+  symbols:
+  - latex: Zi
+    unicode: Zi
+    ascii: Zi
+    html: Zi
+    id: zebi
+    mathml: "<mi>Zi</mi>"
+- base: 2
+  identifiers:
+  - type: nist
+    id: NISTp2_80
+  - type: unitsml
+    id: p:yobi
+  names:
+  - value: yobi
+    lang: en
+  power: 80
+  references:
+  - type: informative
+    authority: qudt
+    uri: http://qudt.org/vocab/prefix/Yobi
+  short: yobi
+  symbols:
+  - latex: Yi
+    unicode: Yi
+    ascii: Yi
+    html: Yi
+    id: yobi
+    mathml: "<mi>Yi</mi>"

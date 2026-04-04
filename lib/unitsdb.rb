@@ -52,7 +52,7 @@ module Unitsdb
   class << self
     # Returns the path to the bundled data directory containing YAML files
     def data_dir
-      @data_dir ||= File.join(gem_dir, "data")
+      @data_dir ||= File.join(gem_dir, "lib", "unitsdb", "data")
     end
 
     # Returns a pre-loaded Database instance from the bundled data

@@ -1,0 +1,97 @@
+# yaml-language-server: $schema=schemas/scales-schema.yaml
+---
+schema_version: 2.0.0
+scales:
+- identifiers:
+  - id: continuous_ratio
+    type: unitsml
+  - id: s:continuous_ratio
+    type: unitsml
+  names:
+  - value: continuous ratio scale
+    lang: en
+  short: continuous_ratio
+  description:
+  - value: A measurement scale with continuous values and a true zero point, allowing
+      for ratio comparisons
+    lang: en
+  properties:
+    continuous: true
+    ordered: true
+    logarithmic: false
+    interval: true
+    ratio: true
+- identifiers:
+  - id: continuous_interval
+    type: unitsml
+  - id: s:continuous_interval
+    type: unitsml
+  names:
+  - value: continuous interval scale
+    lang: en
+  short: continuous_interval
+  description:
+  - value: A measurement scale with continuous values but an arbitrary zero point,
+      allowing for interval but not ratio comparisons
+    lang: en
+  properties:
+    continuous: true
+    ordered: true
+    logarithmic: false
+    interval: true
+    ratio: false
+- identifiers:
+  - id: logarithmic_ratio
+    type: unitsml
+  - id: s:logarithmic_ratio
+    type: unitsml
+  names:
+  - value: logarithmic ratio scale
+    lang: en
+  short: logarithmic_ratio
+  description:
+  - value: A scale where equal ratios appear as equal intervals, with a zero point
+      representing a reference value
+    lang: en
+  properties:
+    continuous: true
+    ordered: true
+    logarithmic: true
+    interval: true
+    ratio: true
+- identifiers:
+  - id: logarithmic_field
+    type: unitsml
+  - id: s:logarithmic_field
+    type: unitsml
+  names:
+  - value: logarithmic field scale
+    lang: en
+  short: logarithmic_field
+  description:
+  - value: A logarithmic scale used for field quantities that uses natural logarithms
+    lang: en
+  properties:
+    continuous: true
+    ordered: true
+    logarithmic: true
+    interval: true
+    ratio: false
+- identifiers:
+  - id: discrete
+    type: unitsml
+  - id: s:discrete
+    type: unitsml
+  names:
+  - value: discrete scale
+    lang: en
+  short: discrete
+  description:
+  - value: A scale consisting of discrete, countable values
+    lang: en
+  properties:
+    continuous: false
+    ordered: true
+    logarithmic: false
+    interval: true
+    ratio: true

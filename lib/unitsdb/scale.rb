@@ -10,4 +10,6 @@ module Unitsdb
     attribute :short, :string
     attribute :properties, ScaleProperties
   end
+
+  Configuration.register_model(Scale, id: :scale)
 end

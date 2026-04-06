@@ -7,4 +7,6 @@ module Unitsdb
     attribute :id, :string
     attribute :type, :string
   end
+
+  Configuration.register_model(QuantityReference, id: :quantity_reference)
 end

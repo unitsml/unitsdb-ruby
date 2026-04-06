@@ -7,4 +7,6 @@ module Unitsdb
     attribute :version, :string
     attribute :quantities, Quantity, collection: true
   end
+
+  Configuration.register_model(Quantities, id: :quantities)
 end

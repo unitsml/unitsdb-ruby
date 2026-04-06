@@ -10,4 +10,6 @@ module Unitsdb
     attribute :acceptable, :boolean
     attribute :references, ExternalReference, collection: true
   end
+
+  Configuration.register_model(UnitSystem, id: :unit_system)
 end

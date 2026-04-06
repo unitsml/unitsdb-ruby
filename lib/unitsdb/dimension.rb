@@ -43,4 +43,6 @@ module Unitsdb
     attribute :names, LocalizedString, collection: true
     attribute :references, ExternalReference, collection: true
   end
+
+  Configuration.register_model(Dimension, id: :dimension)
 end

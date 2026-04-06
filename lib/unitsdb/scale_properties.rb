@@ -9,4 +9,6 @@ module Unitsdb
     attribute :interval, :boolean
     attribute :ratio, :boolean
   end
+
+  Configuration.register_model(ScaleProperties, id: :scale_properties)
 end

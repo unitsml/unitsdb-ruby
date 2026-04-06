@@ -19,4 +19,6 @@ module Unitsdb
     attribute :version, :string
     attribute :prefixes, Prefix, collection: true
   end
+
+  Configuration.register_model(Prefixes, id: :prefixes)
 end

@@ -290,7 +290,10 @@ module Unitsdb
       invalid_refs
     end
 
-    def self.from_db(dir_path)
+    def self.from_db(dir_path, context: Unitsdb::Configuration.context_id)
+      context_id = context.to_sym
+      Unitsdb::Configuration.context(context_id)
+
       # If dir_path is a relative path, make it relative to the current working directory
       db_path = dir_path
       puts "Database directory path: #{db_path}"
@@ -407,7 +410,10 @@ module Unitsdb
         "unit_systems" => unit_systems_hash["unit_systems"],
       }.to_yaml
 
-      from_yaml(combined_yaml)
+      register_id = Lutaml::Model::GlobalRegister.lookup(context_id) ? context_id : nil
+      Lutaml::Model::GlobalContext.with_context(context_id) do
+        from_yaml(combined_yaml, register: register_id)
+      end
     end
 
     private
@@ -696,5 +702,7 @@ file_type)
         end
       end
     end
+
+    Configuration.register_model(self, id: :database)
   end
 end

@@ -2,7 +2,7 @@
 
 module Unitsdb
   module Configuration
-    extend self
+    module_function
 
     CONTEXT_ID = :unitsdb_v2
 
@@ -19,77 +19,40 @@ module Unitsdb
       @registered_models ||= {}
     end
 
-    def context(id = context_id)
-      context_id = id.to_sym
-      current_context = Lutaml::Model::GlobalContext.context(context_id)
-      return current_context if current_context
+    def find_context(id)
+      Lutaml::Model::GlobalContext.context(id.to_sym)
+    end
 
-      populate_context(id: context_id)
+    def resolve_type(type_name, context: context_id)
+      Lutaml::Model::GlobalContext.resolve_type(type_name, context.to_sym)
+    end
+
+    def context(id = context_id, force_populate: false)
+      return find_context(id) if find_context(id) && !force_populate && populated_for(id)
+
+      populate_context(id: id)
     end
 
     def populate_context(id: context_id, fallback_to: [:default], substitutions: [])
-      context_id = id.to_sym
-      registry = build_registry
+      Lutaml::Model::GlobalContext.unregister_context(id) if find_context(id)
 
-      existing_context = Lutaml::Model::GlobalContext.context(context_id)
-      Lutaml::Model::GlobalContext.unregister_context(context_id) if existing_context
-      resolved_substitutions = resolve_substitutions(
-        substitutions,
-        registry: registry,
-        fallback_to: fallback_to,
-        resolution_context_id: :"#{context_id}_substitution_resolution",
-      )
-
+      opts = { registry: build_registry, fallback_to: fallback_to, id: id }
       context = Lutaml::Model::GlobalContext.create_context(
-        id: context_id,
-        registry: registry,
-        fallback_to: fallback_to,
-        substitutions: resolved_substitutions,
+        substitutions: resolve_substitutions(substitutions, **opts),
+        **opts,
       )
+      populated_for(id, value: true)
       context
     end
 
-    def register(id: context_id, fallback: [:default])
-      register_id = id.to_sym
-      current_register = Lutaml::Model::GlobalRegister.lookup(register_id)
-      return current_register if current_register
-
-      populate_register(id: register_id, fallback: fallback)
-    end
-
-    def populate_register(id: context_id, fallback: [:default], substitutions: [])
-      register_id = id.to_sym
-      registry = build_registry
-      existing_register = Lutaml::Model::GlobalRegister.lookup(register_id)
-      Lutaml::Model::GlobalRegister.remove(register_id) if existing_register
-
-      register = Lutaml::Model::Register.new(register_id, fallback: fallback)
-      registered_models.each do |model_id, klass|
-        register.register_model(klass, id: model_id)
-      end
-      resolve_substitutions(
-        substitutions,
-        registry: registry,
-        fallback_to: fallback,
-        resolution_context_id: :"#{register_id}_register_substitution_resolution",
-      ).each do |substitution|
-        register.register_global_type_substitution(**substitution)
-      end
-
-      Lutaml::Model::GlobalRegister.register(register)
-      register
-    end
-
-    private
-
-    def resolve_substitutions(substitutions, registry:, fallback_to:, resolution_context_id:)
+    def resolve_substitutions(substitutions, registry:, fallback_to:, id:)
       resolution_context = Lutaml::Model::TypeContext.derived(
-        id: resolution_context_id,
+        id: "#{id}_substitution_resolution",
         registry: registry,
         fallback_to: fallback_to,
       )
 
-      Array(substitutions).map do |substitution|
+      substitutions&.map do |substitution|
         from_key = substitution[:from_type] || substitution[:from]
         to_key = substitution[:to_type] || substitution[:to]
 
@@ -108,10 +71,13 @@ module Unitsdb
 
     def build_registry
       registry = Lutaml::Model::TypeRegistry.new
-      registered_models.each do |model_id, klass|
-        registry.register(model_id, klass)
-      end
+      registered_models.each { |model_id, klass| registry.register(model_id, klass) }
       registry
+    end
+
+    def populated_for(context_id, value: false)
+      @populated_for ||= {}
+      @populated_for[context_id.to_sym] ||= value
     end
   end
 end

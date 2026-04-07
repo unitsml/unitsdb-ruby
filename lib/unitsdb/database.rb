@@ -290,7 +290,7 @@ module Unitsdb
       invalid_refs
     end
 
-    def self.from_db(dir_path, context: Unitsdb::Configuration.context_id)
+    def self.from_db(dir_path, context: Unitsdb::Configuration.context.id)
       context_id = context.to_sym
       Unitsdb::Configuration.context(context_id)
 
@@ -410,9 +410,8 @@ module Unitsdb
         "unit_systems" => unit_systems_hash["unit_systems"],
       }.to_yaml
 
-      register_id = Lutaml::Model::GlobalRegister.lookup(context_id) ? context_id : nil
       Lutaml::Model::GlobalContext.with_context(context_id) do
-        from_yaml(combined_yaml, register: register_id)
+        from_yaml(combined_yaml, register: context_id)
       end
     end
 
@@ -622,8 +621,7 @@ module Unitsdb
       end
     end
 
-    def validate_reference(ref_id, ref_type, ref_path, registry, invalid_refs,
-file_type)
+    def validate_reference(ref_id, ref_type, ref_path, registry, invalid_refs, file_type)
       # Handle references that are objects with id and type (could be a hash or an object)
       if ref_id.respond_to?(:id) && ref_id.respond_to?(:type)
         id = ref_id.id
@@ -702,7 +700,7 @@ file_type)
         end
       end
     end
-
-    Configuration.register_model(self, id: :database)
   end
+
+  Configuration.register_model(Database, id: :database)
 end

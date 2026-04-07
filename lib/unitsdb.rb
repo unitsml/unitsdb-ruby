@@ -57,11 +57,10 @@ module Unitsdb
     end
 
     # Returns a pre-loaded Database instance from the bundled data
-    def database(context: Configuration.context_id)
+    def database(context: Configuration.context.id)
       context_id = context.to_sym
-      Configuration.context(context_id)
-
-      databases[context_id] ||= Database.from_db(data_dir, context: context_id)
+      klass = Configuration.resolve_type(:database, context: context_id)
+      databases[context_id] ||= klass.from_db(data_dir, context: context_id)
     end
 
     private

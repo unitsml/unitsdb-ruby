@@ -11,4 +11,6 @@ module Unitsdb
     attribute :type, :string, values: %w[normative informative]
     attribute :authority, :string
   end
+
+  Configuration.register_model(ExternalReference, id: :external_reference)
 end

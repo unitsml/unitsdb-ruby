@@ -28,6 +28,7 @@ module Unitsdb
       "ucum:base-unit:code:#{code_sensitive}"
     end
   end
+  Configuration.register_model(UcumBaseUnit, id: :ucum_base_unit)
 
   #  <prefix Code="Y" CODE="YA">
   #   <name>yotta</name>
@@ -46,6 +47,7 @@ module Unitsdb
       map_content to: :content
     end
   end
+  Configuration.register_model(UcumPrefixValue, id: :ucum_prefix_value)
 
   class UcumPrefix < Lutaml::Model::Serializable
     attribute :code_sensitive, :string
@@ -67,6 +69,7 @@ module Unitsdb
       "ucum:prefix:code:#{code_sensitive}"
     end
   end
+  Configuration.register_model(UcumPrefix, id: :ucum_prefix)
 
   #  <unit Code="10*" CODE="10*" isMetric="no" class="dimless">
   #   <name>the number ten for arbitrary powers</name>
@@ -114,6 +117,7 @@ module Unitsdb
       map_attribute "Unit", to: :unit_sensitive
     end
   end
+  Configuration.register_model(UcumUnitValueFunction, id: :ucum_unit_value_function)
 
   class UcumUnitValue < Lutaml::Model::Serializable
     attribute :unit_sensitive, :string
@@ -131,6 +135,7 @@ module Unitsdb
       map_content to: :content
     end
   end
+  Configuration.register_model(UcumUnitValue, id: :ucum_unit_value)
 
   class UcumUnit < Lutaml::Model::Serializable
     attribute :code_sensitive, :string
@@ -165,6 +170,7 @@ module Unitsdb
       "ucum:unit:#{k}:code:#{code_sensitive}"
     end
   end
+  Configuration.register_model(UcumUnit, id: :ucum_unit)
 
   class UcumNamespace < Lutaml::Xml::Namespace
     uri "http://unitsofmeasure.org/ucum-essence"
@@ -199,4 +205,5 @@ module Unitsdb
 
     # No adapter registration needed
   end
+  Configuration.register_model(UcumFile, id: :ucum_file)
 end

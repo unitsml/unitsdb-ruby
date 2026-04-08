@@ -8,4 +8,6 @@ module Unitsdb
     attribute :version, :string
     attribute :dimensions, Dimension, collection: true
   end
+
+  Configuration.register_model(Dimensions, id: :dimensions)
 end

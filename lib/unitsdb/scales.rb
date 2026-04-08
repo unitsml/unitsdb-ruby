@@ -7,4 +7,6 @@ module Unitsdb
     attribute :version, :string
     attribute :scales, Scale, collection: true
   end
+
+  Configuration.register_model(Scales, id: :scales)
 end

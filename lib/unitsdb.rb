@@ -3,10 +3,12 @@
 require "lutaml/model"
 
 module Unitsdb
-  autoload :Cli, "unitsdb/cli"
+  unless RUBY_ENGINE == "opal"
+    autoload :Cli, "unitsdb/cli"
+    autoload :Commands, "unitsdb/commands"
+  end
   autoload :Config, "unitsdb/config"
   autoload :Configuration, "unitsdb/configuration"
-  autoload :Commands, "unitsdb/commands"
   autoload :Database, "unitsdb/database"
   autoload :Dimension, "unitsdb/dimension"
   autoload :DimensionDetails, "unitsdb/dimension_details"

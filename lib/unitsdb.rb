@@ -1,14 +1,13 @@
 # frozen_string_literal: true
 
 require "lutaml/model"
+require "unitsdb/configuration"
 
 module Unitsdb
   unless RUBY_ENGINE == "opal"
     autoload :Cli, "unitsdb/cli"
     autoload :Commands, "unitsdb/commands"
   end
-  autoload :Config, "unitsdb/config"
-  autoload :Configuration, "unitsdb/configuration"
   autoload :Database, "unitsdb/database"
   autoload :Dimension, "unitsdb/dimension"
   autoload :DimensionDetails, "unitsdb/dimension_details"

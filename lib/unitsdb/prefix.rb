@@ -23,4 +23,6 @@ module Unitsdb
     attribute :power, :integer
     attribute :references, ExternalReference, collection: true
   end
+
+  Configuration.register_model(Prefix, id: :prefix)
 end

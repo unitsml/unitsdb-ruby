@@ -8,4 +8,6 @@ module Unitsdb
     attribute :unit_reference, UnitReference
     attribute :prefix_reference, PrefixReference
   end
+
+  Configuration.register_model(RootUnitReference, id: :root_unit_reference)
 end

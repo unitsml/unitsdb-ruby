@@ -50,4 +50,6 @@ module Unitsdb
     attribute :references, ExternalReference, collection: true
     attribute :scale_reference, ScaleReference
   end
+
+  Configuration.register_model(Unit, id: :unit)
 end

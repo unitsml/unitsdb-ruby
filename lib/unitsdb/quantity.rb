@@ -12,4 +12,6 @@ module Unitsdb
     attribute :dimension_reference, DimensionReference
     attribute :references, ExternalReference, collection: true
   end
+
+  Configuration.register_model(Quantity, id: :quantity)
 end

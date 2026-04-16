@@ -11,4 +11,6 @@ module Unitsdb
     attribute :mathml, :string
     attribute :unicode, :string
   end
+
+  Configuration.register_model(SymbolPresentations, id: :symbol_presentations)
 end

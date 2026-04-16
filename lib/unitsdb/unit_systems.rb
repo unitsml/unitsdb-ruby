@@ -8,4 +8,6 @@ module Unitsdb
     attribute :version, :string
     attribute :unit_systems, UnitSystem, collection: true
   end
+
+  Configuration.register_model(UnitSystems, id: :unit_systems)
 end

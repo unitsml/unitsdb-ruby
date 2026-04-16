@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 require "lutaml/model"
+require "unitsdb/configuration"
 
 module Unitsdb
-  autoload :Cli, "unitsdb/cli"
-  autoload :Config, "unitsdb/config"
-  autoload :Commands, "unitsdb/commands"
+  unless RUBY_ENGINE == "opal"
+    autoload :Cli, "unitsdb/cli"
+    autoload :Commands, "unitsdb/commands"
+  end
   autoload :Database, "unitsdb/database"
   autoload :Dimension, "unitsdb/dimension"
   autoload :DimensionDetails, "unitsdb/dimension_details"
@@ -56,11 +58,17 @@ module Unitsdb
     end
 
     # Returns a pre-loaded Database instance from the bundled data
-    def database
-      @database ||= Database.from_db(data_dir)
+    def database(context: Configuration.context.id)
+      context_id = context.to_sym
+      klass = Configuration.resolve_type(:database, context: context_id)
+      databases[context_id] ||= klass.from_db(data_dir, context: context_id)
     end
 
     private
+
+    def databases
+      @databases ||= {}
+    end
 
     def gem_dir
       @gem_dir ||= File.dirname(__dir__)

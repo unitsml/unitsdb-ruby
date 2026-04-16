@@ -4,6 +4,15 @@ module Unitsdb
   class Database < Lutaml::Model::Serializable
     # model Config.model_for(:units)
 
+    DATABASE_FILES = {
+      "prefixes" => "prefixes.yaml",
+      "dimensions" => "dimensions.yaml",
+      "units" => "units.yaml",
+      "quantities" => "quantities.yaml",
+      "unit_systems" => "unit_systems.yaml",
+    }.freeze
+    SUPPORTED_SCHEMA_VERSION = "2.0.0"
+
     attribute :schema_version, :string
     attribute :version, :string
     attribute :units, Unit, collection: true
@@ -290,25 +299,18 @@ module Unitsdb
       invalid_refs
     end
 
-    def self.from_db(dir_path)
-      # If dir_path is a relative path, make it relative to the current working directory
-      db_path = dir_path
-      puts "Database directory path: #{db_path}"
+    def self.from_db(dir_path, context: Unitsdb::Configuration.context.id)
+      context_id = context.to_sym
+      Unitsdb::Configuration.context(context_id)
 
-      # Check if the directory exists
+      db_path = File.expand_path(dir_path.to_s)
       unless Dir.exist?(db_path)
         raise Errors::DatabaseNotFoundError,
               "Database directory not found: #{db_path}"
       end
 
-      # Define required files
-      required_files = %w[prefixes.yaml dimensions.yaml units.yaml
-                          quantities.yaml unit_systems.yaml]
-      yaml_files = required_files.map { |file| File.join(dir_path, file) }
-
-      # Check if all required files exist
-      missing_files = required_files.reject do |file|
-        File.exist?(File.join(dir_path, file))
+      missing_files = DATABASE_FILES.values.reject do |filename|
+        File.exist?(File.join(db_path, filename))
       end
 
       if missing_files.any?
@@ -316,99 +318,88 @@ module Unitsdb
               "Missing required database files: #{missing_files.join(', ')}"
       end
 
-      # Ensure we have path properly joined with filenames
-      prefixes_yaml = yaml_files[0]
-      dimensions_yaml = yaml_files[1]
-      units_yaml = yaml_files[2]
-      quantities_yaml = yaml_files[3]
-      unit_systems_yaml = yaml_files[4]
+      documents = load_database_documents(db_path)
+      schema_version = validate_schema_versions!(documents)
+      combined_hash = build_database_hash(documents, schema_version)
 
-      # Debug paths
-      if ENV["DEBUG"]
-        puts "[UnitsDB] Loading YAML files from directory: #{dir_path}"
-        puts "  - #{prefixes_yaml}"
-        puts "  - #{dimensions_yaml}"
-        puts "  - #{units_yaml}"
-        puts "  - #{quantities_yaml}"
-        puts "  - #{unit_systems_yaml}"
+      Lutaml::Model::GlobalContext.with_context(context_id) do
+        from_hash(combined_hash, register: context_id)
       end
-
-      # Load YAML files with better error handling
-      begin
-        prefixes_hash = YAML.safe_load_file(prefixes_yaml)
-        dimensions_hash = YAML.safe_load_file(dimensions_yaml)
-        units_hash = YAML.safe_load_file(units_yaml)
-        quantities_hash = YAML.safe_load_file(quantities_yaml)
-        unit_systems_hash = YAML.safe_load_file(unit_systems_yaml)
-      rescue Errno::ENOENT => e
-        raise Errors::DatabaseFileNotFoundError,
-              "Failed to read database file: #{e.message}"
-      rescue Psych::SyntaxError => e
-        raise Errors::DatabaseFileInvalidError,
-              "Invalid YAML in database file: #{e.message}"
-      rescue StandardError => e
-        raise Errors::DatabaseLoadError, "Error loading database: #{e.message}"
-      end
-
-      # Verify all files have schema_version field
-      missing_schema = []
-      missing_schema << "prefixes.yaml" unless prefixes_hash.key?("schema_version")
-      missing_schema << "dimensions.yaml" unless dimensions_hash.key?("schema_version")
-      missing_schema << "units.yaml" unless units_hash.key?("schema_version")
-      missing_schema << "quantities.yaml" unless quantities_hash.key?("schema_version")
-      missing_schema << "unit_systems.yaml" unless unit_systems_hash.key?("schema_version")
-
-      if missing_schema.any?
-        raise Errors::DatabaseFileInvalidError,
-              "Missing schema_version in files: #{missing_schema.join(', ')}"
-      end
-
-      # Extract versions from each file
-      prefixes_version = prefixes_hash["schema_version"]
-      dimensions_version = dimensions_hash["schema_version"]
-      units_version = units_hash["schema_version"]
-      quantities_version = quantities_hash["schema_version"]
-      unit_systems_version = unit_systems_hash["schema_version"]
-
-      # Check if all versions match
-      versions = [
-        prefixes_version,
-        dimensions_version,
-        units_version,
-        quantities_version,
-        unit_systems_version,
-      ]
-
-      unless versions.uniq.size == 1
-        version_info = {
-          "prefixes.yaml" => prefixes_version,
-          "dimensions.yaml" => dimensions_version,
-          "units.yaml" => units_version,
-          "quantities.yaml" => quantities_version,
-          "unit_systems.yaml" => unit_systems_version,
-        }
-        raise Errors::VersionMismatchError,
-              "Version mismatch in database files: #{version_info.inspect}"
-      end
-
-      # Check if the version is supported
-      version = versions.first
-      unless version == "2.0.0"
-        raise Errors::UnsupportedVersionError,
-              "Unsupported database version: #{version}. Only version 2.0.0 is supported."
-      end
-
-      combined_yaml = {
-        "schema_version" => prefixes_version,
-        "prefixes" => prefixes_hash["prefixes"],
-        "dimensions" => dimensions_hash["dimensions"],
-        "units" => units_hash["units"],
-        "quantities" => quantities_hash["quantities"],
-        "unit_systems" => unit_systems_hash["unit_systems"],
-      }.to_yaml
-
-      from_yaml(combined_yaml)
     end
+
+    def self.load_database_documents(db_path)
+      puts "[UnitsDB] Loading YAML files from directory: #{db_path}" if ENV["DEBUG"]
+      DATABASE_FILES.transform_values do |filename|
+        puts "  - #{File.join(db_path, filename)}" if ENV["DEBUG"]
+        load_database_yaml(File.join(db_path, filename), filename)
+      end
+    end
+
+    def self.load_database_yaml(path, filename)
+      document = YAML.safe_load_file(path)
+
+      unless document.is_a?(Hash)
+        raise Errors::DatabaseFileInvalidError,
+              "Invalid YAML structure in #{filename}: expected a mapping"
+      end
+
+      document
+    rescue Errno::ENOENT => e
+      raise Errors::DatabaseFileNotFoundError,
+            "Failed to read database file: #{e.message}"
+    rescue Psych::SyntaxError => e
+      raise Errors::DatabaseFileInvalidError,
+            "Invalid YAML in database file: #{e.message}"
+    rescue Errors::DatabaseError
+      raise
+    rescue StandardError => e
+      raise Errors::DatabaseLoadError,
+            "Error loading database file #{filename}: #{e.message}"
+    end
+    private_class_method :load_database_documents, :load_database_yaml
+
+    def self.validate_schema_versions!(documents)
+      versions = DATABASE_FILES.each_with_object({}) do |(collection_key, filename), result|
+        document = documents.fetch(collection_key)
+        result[filename] = document.fetch("schema_version")
+      rescue KeyError
+        raise Errors::DatabaseFileInvalidError,
+              "Missing schema_version in #{filename}"
+      end
+
+      unless versions.values.uniq.size == 1
+        raise Errors::VersionMismatchError,
+              "Version mismatch in database files: #{versions.inspect}"
+      end
+
+      version = versions.values.first
+      unless version == SUPPORTED_SCHEMA_VERSION
+        raise Errors::UnsupportedVersionError,
+              "Unsupported database version: #{version}. Only version #{SUPPORTED_SCHEMA_VERSION} is supported."
+      end
+
+      version
+    end
+
+    def self.build_database_hash(documents, schema_version)
+      {
+        "schema_version" => schema_version,
+      }.merge(
+        DATABASE_FILES.keys.to_h do |collection_key|
+          document = documents.fetch(collection_key)
+          [collection_key, fetch_collection!(document, collection_key)]
+        end,
+      )
+    end
+
+    def self.fetch_collection!(document, collection_key)
+      document.fetch(collection_key)
+    rescue KeyError
+      raise Errors::DatabaseFileInvalidError,
+            "Missing #{collection_key} collection in #{DATABASE_FILES.fetch(collection_key)}"
+    end
+    private_class_method :validate_schema_versions!, :build_database_hash,
+                         :fetch_collection!
 
     private
 
@@ -616,8 +607,7 @@ module Unitsdb
       end
     end
 
-    def validate_reference(ref_id, ref_type, ref_path, registry, invalid_refs,
-file_type)
+    def validate_reference(ref_id, ref_type, ref_path, registry, invalid_refs, file_type)
       # Handle references that are objects with id and type (could be a hash or an object)
       if ref_id.respond_to?(:id) && ref_id.respond_to?(:type)
         id = ref_id.id
@@ -697,4 +687,6 @@ file_type)
       end
     end
   end
+
+  Configuration.register_model(Database, id: :database)
 end

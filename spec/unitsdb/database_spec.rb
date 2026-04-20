@@ -82,9 +82,66 @@ RSpec.describe Unitsdb::Database do
     end
   end
 
+  it "raises a helpful error when schema_version is missing" do
+    Dir.mktmpdir do |tmpdir|
+      copy_database_files(tmpdir)
+      update_database_file(tmpdir, "units.yaml") do |units_hash|
+        units_hash.delete("schema_version")
+      end
+
+      expect do
+        described_class.from_db(tmpdir)
+      end.to raise_error(
+        Unitsdb::Errors::DatabaseFileInvalidError,
+        /Missing schema_version in units\.yaml/,
+      )
+    end
+  end
+
+  it "raises a helpful error when schema versions do not match" do
+    Dir.mktmpdir do |tmpdir|
+      copy_database_files(tmpdir)
+      update_database_file(tmpdir, "quantities.yaml") do |quantities_hash|
+        quantities_hash["schema_version"] = "2.0.1"
+      end
+
+      expect do
+        described_class.from_db(tmpdir)
+      end.to raise_error(
+        Unitsdb::Errors::VersionMismatchError,
+        /Version mismatch in database files: .*"quantities\.yaml" => "2\.0\.1"/,
+      )
+    end
+  end
+
+  it "raises a helpful error when schema version is unsupported" do
+    Dir.mktmpdir do |tmpdir|
+      copy_database_files(tmpdir)
+      database_files.each do |filename|
+        update_database_file(tmpdir, filename) do |document|
+          document["schema_version"] = "3.0.0"
+        end
+      end
+
+      expect do
+        described_class.from_db(tmpdir)
+      end.to raise_error(
+        Unitsdb::Errors::UnsupportedVersionError,
+        /Unsupported database version: 3\.0\.0\. Only version 2\.0\.0 is supported\./,
+      )
+    end
+  end
+
   def copy_database_files(target_dir)
     database_files.each do |filename|
       FileUtils.cp(File.join(dir_path, filename), File.join(target_dir, filename))
     end
+  end
+
+  def update_database_file(tmpdir, filename)
+    file_path = File.join(tmpdir, filename)
+    document = YAML.safe_load_file(file_path)
+    yield document
+    File.write(file_path, document.to_yaml)
   end
 end

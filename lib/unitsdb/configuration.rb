@@ -19,6 +19,27 @@ module Unitsdb
       @registered_models ||= {}
     end
 
+    def register(id = context_id)
+      explicit_registers[id.to_sym]
+    end
+
+    def populate_register(id: context_id, fallback_to: [:default], substitutions: [])
+      register_id = id.to_sym
+      context(register_id)
+
+      model_register = Lutaml::Model::Register.new(register_id, fallback: fallback_to)
+      resolve_substitutions(
+        substitutions,
+        registry: build_registry,
+        fallback_to: fallback_to,
+        id: "#{register_id}_register",
+      ).each do |substitution|
+        model_register.register_global_type_substitution(**substitution)
+      end
+
+      explicit_registers[register_id] = Lutaml::Model::GlobalRegister.register(model_register)
+    end
+
     def find_context(id)
       Lutaml::Model::GlobalContext.context(id.to_sym)
     end
@@ -28,7 +49,8 @@ module Unitsdb
     end
 
     def context(id = context_id, force_populate: false)
-      return find_context(id) if find_context(id) && !force_populate && populated_for(id)
+      existing = find_context(id)
+      return existing if existing && !force_populate && populated_for(id)
 
       populate_context(id: id)
     end
@@ -78,6 +100,10 @@ module Unitsdb
     def populated_for(context_id, value: false)
       @populated_for ||= {}
       @populated_for[context_id.to_sym] ||= value
+    end
+
+    def explicit_registers
+      @explicit_registers ||= {}
     end
   end
 end

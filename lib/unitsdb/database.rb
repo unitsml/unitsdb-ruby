@@ -323,7 +323,11 @@ module Unitsdb
       combined_hash = build_database_hash(documents, schema_version)
 
       Lutaml::Model::GlobalContext.with_context(context_id) do
-        from_hash(combined_hash, register: context_id)
+        if Unitsdb::Configuration.register(context_id)
+          from_hash(combined_hash, register: context_id)
+        else
+          from_hash(combined_hash)
+        end
       end
     end
 

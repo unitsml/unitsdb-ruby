@@ -109,7 +109,7 @@ RSpec.describe Unitsdb::Database do
         described_class.from_db(tmpdir)
       end.to raise_error(
         Unitsdb::Errors::VersionMismatchError,
-        /Version mismatch in database files: .*"quantities\.yaml" => "2\.0\.1"/,
+        /Version mismatch in database files: .*"quantities\.yaml"\s*=>\s*"2\.0\.1"/,
       )
     end
   end

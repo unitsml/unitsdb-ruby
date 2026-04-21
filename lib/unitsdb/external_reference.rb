@@ -12,5 +12,5 @@ module Unitsdb
     attribute :authority, :string
   end
 
-  Configuration.register_model(ExternalReference, id: :external_reference)
+  Config.register_model(ExternalReference, id: :external_reference)
 end

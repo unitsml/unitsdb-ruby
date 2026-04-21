@@ -20,5 +20,5 @@ module Unitsdb
     attribute :prefixes, Prefix, collection: true
   end
 
-  Configuration.register_model(Prefixes, id: :prefixes)
+  Config.register_model(Prefixes, id: :prefixes)
 end

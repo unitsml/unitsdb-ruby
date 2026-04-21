@@ -13,5 +13,5 @@ module Unitsdb
     attribute :references, ExternalReference, collection: true
   end
 
-  Configuration.register_model(Quantity, id: :quantity)
+  Config.register_model(Quantity, id: :quantity)
 end

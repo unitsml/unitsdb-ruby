@@ -15,5 +15,5 @@ module Unitsdb
     end
   end
 
-  Configuration.register_model(LocalizedString, id: :localized_string)
+  Config.register_model(LocalizedString, id: :localized_string)
 end

@@ -8,5 +8,5 @@ module Unitsdb
     attribute :scales, Scale, collection: true
   end
 
-  Configuration.register_model(Scales, id: :scales)
+  Config.register_model(Scales, id: :scales)
 end

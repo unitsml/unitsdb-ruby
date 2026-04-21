@@ -11,5 +11,5 @@ module Unitsdb
     attribute :properties, ScaleProperties
   end
 
-  Configuration.register_model(Scale, id: :scale)
+  Config.register_model(Scale, id: :scale)
 end

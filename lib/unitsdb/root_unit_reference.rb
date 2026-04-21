@@ -9,5 +9,5 @@ module Unitsdb
     attribute :prefix_reference, PrefixReference
   end
 
-  Configuration.register_model(RootUnitReference, id: :root_unit_reference)
+  Config.register_model(RootUnitReference, id: :root_unit_reference)
 end

@@ -6,5 +6,5 @@ module Unitsdb
     attribute :type, :string
   end
 
-  Configuration.register_model(ScaleReference, id: :scale_reference)
+  Config.register_model(ScaleReference, id: :scale_reference)
 end

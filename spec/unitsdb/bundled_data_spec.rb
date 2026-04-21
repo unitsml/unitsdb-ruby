@@ -33,76 +33,33 @@ RSpec.describe Unitsdb do
   end
 
   describe ".database" do
-    it "returns a pre-loaded Database instance" do
+    around do |example|
+      described_class.instance_variable_set(:@databases, nil)
+      Lutaml::Model::GlobalContext.reset!
+      example.run
+    ensure
+      described_class.instance_variable_set(:@databases, nil)
+      Lutaml::Model::GlobalContext.reset!
+    end
+
+    it "boots successfully on first access and caches the bundled database" do
       db = described_class.database
+
       expect(db).to be_a(Unitsdb::Database)
-    end
-
-    it "loads all entity collections" do
-      db = described_class.database
-      expect(db.units).to be_a(Array)
-      expect(db.prefixes).to be_a(Array)
-      expect(db.dimensions).to be_a(Array)
-      expect(db.quantities).to be_a(Array)
-      expect(db.unit_systems).to be_a(Array)
-    end
-
-    it "has a valid schema version" do
-      db = described_class.database
       expect(db.schema_version).to eq("2.0.0")
+      expect(described_class.database).to equal(db)
     end
 
-    it "populates units with known entities" do
+    it "loads known entities across each bundled collection" do
       db = described_class.database
-      unit_ids = db.units.flat_map { |u| u.identifiers.map(&:id) }.compact.uniq
-      expect(unit_ids).to include("NISTu1") # meter
-    end
 
-    it "populates prefixes with known entities" do
-      db = described_class.database
-      prefix_ids = db.prefixes.flat_map do |p|
-        p.identifiers.map(&:id)
-      end.compact.uniq
-      expect(prefix_ids).to include("NISTp10_3") # kilo
-    end
-
-    it "populates dimensions with known entities" do
-      db = described_class.database
-      dimension_ids = db.dimensions.flat_map do |d|
-        d.identifiers.map(&:id)
-      end.compact.uniq
-      expect(dimension_ids).to include("NISTd1") # length
-    end
-
-    it "populates quantities with known entities" do
-      db = described_class.database
-      quantity_ids = db.quantities.flat_map do |q|
-        q.identifiers.map(&:id)
-      end.compact.uniq
-      expect(quantity_ids).to include("NISTq1") # length
-    end
-
-    it "populates unit_systems with known entities" do
-      db = described_class.database
-      system_ids = db.unit_systems.flat_map do |s|
-        s.identifiers.map(&:id)
-      end.compact.uniq
-      expect(system_ids).to include("SI_base") # SI
-    end
-
-    it "has non-empty collections" do
-      db = described_class.database
-      expect(db.units).not_to be_empty
-      expect(db.prefixes).not_to be_empty
-      expect(db.dimensions).not_to be_empty
-      expect(db.quantities).not_to be_empty
-      expect(db.unit_systems).not_to be_empty
-    end
-
-    it "caches the database instance" do
-      db1 = described_class.database
-      db2 = described_class.database
-      expect(db1.object_id).to eq(db2.object_id)
+      aggregate_failures do
+        expect(db.get_by_id(id: "NISTu1")).to be_a(Unitsdb::Unit)
+        expect(db.get_by_id(id: "NISTp10_3")).to be_a(Unitsdb::Prefix)
+        expect(db.get_by_id(id: "NISTd1")).to be_a(Unitsdb::Dimension)
+        expect(db.get_by_id(id: "NISTq1")).to be_a(Unitsdb::Quantity)
+        expect(db.get_by_id(id: "SI_base")).to be_a(Unitsdb::UnitSystem)
+      end
     end
   end
 

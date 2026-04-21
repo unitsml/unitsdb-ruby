@@ -10,5 +10,5 @@ module Unitsdb
     attribute :ratio, :boolean
   end
 
-  Configuration.register_model(ScaleProperties, id: :scale_properties)
+  Config.register_model(ScaleProperties, id: :scale_properties)
 end

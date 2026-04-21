@@ -8,5 +8,5 @@ module Unitsdb
     attribute :quantities, Quantity, collection: true
   end
 
-  Configuration.register_model(Quantities, id: :quantities)
+  Config.register_model(Quantities, id: :quantities)
 end

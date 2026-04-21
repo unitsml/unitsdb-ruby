@@ -9,5 +9,5 @@ module Unitsdb
     attribute :dimensions, Dimension, collection: true
   end
 
-  Configuration.register_model(Dimensions, id: :dimensions)
+  Config.register_model(Dimensions, id: :dimensions)
 end

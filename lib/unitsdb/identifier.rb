@@ -6,5 +6,5 @@ module Unitsdb
     attribute :type, :string
   end
 
-  Configuration.register_model(Identifier, id: :identifier)
+  Config.register_model(Identifier, id: :identifier)
 end

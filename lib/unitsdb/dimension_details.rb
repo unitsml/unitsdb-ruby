@@ -17,5 +17,5 @@ module Unitsdb
     attribute :symbols, SymbolPresentations, collection: true
   end
 
-  Configuration.register_model(DimensionDetails, id: :dimension_details)
+  Config.register_model(DimensionDetails, id: :dimension_details)
 end

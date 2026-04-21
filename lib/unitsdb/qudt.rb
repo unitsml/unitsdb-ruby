@@ -18,7 +18,7 @@ module Unitsdb
       "qudt:unit:#{uri}"
     end
   end
-  Configuration.register_model(QudtUnit, id: :qudt_unit)
+  Config.register_model(QudtUnit, id: :qudt_unit)
 
   # QUDT QuantityKind from quantitykinds vocabulary
   # Example: http://qudt.org/vocab/quantitykind/Length
@@ -34,7 +34,7 @@ module Unitsdb
       "qudt:quantitykind:#{uri}"
     end
   end
-  Configuration.register_model(QudtQuantityKind, id: :qudt_quantity_kind)
+  Config.register_model(QudtQuantityKind, id: :qudt_quantity_kind)
 
   # QUDT DimensionVector from dimensionvectors vocabulary
   # Example: http://qudt.org/vocab/dimensionvector/A0E0L1I0M0H0T0D0
@@ -54,7 +54,7 @@ module Unitsdb
       "qudt:dimensionvector:#{uri}"
     end
   end
-  Configuration.register_model(QudtDimensionVector, id: :qudt_dimension_vector)
+  Config.register_model(QudtDimensionVector, id: :qudt_dimension_vector)
 
   # QUDT SystemOfUnits from sou vocabulary
   # Example: http://qudt.org/vocab/sou/SI
@@ -68,7 +68,7 @@ module Unitsdb
       "qudt:sou:#{uri}"
     end
   end
-  Configuration.register_model(QudtSystemOfUnits, id: :qudt_system_of_units)
+  Config.register_model(QudtSystemOfUnits, id: :qudt_system_of_units)
 
   # QUDT Prefix from prefixes vocabulary
   # Example: http://qudt.org/vocab/prefix/Kilo
@@ -87,7 +87,7 @@ module Unitsdb
       "qudt:prefix:#{uri}"
     end
   end
-  Configuration.register_model(QudtPrefix, id: :qudt_prefix)
+  Config.register_model(QudtPrefix, id: :qudt_prefix)
 
   # Container for all QUDT vocabularies
   class QudtVocabularies

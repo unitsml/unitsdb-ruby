@@ -11,5 +11,5 @@ module Unitsdb
     attribute :references, ExternalReference, collection: true
   end
 
-  Configuration.register_model(UnitSystem, id: :unit_system)
+  Config.register_model(UnitSystem, id: :unit_system)
 end

@@ -299,9 +299,9 @@ module Unitsdb
       invalid_refs
     end
 
-    def self.from_db(dir_path, context: Unitsdb::Configuration.context.id)
+    def self.from_db(dir_path, context: Unitsdb::Config.context_id)
       context_id = context.to_sym
-      Unitsdb::Configuration.context(context_id)
+      Unitsdb::Config.context(context_id)
 
       db_path = File.expand_path(dir_path.to_s)
       unless Dir.exist?(db_path)
@@ -323,7 +323,7 @@ module Unitsdb
       combined_hash = build_database_hash(documents, schema_version)
 
       Lutaml::Model::GlobalContext.with_context(context_id) do
-        if Unitsdb::Configuration.register(context_id)
+        if Unitsdb::Config.register(context_id)
           from_hash(combined_hash, register: context_id)
         else
           from_hash(combined_hash)
@@ -692,5 +692,5 @@ module Unitsdb
     end
   end
 
-  Configuration.register_model(Database, id: :database)
+  Config.register_model(Database, id: :database)
 end

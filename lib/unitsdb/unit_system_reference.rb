@@ -6,5 +6,5 @@ module Unitsdb
     attribute :type, :string
   end
 
-  Configuration.register_model(UnitSystemReference, id: :unit_system_reference)
+  Config.register_model(UnitSystemReference, id: :unit_system_reference)
 end

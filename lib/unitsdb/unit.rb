@@ -51,5 +51,5 @@ module Unitsdb
     attribute :scale_reference, ScaleReference
   end
 
-  Configuration.register_model(Unit, id: :unit)
+  Config.register_model(Unit, id: :unit)
 end

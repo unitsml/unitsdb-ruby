@@ -44,5 +44,5 @@ module Unitsdb
     attribute :references, ExternalReference, collection: true
   end
 
-  Configuration.register_model(Dimension, id: :dimension)
+  Config.register_model(Dimension, id: :dimension)
 end

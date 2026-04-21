@@ -24,5 +24,5 @@ module Unitsdb
     attribute :references, ExternalReference, collection: true
   end
 
-  Configuration.register_model(Prefix, id: :prefix)
+  Config.register_model(Prefix, id: :prefix)
 end

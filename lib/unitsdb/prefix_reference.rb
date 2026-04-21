@@ -6,5 +6,5 @@ module Unitsdb
     attribute :type, :string
   end
 
-  Configuration.register_model(PrefixReference, id: :prefix_reference)
+  Config.register_model(PrefixReference, id: :prefix_reference)
 end

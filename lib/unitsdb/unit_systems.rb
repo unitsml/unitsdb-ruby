@@ -9,5 +9,5 @@ module Unitsdb
     attribute :unit_systems, UnitSystem, collection: true
   end
 
-  Configuration.register_model(UnitSystems, id: :unit_systems)
+  Config.register_model(UnitSystems, id: :unit_systems)
 end

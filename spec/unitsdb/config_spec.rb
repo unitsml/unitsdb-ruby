@@ -6,9 +6,9 @@ RSpec.describe Unitsdb::Config do
   let(:database_path) { File.join(__dir__, "../../data") }
 
   around do |example|
-    original_models = Unitsdb::Config.registered_models.dup
-    original_registers = Unitsdb::Config.explicit_registers.dup
-    original_legacy_models = Unitsdb::Config.models.dup
+    original_models = described_class.registered_models.dup
+    original_registers = described_class.explicit_registers.dup
+    original_legacy_models = described_class.models.dup
 
     Lutaml::Model::GlobalContext.reset!
     Unitsdb.instance_variable_set(:@databases, nil)
@@ -19,9 +19,9 @@ RSpec.describe Unitsdb::Config do
     rescue StandardError
       nil
     end
-    Unitsdb::Config.instance_variable_set(:@registered_models, original_models)
-    Unitsdb::Config.instance_variable_set(:@explicit_registers, original_registers)
-    Unitsdb::Config.instance_variable_set(:@models, original_legacy_models)
+    described_class.instance_variable_set(:@registered_models, original_models)
+    described_class.instance_variable_set(:@explicit_registers, original_registers)
+    described_class.instance_variable_set(:@models, original_legacy_models)
     Lutaml::Model::GlobalContext.reset!
     Unitsdb.instance_variable_set(:@databases, nil)
   end
@@ -80,12 +80,12 @@ RSpec.describe Unitsdb::Config do
 
   describe "compatibility" do
     it "keeps Unitsdb::Configuration as an alias of Config" do
-      expect(Unitsdb::Configuration).to be(Unitsdb::Config)
+      expect(Unitsdb::Configuration).to be(described_class)
       expect(Unitsdb::Configuration.respond_to?(:populate_register)).to be(true)
     end
 
     it "uses eagerly loaded core models without a bootstrap manifest" do
-      expect(Unitsdb::Config.const_defined?(:CORE_MODEL_CONSTANTS, false)).to be(false)
+      expect(described_class.const_defined?(:CORE_MODEL_CONSTANTS, false)).to be(false)
       expect(Unitsdb.respond_to?(:load_core_models!)).to be(false)
       expect(described_class.send(:build_registry)).to be_a(Lutaml::Model::TypeRegistry)
       expect(described_class.registered_models[:database]).to be(Unitsdb::Database)
@@ -99,7 +99,7 @@ RSpec.describe Unitsdb::Config do
       described_class.models = { unit: LegacyConfiguredUnit }
 
       expect(described_class.model_for(:unit)).to be(LegacyConfiguredUnit)
-      expect(Unitsdb::Config.registered_models[:unit]).to be(LegacyConfiguredUnit)
+      expect(described_class.registered_models[:unit]).to be(LegacyConfiguredUnit)
     end
   end
 

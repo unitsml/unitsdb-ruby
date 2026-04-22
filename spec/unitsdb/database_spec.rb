@@ -9,6 +9,15 @@ RSpec.describe Unitsdb::Database do
     %w[prefixes.yaml dimensions.yaml units.yaml quantities.yaml unit_systems.yaml]
   end
 
+  around do |example|
+    Lutaml::Model::GlobalContext.reset!
+    Unitsdb.instance_variable_set(:@databases, nil)
+    example.run
+  ensure
+    Lutaml::Model::GlobalContext.reset!
+    Unitsdb.instance_variable_set(:@databases, nil)
+  end
+
   it "parses the full unitsdb database" do
     parsed = described_class.from_db(dir_path)
     generated = parsed.to_yaml
@@ -40,14 +49,39 @@ RSpec.describe Unitsdb::Database do
   end
 
   it "does not write to stdout during a normal load" do
-    original_debug = ENV.fetch("DEBUG", nil)
-    ENV.delete("DEBUG")
+    original_debug = ENV.fetch("UNITSDB_DEBUG", nil)
+    ENV.delete("UNITSDB_DEBUG")
 
     output = capture_output { described_class.from_db(dir_path) }
 
     expect(output[:output]).to eq("")
   ensure
-    ENV["DEBUG"] = original_debug
+    ENV["UNITSDB_DEBUG"] = original_debug
+  end
+
+  it "preserves an externally managed non-default context during load" do
+    external_context = Lutaml::Model::GlobalContext.create_context(
+      id: :externally_managed_unitsdb,
+      registry: Unitsdb::Config.send(:build_registry),
+      fallback_to: [:default],
+      substitutions: [],
+    )
+
+    db = described_class.from_db(dir_path, context: :externally_managed_unitsdb)
+
+    expect(db).to be_a(described_class)
+    expect(Unitsdb::Config.find_context(:externally_managed_unitsdb)).to equal(external_context)
+  end
+
+  it "raises a helpful error when the database directory is empty" do
+    Dir.mktmpdir do |tmpdir|
+      expect do
+        described_class.from_db(tmpdir)
+      end.to raise_error(
+        Unitsdb::Errors::DatabaseFileNotFoundError,
+        /Missing required database files:/,
+      )
+    end
   end
 
   it "raises a helpful error when a database YAML file is not a mapping" do

@@ -67,7 +67,7 @@ module Unitsdb
 
       def context(id = context_id, force_populate: false)
         existing = find_context(id)
-        return existing if existing && !force_populate && populated_for(id)
+        return existing if existing && !force_populate && populated?(id)
 
         populate_context(id: id)
       end
@@ -80,7 +80,7 @@ module Unitsdb
           substitutions: resolve_substitutions(substitutions, **opts),
           **opts,
         )
-        populated_for(id, value: true)
+        mark_populated!(id)
         context
       end
 
@@ -91,7 +91,7 @@ module Unitsdb
           fallback_to: fallback_to,
         )
 
-        substitutions&.map do |substitution|
+        Array(substitutions).map do |substitution|
           from_key = substitution[:from_type] || substitution[:from]
           to_key = substitution[:to_type] || substitution[:to]
 
@@ -114,9 +114,13 @@ module Unitsdb
         registry
       end
 
-      def populated_for(context_id, value: false)
+      def populated?(context_id)
+        @populated_for&.[](context_id.to_sym)
+      end
+
+      def mark_populated!(context_id)
         @populated_for ||= {}
-        @populated_for[context_id.to_sym] ||= value
+        @populated_for[context_id.to_sym] = true
       end
 
       def explicit_registers
@@ -124,6 +128,4 @@ module Unitsdb
       end
     end
   end
-
-  Configuration = Config unless const_defined?(:Configuration, false)
 end

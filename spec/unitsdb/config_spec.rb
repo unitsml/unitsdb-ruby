@@ -9,6 +9,7 @@ RSpec.describe Unitsdb::Config do
     original_models = described_class.registered_models.dup
     original_registers = described_class.explicit_registers.dup
     original_legacy_models = described_class.models.dup
+    original_populated_for = described_class.instance_variable_get(:@populated_for)&.dup
 
     Lutaml::Model::GlobalContext.reset!
     Unitsdb.instance_variable_set(:@databases, nil)
@@ -22,6 +23,7 @@ RSpec.describe Unitsdb::Config do
     described_class.instance_variable_set(:@registered_models, original_models)
     described_class.instance_variable_set(:@explicit_registers, original_registers)
     described_class.instance_variable_set(:@models, original_legacy_models)
+    described_class.instance_variable_set(:@populated_for, original_populated_for)
     Lutaml::Model::GlobalContext.reset!
     Unitsdb.instance_variable_set(:@databases, nil)
   end
@@ -79,11 +81,6 @@ RSpec.describe Unitsdb::Config do
   end
 
   describe "compatibility" do
-    it "keeps Unitsdb::Configuration as an alias of Config" do
-      expect(Unitsdb::Configuration).to be(described_class)
-      expect(Unitsdb::Configuration.respond_to?(:populate_register)).to be(true)
-    end
-
     it "uses eagerly loaded core models without a bootstrap manifest" do
       expect(described_class.const_defined?(:CORE_MODEL_CONSTANTS, false)).to be(false)
       expect(Unitsdb.respond_to?(:load_core_models!)).to be(false)
@@ -103,6 +100,16 @@ RSpec.describe Unitsdb::Config do
     end
   end
 
+  describe ".context" do
+    it "rebuilds an existing context when forced" do
+      initial_context = described_class.context
+      rebuilt_context = described_class.context(force_populate: true)
+
+      expect(rebuilt_context).not_to equal(initial_context)
+      expect(described_class.find_context(described_class.context_id)).to equal(rebuilt_context)
+    end
+  end
+
   describe ".database integration" do
     it "does not auto-create third-party contexts" do
       expect(described_class).not_to receive(:context).with(:unitsml_ruby)
@@ -112,6 +119,28 @@ RSpec.describe Unitsdb::Config do
       allow(Unitsdb::Database).to receive(:from_db).and_return(:foreign_context_db)
 
       expect(Unitsdb.database(context: :unitsml_ruby)).to eq(:foreign_context_db)
+    end
+
+    it "loads bundled data through a pre-populated custom context" do
+      stub_const("CustomDatabaseUnit", Class.new(Unitsdb::Unit))
+
+      described_class.register_model(CustomDatabaseUnit, id: :custom_database_unit)
+      described_class.populate_context(
+        id: :custom_unitsdb_database,
+        fallback_to: [described_class.context_id],
+        substitutions: [
+          { from_type: :unit, to_type: :custom_database_unit },
+        ],
+      )
+      described_class.populate_register(
+        id: :custom_unitsdb_database,
+        fallback_to: [described_class.context_id],
+      )
+
+      db = Unitsdb.database(context: :custom_unitsdb_database)
+
+      expect(db).to be_a(Unitsdb::Database)
+      expect(db.units.first).to be_a(CustomDatabaseUnit)
     end
   end
 end

@@ -301,7 +301,10 @@ module Unitsdb
 
     def self.from_db(dir_path, context: Unitsdb::Config.context_id)
       context_id = context.to_sym
-      Unitsdb::Config.context(context_id)
+      if context_id == Unitsdb::Config.context_id &&
+          Unitsdb::Config.find_context(context_id).nil?
+        Unitsdb::Config.context(context_id)
+      end
 
       db_path = File.expand_path(dir_path.to_s)
       unless Dir.exist?(db_path)
@@ -332,9 +335,9 @@ module Unitsdb
     end
 
     def self.load_database_documents(db_path)
-      puts "[UnitsDB] Loading YAML files from directory: #{db_path}" if ENV["DEBUG"]
+      puts "[UnitsDB] Loading YAML files from directory: #{db_path}" if ENV["UNITSDB_DEBUG"]
       DATABASE_FILES.transform_values do |filename|
-        puts "  - #{File.join(db_path, filename)}" if ENV["DEBUG"]
+        puts "  - #{File.join(db_path, filename)}" if ENV["UNITSDB_DEBUG"]
         load_database_yaml(File.join(db_path, filename), filename)
       end
     end

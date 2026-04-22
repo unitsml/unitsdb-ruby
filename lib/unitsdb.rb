@@ -33,6 +33,8 @@ require "unitsdb/qudt"
 require "unitsdb/ucum"
 
 module Unitsdb
+  # Core models are eagerly loaded so type registrations are complete before
+  # any context or database loading happens.
   unless RUBY_ENGINE == "opal"
     autoload :Cli, "unitsdb/cli"
     autoload :Commands, "unitsdb/commands"
@@ -49,7 +51,7 @@ module Unitsdb
     # Returns a pre-loaded Database instance from the bundled data
     def database(context: Config.context_id)
       context_id = context.to_sym
-      Config.context if context_id == Config.context_id
+      Config.context(context_id) if context_id == Config.context_id && Config.find_context(context_id).nil?
       klass = Config.resolve_type(:database, context: context_id)
       databases[context_id] ||= klass.from_db(data_dir, context: context_id)
     end

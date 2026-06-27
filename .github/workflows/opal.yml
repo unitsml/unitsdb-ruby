@@ -1,0 +1,36 @@
+name: opal
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  boot-file-spec:
+    name: Opal boot file verification
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.3'
+        bundler-cache: true
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Run opal boot file spec
+      # The spec statically verifies that lib/unitsdb/opal.rb is well-formed
+      # (every require resolves to a real file, no Opal-gated entry points
+      # leak in, and the boot file actually compiles under Opal::Builder with
+      # the native-only deps stubbed).
+      run: bundle exec rspec spec/unitsdb/unitsdb_opal_boot_spec.rb

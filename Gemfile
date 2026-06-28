@@ -6,7 +6,6 @@ source "https://rubygems.org"
 gemspec
 
 gem "canon"
-gem "lutaml-model", github: "lutaml/lutaml-model", branch: "fix/global-context-register-lookup-fallback"
 gem "nokogiri"
 gem "rake"
 gem "rspec"

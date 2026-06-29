@@ -6,26 +6,16 @@ RSpec.describe Unitsdb::Config do
   let(:database_path) { File.join(__dir__, "../../data") }
 
   around do |example|
-    original_models = described_class.registered_models.dup
-    original_registers = described_class.explicit_registers.dup
-    original_legacy_models = described_class.models.dup
-    original_populated_for = described_class.instance_variable_get(:@populated_for)&.dup
-
-    Lutaml::Model::GlobalContext.reset!
-    Unitsdb.instance_variable_set(:@databases, nil)
-    example.run
+    described_class.with_isolated_config do
+      example.run
+    end
   ensure
     %i[custom_unitsdb custom_unitsdb_with_register].each do |id|
       Lutaml::Model::GlobalRegister.unregister(id)
     rescue StandardError
       nil
     end
-    described_class.instance_variable_set(:@registered_models, original_models)
-    described_class.instance_variable_set(:@explicit_registers, original_registers)
-    described_class.instance_variable_set(:@models, original_legacy_models)
-    described_class.instance_variable_set(:@populated_for, original_populated_for)
-    Lutaml::Model::GlobalContext.reset!
-    Unitsdb.instance_variable_set(:@databases, nil)
+    Unitsdb.reset_database_cache!
   end
 
   it "builds a custom context without implicitly using it as a register" do
@@ -47,7 +37,7 @@ RSpec.describe Unitsdb::Config do
 
     expect(context).not_to be_nil
     expect(context.substitutions.length).to eq(1)
-    expect(described_class.register(:custom_unitsdb)).to be_nil
+    expect(described_class.register_id_for(:custom_unitsdb)).to be_nil
     expect(db.units.first).to be_a(Unitsdb::Unit)
     expect(db.units.first).not_to be_a(CustomContextUnit)
     expect(db.get_by_id(id: "NISTu1")).to be_a(Unitsdb::Unit)
@@ -76,7 +66,7 @@ RSpec.describe Unitsdb::Config do
     db = Unitsdb::Database.from_db(database_path,
                                    context: :custom_unitsdb_with_register)
 
-    expect(described_class.register(:custom_unitsdb_with_register)).not_to be_nil
+    expect(described_class.register_id_for(:custom_unitsdb_with_register)).not_to be_nil
     expect(db.units.first).to be_a(CustomContextUnitWithRegister)
   end
 
@@ -84,7 +74,7 @@ RSpec.describe Unitsdb::Config do
     it "uses eagerly loaded core models without a bootstrap manifest" do
       expect(described_class.const_defined?(:CORE_MODEL_CONSTANTS, false)).to be(false)
       expect(Unitsdb.respond_to?(:load_core_models!)).to be(false)
-      expect(described_class.send(:build_registry)).to be_a(Lutaml::Model::TypeRegistry)
+      expect(described_class.build_registry).to be_a(Lutaml::Model::TypeRegistry)
       expect(described_class.registered_models[:database]).to be(Unitsdb::Database)
       expect(described_class.context).not_to be_nil
       expect(described_class.resolve_type(:database)).to be(Unitsdb::Database)
@@ -101,9 +91,9 @@ RSpec.describe Unitsdb::Config do
   end
 
   describe ".context" do
-    it "rebuilds an existing context when forced" do
+    it "rebuilds an existing context when re-populated" do
       initial_context = described_class.context
-      rebuilt_context = described_class.context(force_populate: true)
+      rebuilt_context = described_class.populate_context(id: described_class.context_id)
 
       expect(rebuilt_context).not_to equal(initial_context)
       expect(described_class.find_context(described_class.context_id)).to equal(rebuilt_context)

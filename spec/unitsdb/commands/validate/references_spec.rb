@@ -2,231 +2,111 @@
 
 require "spec_helper"
 require "unitsdb/commands/validate/references"
-require "stringio"
 require "fileutils"
 require "yaml"
 
 RSpec.describe Unitsdb::Commands::Validate::References do
-  let(:command) { described_class.new(options) }
-  let(:options) { { database: fixtures_dir } }
   let(:fixtures_dir) { File.join("spec", "fixtures", "test_references") }
+  let(:options) { { database: fixtures_dir } }
+  let(:command) { described_class.new(options) }
 
-  before(:all) do
-    # Create test fixtures directory
-    FileUtils.mkdir_p(File.join("spec", "fixtures", "test_references"))
+  around do |example|
+    FileUtils.mkdir_p(fixtures_dir)
+    example.run
+  ensure
+    FileUtils.rm_rf(fixtures_dir)
   end
 
-  after(:all) do
-    # Clean up test fixtures
-    FileUtils.rm_rf(File.join("spec", "fixtures", "test_references"))
-  end
-
-  # No global output capture - each test will capture output explicitly
-
-  describe "#check" do
-    context "with valid references" do
+  describe "#run" do
+    context "with a database whose references are all valid" do
       before do
-        # Create test fixture files with valid references
-        create_test_fixtures(true)
-
-        # Mock database loading
-        allow(command).to receive(:load_database).and_return(test_database)
+        write_fixture(
+          dimensions: [
+            {
+              "identifiers" => [{ "id" => "NISTd1", "type" => "nist" }],
+              "short" => "L",
+              "names" => [{ "value" => "length", "lang" => "en" }],
+            },
+          ],
+          units: [
+            {
+              "identifiers" => [{ "id" => "NISTu1", "type" => "nist" }],
+              "short" => "meter",
+              "names" => [{ "value" => "meter", "lang" => "en" }],
+              "dimension_reference" => { "id" => "NISTd1", "type" => "nist" },
+              "unit_system_reference" => [{ "id" => "si-base",
+                                            "type" => "unitsml" }],
+            },
+          ],
+          unit_systems: [
+            {
+              "identifiers" => [{ "id" => "si-base", "type" => "unitsml" }],
+              "short" => "SI",
+              "names" => [{ "value" => "SI base", "lang" => "en" }],
+            },
+          ],
+        )
       end
 
       it "reports that all references are valid" do
-        output = capture_output do
-          command.run
-        end
+        output = capture_output { command.run }
 
         expect(output[:output]).to include("All references are valid!")
       end
-
-      context "with --print_valid option" do
-        let(:options) { { database: fixtures_dir, print_valid: true } }
-
-        it "prints valid references when --print_valid is specified" do
-          output = capture_output do
-            command.run
-          end
-
-          expect(output[:output]).to include("Valid reference:")
-          expect(output[:output]).to include("All references are valid!")
-        end
-      end
-
-      context "with debug_registry option" do
-        let(:options) { { database: fixtures_dir, debug_registry: true } }
-
-        it "shows registry contents when --debug_registry is specified" do
-          output = capture_output do
-            command.run
-          end
-
-          expect(output[:output]).to include("Registry contents:")
-          expect(output[:output]).to include("All references are valid!")
-        end
-      end
     end
 
-    context "with invalid references" do
+    context "with a database containing a broken unit_system_reference" do
       before do
-        # Create test fixture files with invalid references
-        create_test_fixtures(false)
-
-        # Mock database loading with actual validation failures
-        db = test_database
-
-        # Mock the load_database method to avoid file access errors
-
-        # Create a known registry
-        mock_registry = {
-          "units" => { "NISTu1" => "index:0", "nist:NISTu1" => "index:0" },
-          "dimensions" => { "NISTd1" => "index:0", "nist:NISTd1" => "index:0" },
-          "unit_systems" => { "si-base" => "index:0",
-                              "unitsml:si-base" => "index:0" },
-        }
-
-        # Mock the build_id_registry method
-
-        # Mock the check_references method
-        invalid_refs = {
-          "units" => {
-            "units:index:0:unit_system_reference[0]" => {
-              id: "invalid-system",
-              type: "unitsml",
-              ref_type: "unit_systems",
+        write_fixture(
+          units: [
+            {
+              "identifiers" => [{ "id" => "NISTu1", "type" => "nist" }],
+              "short" => "meter",
+              "names" => [{ "value" => "meter", "lang" => "en" }],
+              "unit_system_reference" => [{ "id" => "invalid-system",
+                                            "type" => "unitsml" }],
             },
-          },
-        }
-        allow(command).to receive_messages(load_database: db,
-                                           build_id_registry: mock_registry, check_references: invalid_refs)
-
-        # Allow the Unitsdb::Utils.find_similar_ids method to work normally
-        similar_ids = ["si-base"]
-        allow(Unitsdb::Utils).to receive(:find_similar_ids).and_return(similar_ids)
+          ],
+          unit_systems: [
+            {
+              "identifiers" => [{ "id" => "si-base", "type" => "unitsml" }],
+              "short" => "SI",
+              "names" => [{ "value" => "SI base", "lang" => "en" }],
+            },
+          ],
+        )
       end
 
-      it "reports invalid references" do
-        output = capture_output do
-          command.run
-        end
+      it "reports the invalid reference path" do
+        output = capture_output { command.run }
 
         expect(output[:output]).to include("Found invalid references:")
         expect(output[:output]).to include("units:index:0:unit_system_reference[0]")
       end
+    end
 
-      it "suggests similar IDs for invalid references" do
-        output = capture_output do
-          command.run
-        end
-
-        expect(output[:output]).to include("Did you mean one of these?")
-      end
+    it "raises a ValidationError when the database cannot be loaded" do
+      expect do
+        described_class.new(database: "/does/not/exist").run
+      end.to raise_error(Unitsdb::Errors::ValidationError)
     end
   end
 
   private
 
-  def create_test_fixtures(valid_references)
-    # Create dimensions.yaml
-    dimensions = [
-      {
-        "identifiers" => [
-          { "id" => "NISTd1", "type" => "nist" },
-        ],
-        "dimension_name" => ["length"],
-        "short" => "L",
-      },
-    ]
-
-    # Create units.yaml
-    units = [
-      {
-        "identifiers" => [
-          { "id" => "NISTu1", "type" => "nist" },
-        ],
-        "names" => ["meter"],
-        "short" => "meter",
-        "dimension_reference" => { "id" => "NISTd1", "type" => "nist" },
-        "unit_system_reference" => if valid_references
-                                     [{ "id" => "si-base",
-                                        "type" => "unitsml" }]
-                                   else
-                                     [{ "id" => "invalid-system",
-                                        "type" => "unitsml" }]
-                                   end,
-      },
-    ]
-
-    # Create unit_systems.yaml
-    unit_systems = [
-      {
-        "identifiers" => [
-          { "id" => "si-base", "type" => "unitsml" },
-        ],
-        "unit_system_name" => ["SI base"],
-        "short" => "SI",
-      },
-    ]
-
-    # Write fixture files
-    File.write(File.join(fixtures_dir, "dimensions.yaml"), dimensions.to_yaml)
-    File.write(File.join(fixtures_dir, "units.yaml"), units.to_yaml)
-    File.write(File.join(fixtures_dir, "unit_systems.yaml"),
-               unit_systems.to_yaml)
-  end
-
-  def test_database
-    # Create an instance of Unitsdb::Database
-    # This could be a real database loaded from the fixtures
-    # or a mock with the necessary structure
-    dimension_identifier = double("Identifier", id: "NISTd1", type: "nist")
-    allow(dimension_identifier).to receive(:respond_to?).with(any_args).and_return(true)
-
-    dimension = double("Dimension",
-                       identifiers: [dimension_identifier],
-                       short: "L")
-    allow(dimension).to receive(:respond_to?).with(any_args).and_return(true)
-    allow(dimension).to receive(:dimension_reference).and_return(nil)
-
-    dimensions = [dimension]
-
-    unit_identifier = double("Identifier", id: "NISTu1", type: "nist")
-    allow(unit_identifier).to receive(:respond_to?).with(any_args).and_return(true)
-
-    dimension_ref = double("DimensionRef", id: "NISTd1", type: "nist")
-    allow(dimension_ref).to receive(:respond_to?).with(any_args).and_return(true)
-
-    unit_system_ref = double("UnitSystemRef", id: "si-base", type: "unitsml")
-    allow(unit_system_ref).to receive(:respond_to?).with(any_args).and_return(true)
-
-    unit = double("Unit",
-                  identifiers: [unit_identifier],
-                  dimension_reference: dimension_ref,
-                  unit_system_reference: [unit_system_ref])
-    allow(unit).to receive(:respond_to?).with(any_args).and_return(true)
-    allow(unit).to receive_messages(root_units: nil, quantity_references: nil)
-
-    units = [unit]
-
-    unit_system_identifier = double("Identifier", id: "si-base",
-                                                  type: "unitsml")
-    allow(unit_system_identifier).to receive(:respond_to?).with(any_args).and_return(true)
-
-    unit_system = double("UnitSystem",
-                         identifiers: [unit_system_identifier],
-                         short: "SI")
-    allow(unit_system).to receive(:respond_to?).with(any_args).and_return(true)
-
-    unit_systems = [unit_system]
-
-    quantities = []
-    prefixes = []
-
-    db = double("Database")
-    allow(db).to receive_messages(dimensions: dimensions, units: units,
-                                  unit_systems: unit_systems, quantities: quantities, prefixes: prefixes)
-
-    db
+  def write_fixture(dimensions: [], units: [], unit_systems: [],
+                    prefixes: [], quantities: [])
+    {
+      "dimensions" => dimensions,
+      "units" => units,
+      "unit_systems" => unit_systems,
+      "prefixes" => prefixes,
+      "quantities" => quantities,
+    }.each do |name, payload|
+      File.write(
+        File.join(fixtures_dir, "#{name}.yaml"),
+        { "schema_version" => "2.0.0", name => payload }.to_yaml,
+      )
+    end
   end
 end

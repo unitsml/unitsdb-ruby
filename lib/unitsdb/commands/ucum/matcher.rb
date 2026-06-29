@@ -70,14 +70,14 @@ module Unitsdb
 
         # Check if a UnitsDB entity already has a UCUM reference
         def has_ucum_reference?(entity)
-          return false unless entity.respond_to?(:references) && entity.references
+          return false unless entity.references
 
           entity.references.any? { |ref| ref.authority == "ucum" }
         end
 
         # Find the referenced UCUM entity based on the reference URI
         def find_referenced_ucum_entity(db_entity, ucum_entities)
-          return nil unless db_entity.respond_to?(:references) && db_entity.references
+          return nil unless db_entity.references
 
           ucum_ref = db_entity.references.find { |ref| ref.authority == "ucum" }
           return nil unless ucum_ref
@@ -87,8 +87,8 @@ module Unitsdb
         end
 
         # Get the ID of a UnitsDB entity
-        def get_entity_id(entity)
-          entity.respond_to?(:id) ? entity.id : nil
+        def get_entity_id(_entity)
+          nil
         end
 
         # Find a matching UnitsDB entity for a UCUM entity

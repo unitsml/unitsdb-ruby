@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "thor"
-
 module Unitsdb
   module Commands
     module Validate
@@ -12,11 +10,7 @@ module Unitsdb
       autoload :UcumReferences, "unitsdb/commands/validate/ucum_references"
     end
 
-    class ValidateCommand < Thor
-      # Inherit trace option from parent CLI
-      class_option :trace, type: :boolean, default: false,
-                           desc: "Show full backtrace on error"
-
+    class ValidateCommand < Unitsdb::Commands::Thor
       desc "references", "Validate that all references exist"
       option :debug_registry, type: :boolean,
                               desc: "Show registry contents for debugging"
@@ -61,35 +55,6 @@ module Unitsdb
 
       def ucum_references
         run_command(Commands::Validate::UcumReferences, options)
-      end
-
-      private
-
-      def run_command(command_class, options)
-        command = command_class.new(options)
-        command.run
-      rescue Unitsdb::Errors::CLIRuntimeError => e
-        handle_cli_error(e)
-      rescue StandardError => e
-        handle_error(e)
-      end
-
-      def handle_cli_error(error)
-        if options[:trace]
-          raise error
-        else
-          warn "Error: #{error.message}"
-          exit 1
-        end
-      end
-
-      def handle_error(error)
-        if options[:trace]
-          raise error
-        else
-          warn "Error: #{error.message}"
-          exit 1
-        end
       end
     end
   end

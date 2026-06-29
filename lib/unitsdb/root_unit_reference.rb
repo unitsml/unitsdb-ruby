@@ -2,8 +2,6 @@
 
 module Unitsdb
   class RootUnitReference < Lutaml::Model::Serializable
-    # model Config.model_for(:root_unit)
-
     attribute :power, :integer
     attribute :unit_reference, UnitReference
     attribute :prefix_reference, PrefixReference

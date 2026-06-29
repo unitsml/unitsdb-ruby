@@ -1,41 +1,7 @@
 # frozen_string_literal: true
 
-# "NISTu10":
-#   dimension_url: "#NISTd9"
-#   short: steradian
-#   root: true
-#   unit_system:
-#     type: "SI_derived_special"
-#     name: "SI"
-#   names:
-#     - "steradian"
-#   unit_symbols:
-#     - id: "sr"
-#       ascii: "sr"
-#       html: "sr"
-#       mathml: "<mi mathvariant='normal'>sr</mi>"
-#       latex: \ensuremath{\mathrm{sr}}
-#       unicode: "sr"
-#   root_units:
-#     enumerated_root_units:
-#       - unit: "steradian"
-#         power_denominator: 1
-#         power: 1
-#   quantity_reference:
-#     - name: "solid angle"
-#       url: "#NISTq11"
-#   si_derived_bases:
-#     - id: NISTu1
-#       prefix:
-#       power: 1
-#     - id: NISTu1
-#       prefix:
-#       power: -1
-
 module Unitsdb
   class Unit < Lutaml::Model::Serializable
-    # model Config.model_for(:unit)
-
     attribute :identifiers, Identifier, collection: true
     attribute :short, :string
     attribute :root, :boolean

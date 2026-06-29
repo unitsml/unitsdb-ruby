@@ -48,7 +48,7 @@ unmatched_ucum)
             db_id = get_db_entity_id(db_entity)
             db_name = get_db_entity_name(db_entity)
             ucum_name = get_ucum_entity_name(ucum_entity)
-            ucum_code = ucum_entity.respond_to?(:code_sensitive) ? ucum_entity.code_sensitive : "unknown"
+            ucum_code = ucum_entity.code_sensitive || "unknown"
 
             case ucum_entity
             when Unitsdb::UcumPrefix
@@ -88,7 +88,7 @@ unmatched_ucum)
             db_id = get_db_entity_id(db_entity)
             db_name = get_db_entity_name(db_entity)
             ucum_name = get_ucum_entity_name(ucum_entity)
-            ucum_code = ucum_entity.respond_to?(:code_sensitive) ? ucum_entity.code_sensitive : "unknown"
+            ucum_code = ucum_entity.code_sensitive || "unknown"
 
             case ucum_entity
             when Unitsdb::UcumPrefix
@@ -103,26 +103,17 @@ unmatched_ucum)
 
         # Helper to get db entity id
         def get_db_entity_id(entity)
-          if entity.respond_to?(:identifiers) && entity.identifiers && !entity.identifiers.empty?
-            entity.identifiers.first.id
-          elsif entity.respond_to?(:id)
-            entity.id
-          else
-            "unknown-id"
-          end
+          return entity.identifiers.first.id unless entity.identifiers.empty?
+
+          entity.short || "unknown-id"
         end
 
         # Helper to get db entity name
         def get_db_entity_name(entity)
-          if entity.respond_to?(:names) && entity.names && !entity.names.empty?
-            entity.names.first.value
-          elsif entity.respond_to?(:short) && entity.short
-            entity.short
-          elsif entity.respond_to?(:name)
-            entity.name
-          else
-            "unknown-name"
-          end
+          return entity.names.first.value unless entity.names.empty?
+          return entity.short if entity.short
+
+          "unknown-name"
         end
 
         # Helper to get ucum entity name

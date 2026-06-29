@@ -34,11 +34,11 @@ RSpec.describe Unitsdb do
 
   describe ".database" do
     around do |example|
-      described_class.instance_variable_set(:@databases, nil)
+      described_class.reset_database_cache!
       Lutaml::Model::GlobalContext.reset!
       example.run
     ensure
-      described_class.instance_variable_set(:@databases, nil)
+      described_class.reset_database_cache!
       Lutaml::Model::GlobalContext.reset!
     end
 

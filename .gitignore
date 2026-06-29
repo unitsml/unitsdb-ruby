@@ -11,3 +11,6 @@
 .rspec_status
 
 Gemfile.lock
+
+# Local-only refactor audit notes — never commit
+TODO*

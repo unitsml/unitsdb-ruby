@@ -238,7 +238,7 @@ module Unitsdb
             matches.each do |match|
               db_entity = match[:db_entity]
               entity_id = match[:entity_id] || db_entity.short
-              entity_name = db_entity.respond_to?(:names) ? db_entity.names&.first : "unnamed"
+              entity_name = db_entity.names.first || "unnamed"
               si_suffix = SiTtlParser.extract_identifying_suffix(match[:ttl_uri])
 
               ttl_label = match[:ttl_entity] ? (match[:ttl_entity][:label] || match[:ttl_entity][:name]) : "Unknown"
@@ -279,7 +279,7 @@ module Unitsdb
               # Get match description if available
               entity_id = match[:db_entity].short
               match_pair_key = "#{entity_id}:#{ttl_entities.first[:uri]}"
-              match_details = Unitsdb::Commands::CheckSi::SiMatcher.instance_variable_get(:@match_details)&.dig(match_pair_key)
+              match_details = Unitsdb::Commands::CheckSi::SiMatcher.match_details&.dig(match_pair_key)
               match_desc = match_details[:match_desc] if match_details && match_details[:match_desc]
 
               # Symbol matches and partial matches should always be potential matches
@@ -301,7 +301,7 @@ module Unitsdb
               exact_matches.each do |match|
                 db_entity = match[:db_entity]
                 entity_id = match[:entity_id] || db_entity.short
-                entity_name = db_entity.respond_to?(:names) ? db_entity.names&.first : "unnamed"
+                entity_name = db_entity.names.first || "unnamed"
 
                 # Handle multiple TTL entities in a single row
                 ttl_entities = match[:ttl_entities]
@@ -347,7 +347,7 @@ module Unitsdb
 
                 # Get match details for this match
                 match_pair_key = "#{db_entity.short}:#{ttl_entities.first[:uri]}"
-                match_details = Unitsdb::Commands::CheckSi::SiMatcher.instance_variable_get(:@match_details)&.dig(match_pair_key)
+                match_details = Unitsdb::Commands::CheckSi::SiMatcher.match_details&.dig(match_pair_key)
 
                 # Format match info
                 match_info = ""
@@ -377,7 +377,7 @@ module Unitsdb
               potential_matches.each do |match|
                 db_entity = match[:db_entity]
                 entity_id = match[:entity_id] || db_entity.short
-                entity_name = db_entity.respond_to?(:names) ? db_entity.names&.first : "unnamed"
+                entity_name = db_entity.names.first || "unnamed"
 
                 # Handle multiple TTL entities in a single row
                 ttl_entities = match[:ttl_entities]
@@ -423,7 +423,7 @@ module Unitsdb
 
                 # Get match details
                 match_pair_key = "#{db_entity.short}:#{ttl_entities.first[:uri]}"
-                match_details = Unitsdb::Commands::CheckSi::SiMatcher.instance_variable_get(:@match_details)&.dig(match_pair_key)
+                match_details = Unitsdb::Commands::CheckSi::SiMatcher.match_details&.dig(match_pair_key)
 
                 # Format match info
                 match_info = ""

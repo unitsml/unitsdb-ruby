@@ -3,10 +3,18 @@
 module Unitsdb
   module Commands
     module CheckSi
-      # Matcher for SI entities and UnitsDB entities
+      # Matcher for SI digital-framework entities and UnitsDB entities.
+      # All iteration is typed — entities expose `identifiers`, `names`,
+      # `short`, `references`, and (for units/prefixes) `symbols` as
+      # declared Lutaml attributes, so we read them directly.
       module SiMatcher
         SI_AUTHORITY = "si-digital-framework"
-        @match_details = {}
+        SYMBOL_ENTITY_TYPES = %w[units prefixes].freeze
+
+        class << self
+          attr_accessor :match_details
+        end
+        self.match_details = {}
 
         module_function
 
@@ -15,14 +23,12 @@ module Unitsdb
           matches = []
           missing_matches = []
           matched_ttl_uris = []
-          processed_pairs = {} # Track processed entity-ttl pairs to avoid duplicates
-          entity_matches = {} # Track matches by entity ID
+          processed_pairs = {}
+          entity_matches = {}
 
-          # First pass: find direct references
           db_entities.each do |entity|
-            next unless entity.respond_to?(:references) && entity.references
-
-            entity.references.each do |ref|
+            references = entity.references || []
+            references.each do |ref|
               next unless ref.authority == SI_AUTHORITY
 
               matched_ttl_uris << ref.uri
@@ -42,42 +48,33 @@ module Unitsdb
             end
           end
 
-          # Second pass: find matching entities
           ttl_entities.each do |ttl_entity|
             next if matched_ttl_uris.include?(ttl_entity[:uri])
 
-            matching_entities = find_matching_entities(entity_type, ttl_entity,
-                                                       db_entities)
+            matching_entities = find_matching_entities(entity_type, ttl_entity, db_entities)
             next if matching_entities.empty?
 
             matched_ttl_uris << ttl_entity[:uri]
 
             matching_entities.each do |entity|
               entity_id = entity.short
-              entity_name = format_entity_name(entity)
-
-              # Create a unique key for this entity-ttl pair to avoid duplicates
               pair_key = "#{entity_id}:#{ttl_entity[:uri]}"
               next if processed_pairs[pair_key]
 
               processed_pairs[pair_key] = true
 
-              # Get detailed match information
-              match_result = match_entity_names?(entity_type, entity,
-                                                 ttl_entity)
+              match_result = match_entity_names?(entity_type, entity, ttl_entity)
               next unless match_result[:match]
 
-              # Save match details for later use
-              @match_details[pair_key] = match_result
+              match_details[pair_key] = match_result
 
-              # Check if already has reference
-              has_reference = entity.references&.any? do |ref|
+              has_reference = (entity.references || []).any? do |ref|
                 ref.uri == ttl_entity[:uri] && ref.authority == SI_AUTHORITY
               end
 
               match_data = {
                 entity_id: entity_id,
-                entity_name: entity_name,
+                entity_name: format_entity_name(entity),
                 si_uri: ttl_entity[:uri],
                 si_name: ttl_entity[:name],
                 si_label: ttl_entity[:label],
@@ -92,35 +89,24 @@ module Unitsdb
               if has_reference
                 matches << match_data
               else
-                # Group by entity_id for multiple SI matches
                 entity_matches[entity_id] ||= []
                 entity_matches[entity_id] << {
                   uri: ttl_entity[:uri],
                   name: ttl_entity[:name],
                   label: ttl_entity[:label],
                 }
-
-                # Add first occurrence of this entity to missing_matches
-                missing_matches << match_data unless missing_matches.any? do |m|
-                  m[:entity_id] == entity_id
-                end
+                missing_matches << match_data unless missing_matches.any? { |m| m[:entity_id] == entity_id }
               end
             end
           end
 
-          # Update missing_matches to include multiple SI entities
           missing_matches.each do |match|
-            entity_id = match[:entity_id]
-            si_matches = entity_matches[entity_id]
+            si_matches = entity_matches[match[:entity_id]]
+            next unless si_matches && si_matches.size > 1
 
-            # If entity matches multiple SI entities, record them
-            if si_matches && si_matches.size > 1
-              match[:multiple_si] =
-                si_matches
-            end
+            match[:multiple_si] = si_matches
           end
 
-          # Find unmatched TTL entities
           unmatched_ttl = ttl_entities.reject do |entity|
             matched_ttl_uris.include?(entity[:uri]) ||
               entity[:uri].end_with?("/units/") ||
@@ -136,78 +122,49 @@ module Unitsdb
           matches = []
           missing_refs = []
           matched_db_ids = []
-          processed_db_ids = {} # Track processed entities
+          processed_db_ids = {}
 
-          # Map from NIST IDs to display names for original output compatibility
-          nist_id_to_display = {}
-
-          # Build mappings for each entity type
-          db_entities.each do |entity|
-            next unless entity.respond_to?(:identifiers) && entity.identifiers&.first&.id&.start_with?("NIST")
-
-            nist_id = entity.identifiers.first.id
-
-            # For quantities and prefixes, we want to show the "short" field
-            nist_id_to_display[nist_id] = entity.short if %w[quantities
-                                                             prefixes].include?(entity_type) && entity.respond_to?(:short)
-          end
+          nist_id_to_display = build_nist_id_to_display(entity_type, db_entities)
 
           db_entities.each do |db_entity|
             entity_id = find_entity_id(db_entity)
+            display_id = nist_id_to_display[entity_id] || entity_id
 
-            # For display purposes - use original display names
-            display_id = entity_id
-
-            # Apply the NIST ID mapping if available
-            display_id = nist_id_to_display[entity_id] if entity_id.start_with?("NIST") && nist_id_to_display[entity_id]
-
-            # Skip if we've already processed this entity
             next if processed_db_ids[entity_id]
 
             processed_db_ids[entity_id] = true
+
             has_reference = false
+            (db_entity.references || []).each do |ref|
+              next unless ref.authority == SI_AUTHORITY
 
-            # Check for existing SI references
-            if db_entity.respond_to?(:references) && db_entity.references
-              db_entity.references.each do |ref|
-                next unless ref.authority == SI_AUTHORITY
-
-                has_reference = true
-                # Find the matching TTL entity for display
-                ttl_entity = ttl_entities.find { |e| e[:uri] == ref.uri }
-
-                matches << {
-                  entity_id: display_id,
-                  db_entity: db_entity,
-                  ttl_uri: ref.uri,
-                  ttl_entity: ttl_entity,
-                }
-              end
+              has_reference = true
+              ttl_entity = ttl_entities.find { |e| e[:uri] == ref.uri }
+              matches << {
+                entity_id: display_id,
+                db_entity: db_entity,
+                ttl_uri: ref.uri,
+                ttl_entity: ttl_entity,
+              }
             end
 
-            # If already has reference, continue to next entity
             if has_reference
               matched_db_ids << entity_id
               next
             end
 
-            # Find matching TTL entities
             matching_ttl = []
             match_types = {}
 
             ttl_entities.each do |ttl_entity|
-              match_result = match_entity_names?(entity_type, db_entity,
-                                                 ttl_entity)
+              match_result = match_entity_names?(entity_type, db_entity, ttl_entity)
               next unless match_result[:match]
 
               matching_ttl << ttl_entity
               match_types[ttl_entity[:uri]] = match_result[:match_type]
-
-              # Save detailed match info
-              @match_details["#{entity_id}:#{ttl_entity[:uri]}"] = match_result
+              match_details["#{entity_id}:#{ttl_entity[:uri]}"] = match_result
             end
 
-            # If found matches, add to missing_refs
             next if matching_ttl.empty?
 
             matched_db_ids << entity_id
@@ -219,7 +176,6 @@ module Unitsdb
             }
           end
 
-          # Find unmatched db entities
           unmatched_db = db_entities.reject do |entity|
             matched_db_ids.include?(find_entity_id(entity))
           end
@@ -227,260 +183,214 @@ module Unitsdb
           [matches, missing_refs, unmatched_db]
         end
 
-        # Find entity ID
+        # UnitsDB top-level entities are identified by their first
+        # Identifier's id; if none is present, fall back to short.
         def find_entity_id(entity)
-          return entity.id if entity.respond_to?(:id) && entity.id
-          return entity.identifiers.first.id if entity.respond_to?(:identifiers) && !entity.identifiers.empty? &&
-            entity.identifiers.first.respond_to?(:id)
+          identifier = entity.identifiers.first
+          return identifier.id if identifier&.id
 
           entity.short
         end
 
-        # Format entity name correctly
+        # First localized name (LocalizedString instance) or nil.
         def format_entity_name(entity)
-          return nil unless entity.respond_to?(:names) && entity.names&.first
-
           entity.names.first
-
-          # # Special handling for sidereal names - use comma format
-          # if name.include?("sidereal")
-          #   if name.start_with?("sidereal ")
-          #     # For names that already start with "sidereal " - strip it
-          #     base_name = name.gsub("sidereal ", "")
-          #     return "#{base_name}, sidereal"
-          #   elsif name.end_with?(" sidereal")
-          #     # For names that already have comma format but missing comma
-          #     parts = name.split
-          #     return "#{parts.first}, #{parts.last}"
-          #   end
-          # end
-
-          # # Handle other special cases
-          # return name if name == "year (365 days)"
-
-          # # Default to the original name
         end
 
-        # Find matching entities for a TTL entity
         def find_matching_entities(entity_type, ttl_entity, db_entities)
-          case entity_type
-          when "units"
-            find_matching_units(ttl_entity, db_entities)
-          when "quantities"
-            find_matching_quantities(ttl_entity, db_entities)
-          when "prefixes"
-            find_matching_prefixes(ttl_entity, db_entities)
-          else
-            []
-          end
+          finder = MATCHERS[entity_type]
+          return [] unless finder
+
+          finder.call(ttl_entity, db_entities)
         end
 
-        # Find exact matches for units
+        # ---- Per-entity-type matchers (open for extension: add to
+        # MATCHERS to support a new type) ----
+
         def find_matching_units(ttl_unit, units)
-          matching_units = []
-
-          units.each do |unit|
-            # Match by short
-            if unit.short&.downcase == ttl_unit[:name]&.downcase ||
-                unit.short&.downcase == ttl_unit[:label]&.downcase
-              matching_units << unit
-              next
-            end
-
-            # Match by name
-            if unit.respond_to?(:names) && unit.names&.any? do |name|
-              name.downcase == ttl_unit[:name]&.downcase ||
-                  name.downcase == ttl_unit[:label]&.downcase
-            end
-              matching_units << unit
-              next
-            end
-
-            # Match by symbol
-            next unless ttl_unit[:symbol] && unit.respond_to?(:symbols) && unit.symbols&.any? do |sym|
-              sym.respond_to?(:ascii) && sym.ascii && sym.ascii.downcase == ttl_unit[:symbol].downcase
-            end
-
-            matching_units << unit
-          end
-
-          matching_units.uniq
+          units.select do |unit|
+            short_matches?(unit.short, ttl_unit) ||
+              name_matches?(unit.names, ttl_unit) ||
+              symbol_matches?(unit.symbols, ttl_unit)
+          end.uniq
         end
 
-        # Find exact matches for quantities
         def find_matching_quantities(ttl_quantity, quantities)
-          matching_quantities = []
-
-          quantities.each do |quantity|
-            # Match by short
-            if quantity.short&.downcase == ttl_quantity[:name]&.downcase ||
-                quantity.short&.downcase == ttl_quantity[:label]&.downcase ||
-                quantity.short&.downcase == ttl_quantity[:alt_label]&.downcase
-              matching_quantities << quantity
-              next
-            end
-
-            # Match by name
-            next unless quantity.respond_to?(:names) && quantity.names&.any? do |name|
-              name.downcase == ttl_quantity[:name]&.downcase ||
-                name.downcase == ttl_quantity[:label]&.downcase ||
-                name.downcase == ttl_quantity[:alt_label]&.downcase
-            end
-
-            matching_quantities << quantity
-          end
-
-          matching_quantities.uniq
+          quantities.select do |quantity|
+            short_matches_any?(quantity.short, ttl_quantity, %i[name label alt_label]) ||
+              name_matches_any?(quantity.names, ttl_quantity, %i[name label alt_label])
+          end.uniq
         end
 
-        # Find exact matches for prefixes
         def find_matching_prefixes(ttl_prefix, prefixes)
-          matching_prefixes = []
-
-          prefixes.each do |prefix|
-            # Match by short
-            if prefix.short&.downcase == ttl_prefix[:name]&.downcase ||
-                prefix.short&.downcase == ttl_prefix[:label]&.downcase
-              matching_prefixes << prefix
-              next
-            end
-
-            # Match by name
-            if prefix.respond_to?(:names) && prefix.names&.any? do |name|
-              name.downcase == ttl_prefix[:name]&.downcase ||
-                  name.downcase == ttl_prefix[:label]&.downcase
-            end
-              matching_prefixes << prefix
-              next
-            end
-
-            # Match by symbol
-            next unless ttl_prefix[:symbol] && prefix.respond_to?(:symbol) && prefix.symbol &&
-              prefix.symbol.respond_to?(:ascii) && prefix.symbol.ascii &&
-              prefix.symbol.ascii.downcase == ttl_prefix[:symbol].downcase
-
-            matching_prefixes << prefix
-          end
-
-          matching_prefixes.uniq
+          prefixes.select do |prefix|
+            short_matches?(prefix.short, ttl_prefix) ||
+              name_matches?(prefix.names, ttl_prefix) ||
+              prefix_symbol_matches?(prefix.symbols, ttl_prefix)
+          end.uniq
         end
 
-        # Match entity names with detailed type information
+        MATCHERS = {
+          "units" => method(:find_matching_units),
+          "quantities" => method(:find_matching_quantities),
+          "prefixes" => method(:find_matching_prefixes),
+        }.freeze
+
+        # ---- Generic match primitives ----
+
+        def short_matches?(short, ttl_entity)
+          target = ttl_entity[:name]&.downcase
+          target_label = ttl_entity[:label]&.downcase
+          short && [target, target_label].include?(short.downcase)
+        end
+
+        def short_matches_any?(short, ttl_entity, keys)
+          targets = keys.map { |k| ttl_entity[k]&.downcase }
+          short && targets.include?(short.downcase)
+        end
+
+        def name_matches?(names, ttl_entity)
+          targets = [ttl_entity[:name]&.downcase, ttl_entity[:label]&.downcase].compact
+          names.any? { |n| targets.include?(n.value&.downcase) }
+        end
+
+        def name_matches_any?(names, ttl_entity, keys)
+          targets = keys.filter_map { |k| ttl_entity[k]&.downcase }
+          names.any? { |n| targets.include?(n.value&.downcase) }
+        end
+
+        def symbol_matches?(symbols, ttl_entity)
+          ttl_symbol = ttl_entity[:symbol]
+          return false unless ttl_symbol
+
+          needle = ttl_symbol.downcase
+          symbols.any? { |s| s.ascii.to_s.downcase == needle }
+        end
+
+        # Prefixes in 2.0 carry a `symbols` collection, just like Units.
+        alias prefix_symbol_matches? symbol_matches?
+
+        # ---- Detailed match (returns a hash with match metadata) ----
+
         def match_entity_names?(entity_type, db_entity, ttl_entity)
-          match_details = { match: false }
+          matcher = DetailedMatcher.new(db_entity, ttl_entity, entity_type)
+          matcher.call
+        end
 
-          # Match by short name - EXACT match
-          if db_entity.short && db_entity.short.downcase == ttl_entity[:name].downcase
-            match_details = {
-              match: true,
-              exact: true,
-              match_type: "Exact match",
-              match_desc: "short_to_name",
-              details: "UnitsDB short '#{db_entity.short}' matches SI name '#{ttl_entity[:name]}'",
-            }
-          # Match by short to label
-          elsif db_entity.short && ttl_entity[:label] && db_entity.short.downcase == ttl_entity[:label].downcase
-            match_details = {
-              match: true,
-              exact: true,
-              match_type: "Exact match",
-              match_desc: "short_to_label",
-              details: "UnitsDB short '#{db_entity.short}' matches SI label '#{ttl_entity[:label]}'",
-            }
-          # Match by names - EXACT match
-          elsif db_entity.respond_to?(:names) && db_entity.names
-            # Match by TTL name
-            db_name_match = db_entity.names.find do |name|
-              name.downcase == ttl_entity[:name].downcase
-            end
-            if db_name_match
-              match_details = {
-                match: true,
-                exact: true,
-                match_type: "Exact match",
-                match_desc: "name_to_name",
-                details: "UnitsDB name '#{db_name_match}' matches SI name '#{ttl_entity[:name]}'",
-              }
-            # Match by TTL label
-            elsif ttl_entity[:label]
-              db_name_match = db_entity.names.find do |name|
-                name.downcase == ttl_entity[:label].downcase
-              end
-              if db_name_match
-                match_details = {
-                  match: true,
-                  exact: true,
-                  match_type: "Exact match",
-                  match_desc: "name_to_label",
-                  details: "UnitsDB name '#{db_name_match}' matches SI label '#{ttl_entity[:label]}'",
-                }
-              end
-            end
-
-            # Match by TTL alt_label
-            if !match_details[:match] && ttl_entity[:alt_label]
-              db_name_match = db_entity.names.find do |name|
-                name.downcase == ttl_entity[:alt_label].downcase
-              end
-              if db_name_match
-                match_details = {
-                  match: true,
-                  exact: true,
-                  match_type: "Exact match",
-                  match_desc: "name_to_alt_label",
-                  details: "UnitsDB name '#{db_name_match}' matches SI alt_label '#{ttl_entity[:alt_label]}'",
-                }
-              end
-            end
+        # Encapsulates the per-entity detailed match strategies.
+        class DetailedMatcher
+          def initialize(db_entity, ttl_entity, entity_type)
+            @db_entity = db_entity
+            @ttl = ttl_entity
+            @entity_type = entity_type
           end
 
-          # Special validation for "sidereal_" units
-          if match_details[:match] && match_details[:exact] && db_entity.short&.include?("sidereal_") &&
-              !(ttl_entity[:name]&.include?("sidereal") || ttl_entity[:label]&.include?("sidereal"))
-            match_details = {
+          def call
+            short_to_name || short_to_label || name_to_name ||
+              name_to_label || name_to_alt_label || sidereal_demotion ||
+              symbol_potential || NO_MATCH
+          end
+
+          NO_MATCH = { match: false }.freeze
+
+          private
+
+          def short_to_name
+            return unless @db_entity.short&.downcase == @ttl[:name]&.downcase
+
+            exact_match("short_to_name",
+                        "UnitsDB short '#{@db_entity.short}' matches SI name '#{@ttl[:name]}'")
+          end
+
+          def short_to_label
+            return unless @db_entity.short && @ttl[:label] &&
+              @db_entity.short.downcase == @ttl[:label].downcase
+
+            exact_match("short_to_label",
+                        "UnitsDB short '#{@db_entity.short}' matches SI label '#{@ttl[:label]}'")
+          end
+
+          def name_to_name
+            db_name = find_name_match(@ttl[:name])
+            return unless db_name
+
+            exact_match("name_to_name",
+                        "UnitsDB name '#{db_name}' matches SI name '#{@ttl[:name]}'")
+          end
+
+          def name_to_label
+            return unless @ttl[:label]
+
+            db_name = find_name_match(@ttl[:label])
+            return unless db_name
+
+            exact_match("name_to_label",
+                        "UnitsDB name '#{db_name}' matches SI label '#{@ttl[:label]}'")
+          end
+
+          def name_to_alt_label
+            return unless @ttl[:alt_label]
+
+            db_name = find_name_match(@ttl[:alt_label])
+            return unless db_name
+
+            exact_match("name_to_alt_label",
+                        "UnitsDB name '#{db_name}' matches SI alt_label '#{@ttl[:alt_label]}'")
+          end
+
+          # A `sidereal_*` short counts as a partial match unless the
+          # TTL name/label acknowledges the sidereal form.
+          def sidereal_demotion
+            prior = short_to_name || short_to_label
+            return unless prior && prior[:exact]
+            return unless @db_entity.short&.include?("sidereal_")
+            return if @ttl[:name]&.include?("sidereal") || @ttl[:label]&.include?("sidereal")
+
+            potential_match("partial_match",
+                            "UnitsDB '#{@db_entity.short}' partially matches SI '#{@ttl[:name]}'")
+          end
+
+          def symbol_potential
+            return unless SYMBOL_ENTITY_TYPES.include?(@entity_type)
+            return unless @ttl[:symbol]
+
+            needle = @ttl[:symbol].downcase
+            match = @db_entity.symbols.find { |s| s.ascii.to_s.downcase == needle }
+            return unless match
+
+            potential_match("symbol_match",
+                            "UnitsDB symbol '#{match.ascii}' matches SI symbol '#{@ttl[:symbol]}'")
+          end
+
+          def find_name_match(ttl_value)
+            return unless ttl_value
+
+            needle = ttl_value.downcase
+            @db_entity.names.find { |n| n.value&.downcase == needle }
+          end
+
+          def exact_match(desc, details)
+            {
+              match: true,
+              exact: true,
+              match_type: "Exact match",
+              match_desc: desc,
+              details: details,
+            }
+          end
+
+          def potential_match(desc, details)
+            {
               match: true,
               exact: false,
               match_type: "Potential match",
-              match_desc: "partial_match",
-              details: "UnitsDB '#{db_entity.short}' partially matches SI '#{ttl_entity[:name]}'",
+              match_desc: desc,
+              details: details,
             }
           end
-
-          # Match by symbol if available (units and prefixes) - POTENTIAL match
-          if !match_details[:match] && %w[units
-                                          prefixes].include?(entity_type) && ttl_entity[:symbol]
-            if entity_type == "units" && db_entity.respond_to?(:symbols) && db_entity.symbols
-              matching_symbol = db_entity.symbols.find do |sym|
-                sym.respond_to?(:ascii) && sym.ascii && sym.ascii.downcase == ttl_entity[:symbol].downcase
-              end
-
-              if matching_symbol
-                match_details = {
-                  match: true,
-                  exact: false,
-                  match_type: "Potential match",
-                  match_desc: "symbol_match",
-                  details: "UnitsDB symbol '#{matching_symbol.ascii}' matches SI symbol '#{ttl_entity[:symbol]}'",
-                }
-              end
-            elsif entity_type == "prefixes" && db_entity.respond_to?(:symbol) && db_entity.symbol
-              if db_entity.symbol.respond_to?(:ascii) &&
-                  db_entity.symbol.ascii &&
-                  db_entity.symbol.ascii.downcase == ttl_entity[:symbol].downcase
-
-                match_details = {
-                  match: true,
-                  exact: false,
-                  match_type: "Potential match",
-                  match_desc: "symbol_match",
-                  details: "UnitsDB symbol '#{db_entity.symbol.ascii}' matches SI symbol '#{ttl_entity[:symbol]}'",
-                }
-              end
-            end
-          end
-
-          match_details
         end
+
+        private_constant :DetailedMatcher, :MATCHERS
       end
     end
   end

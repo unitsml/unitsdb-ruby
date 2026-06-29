@@ -10,12 +10,12 @@ RSpec.describe Unitsdb::Database do
   end
 
   around do |example|
+    Unitsdb.reset_database_cache!
     Lutaml::Model::GlobalContext.reset!
-    Unitsdb.instance_variable_set(:@databases, nil)
     example.run
   ensure
+    Unitsdb.reset_database_cache!
     Lutaml::Model::GlobalContext.reset!
-    Unitsdb.instance_variable_set(:@databases, nil)
   end
 
   it "parses the full unitsdb database" do
@@ -62,7 +62,7 @@ RSpec.describe Unitsdb::Database do
   it "preserves an externally managed non-default context during load" do
     external_context = Lutaml::Model::GlobalContext.create_context(
       id: :externally_managed_unitsdb,
-      registry: Unitsdb::Config.send(:build_registry),
+      registry: Unitsdb::Config.build_registry,
       fallback_to: [:default],
       substitutions: [],
     )

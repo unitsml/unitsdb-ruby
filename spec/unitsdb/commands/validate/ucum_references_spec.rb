@@ -8,50 +8,45 @@ RSpec.describe Unitsdb::Commands::Validate::UcumReferences do
   let(:options) { { database: database_path } }
 
   describe "#run" do
-    it "can be instantiated and run without errors" do
-      command = described_class.new(options)
-
-      # The command should be able to be instantiated
-      expect(command).to be_a(described_class)
-
-      # Should run without raising an exception
-      expect { command.run }.not_to raise_error
+    it "runs against the bundled database without raising" do
+      expect { capture_output { described_class.new(options).run } }.not_to raise_error
     end
 
-    it "loads the database correctly" do
-      command = described_class.new(options)
-
-      # Should not raise an error when loading the database
-      expect { command.run }.not_to raise_error
-    end
-
-    it "handles database errors gracefully" do
-      invalid_options = { database: "/nonexistent/path" }
-      command = described_class.new(invalid_options)
-
-      # Should raise ValidationError for invalid database path
+    it "raises ValidationError when the database path is missing" do
       expect do
-        command.run
+        described_class.new(database: "/nonexistent/path").run
       end.to raise_error(Unitsdb::Errors::ValidationError) do |error|
         expect(error.message).to include("Failed to validate UCUM references")
       end
     end
 
-    it "validates UCUM references across all entity types" do
-      command = described_class.new(options)
+    it "flags two prefixes sharing the same UCUM code" do
+      shared_ref = Unitsdb::ExternalReference.new(
+        uri: "http://unitsofmeasure.org/ucum/k",
+        type: "normative",
+        authority: "ucum",
+      )
+      prefix_a = Unitsdb::Prefix.new(
+        identifiers: [Unitsdb::Identifier.new(id: "NISTp10_3a", type: "nist")],
+        short: "kilo_a",
+        names: [Unitsdb::LocalizedString.new(value: "kilo a", lang: "en")],
+        references: [shared_ref],
+      )
+      prefix_b = Unitsdb::Prefix.new(
+        identifiers: [Unitsdb::Identifier.new(id: "NISTp10_3b", type: "nist")],
+        short: "kilo_b",
+        names: [Unitsdb::LocalizedString.new(value: "kilo b", lang: "en")],
+        references: [shared_ref],
+      )
+      db = Unitsdb::Database.new
+      db.prefixes = [prefix_a, prefix_b]
 
-      # Mock the database to have entities with UCUM references
-      db = double("database")
+      command = described_class.new(options)
       allow(command).to receive(:load_database).and_return(db)
 
-      # Mock entities with no external references (should pass validation)
-      units = [double("unit", external_references: nil)]
-      prefixes = [double("prefix", external_references: [])]
-
-      allow(db).to receive_messages(units: units, prefixes: prefixes)
-
-      # Should run without errors
-      expect { command.run }.not_to raise_error
+      output = capture_output { command.run }
+      expect(output[:output]).to include("Found duplicate UCUM references:")
+      expect(output[:output]).to include("http://unitsofmeasure.org/ucum/k")
     end
   end
 end

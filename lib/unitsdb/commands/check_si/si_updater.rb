@@ -13,24 +13,9 @@ module Unitsdb
         module_function
 
         # Update references in YAML file (TTL → DB direction)
-        def update_references(entity_type, missing_matches, db_entities,
+        def update_references(entity_type, missing_matches, _db_entities,
   output_file, include_potential = false)
-          # Use the database objects to access the data directly
-          original_yaml_file = db_entities.first.send(:yaml_file) if db_entities&.first.respond_to?(
-            :yaml_file, true
-          )
-
-          # If we can't get the path from the database object, use the output file path as a fallback
-          if original_yaml_file.nil? || !File.exist?(original_yaml_file)
-            puts "Warning: Could not determine original YAML file path. Using output file as template."
-            original_yaml_file = output_file
-
-            # Create an empty template if output file doesn't exist
-            unless File.exist?(original_yaml_file)
-              FileUtils.mkdir_p(File.dirname(original_yaml_file))
-              File.write(original_yaml_file, { entity_type => [] }.to_yaml)
-            end
-          end
+          original_yaml_file = resolve_yaml_file(output_file, entity_type)
 
           # Load the original YAML file
           yaml_content = File.read(original_yaml_file)
@@ -111,23 +96,7 @@ module Unitsdb
         # Update references in YAML file (DB → TTL direction)
         def update_db_references(entity_type, missing_refs, output_file,
   include_potential = false)
-          # Try to get the original YAML file from the first entity
-          first_entity = missing_refs.first&.dig(:db_entity)
-          original_yaml_file = first_entity.send(:yaml_file) if first_entity.respond_to?(
-            :yaml_file, true
-          )
-
-          # If we can't get the path from the database object, use the output file path as a fallback
-          if original_yaml_file.nil? || !File.exist?(original_yaml_file)
-            puts "Warning: Could not determine original YAML file path. Using output file as template."
-            original_yaml_file = output_file
-
-            # Create an empty template if output file doesn't exist
-            unless File.exist?(original_yaml_file)
-              FileUtils.mkdir_p(File.dirname(original_yaml_file))
-              File.write(original_yaml_file, { entity_type => [] }.to_yaml)
-            end
-          end
+          original_yaml_file = resolve_yaml_file(output_file, entity_type)
 
           # Load the original YAML file
           yaml_content = File.read(original_yaml_file)
@@ -146,7 +115,7 @@ module Unitsdb
               # Check if it's an exact match or if we're including potential matches
               match_type = match_types[ttl_entity[:uri]] || "Exact match" # Default to exact match
               match_pair_key = "#{entity_id}:#{ttl_entity[:uri]}"
-              match_details = Unitsdb::Commands::CheckSi::SiMatcher.instance_variable_get(:@match_details)&.dig(match_pair_key)
+              match_details = Unitsdb::Commands::CheckSi::SiMatcher.match_details&.dig(match_pair_key)
 
               if match_details && %w[symbol_match
                                      partial_match].include?(match_details[:match_desc])
@@ -208,9 +177,20 @@ module Unitsdb
           write_yaml_file(output_file, output_data)
         end
 
+        # Resolve which YAML file to read from. Caller supplies
+        # `output_file` as the canonical path; if it doesn't exist
+        # yet we seed it with an empty `{entity_type => []}` template.
+        def resolve_yaml_file(output_file, entity_type)
+          unless File.exist?(output_file)
+            FileUtils.mkdir_p(File.dirname(output_file))
+            File.write(output_file, { entity_type => [] }.to_yaml)
+          end
+          output_file
+        end
+
         # Helper to write YAML file
+        # Ensure the output directory exists
         def write_yaml_file(output_file, output_data)
-          # Ensure the output directory exists
           output_dir = File.dirname(output_file)
           FileUtils.mkdir_p(output_dir)
 

@@ -8,53 +8,45 @@ RSpec.describe Unitsdb::Commands::Validate::QudtReferences do
   let(:options) { { database: database_path } }
 
   describe "#run" do
-    it "can be instantiated and run without errors" do
-      command = described_class.new(options)
-
-      # The command should be able to be instantiated
-      expect(command).to be_a(described_class)
-
-      # Should run without raising an exception
-      expect { command.run }.not_to raise_error
+    it "runs against the bundled database without raising" do
+      expect { capture_output { described_class.new(options).run } }.not_to raise_error
     end
 
-    it "loads the database correctly" do
-      command = described_class.new(options)
-
-      # Should not raise an error when loading the database
-      expect { command.run }.not_to raise_error
-    end
-
-    it "handles database errors gracefully" do
-      invalid_options = { database: "/nonexistent/path" }
-      command = described_class.new(invalid_options)
-
-      # Should raise ValidationError for invalid database path
+    it "raises ValidationError when the database path is missing" do
       expect do
-        command.run
+        described_class.new(database: "/nonexistent/path").run
       end.to raise_error(Unitsdb::Errors::ValidationError) do |error|
         expect(error.message).to include("Failed to validate QUDT references")
       end
     end
 
-    it "validates QUDT references across all entity types" do
-      command = described_class.new(options)
+    it "flags two units sharing the same QUDT URI" do
+      shared_ref = Unitsdb::ExternalReference.new(
+        uri: "http://qudt.org/vocab/unit/M",
+        type: "normative",
+        authority: "qudt",
+      )
+      unit_a = Unitsdb::Unit.new(
+        identifiers: [Unitsdb::Identifier.new(id: "NISTu1", type: "nist")],
+        short: "meter_a",
+        names: [Unitsdb::LocalizedString.new(value: "meter a", lang: "en")],
+        references: [shared_ref],
+      )
+      unit_b = Unitsdb::Unit.new(
+        identifiers: [Unitsdb::Identifier.new(id: "NISTu2", type: "nist")],
+        short: "meter_b",
+        names: [Unitsdb::LocalizedString.new(value: "meter b", lang: "en")],
+        references: [shared_ref],
+      )
+      db = Unitsdb::Database.new
+      db.units = [unit_a, unit_b]
 
-      # Mock the database to have entities with QUDT references
-      db = double("database")
+      command = described_class.new(options)
       allow(command).to receive(:load_database).and_return(db)
 
-      # Mock entities with no references (should pass validation)
-      units = [double("unit", references: nil)]
-      quantities = [double("quantity", references: [])]
-      dimensions = [double("dimension", references: nil)]
-      unit_systems = [double("unit_system", references: [])]
-
-      allow(db).to receive_messages(units: units, quantities: quantities,
-                                    dimensions: dimensions, unit_systems: unit_systems)
-
-      # Should run without errors
-      expect { command.run }.not_to raise_error
+      output = capture_output { command.run }
+      expect(output[:output]).to include("Found duplicate QUDT references:")
+      expect(output[:output]).to include("http://qudt.org/vocab/unit/M")
     end
   end
 end

@@ -168,20 +168,17 @@ include_potential = false)
 
         # Get entity ID (either from identifiers array or directly)
         def get_entity_id(entity)
-          if entity.respond_to?(:identifiers) && entity.identifiers && !entity.identifiers.empty?
-            entity.identifiers.first.id
-          elsif entity.respond_to?(:id)
-            entity.id
-          end
+          return entity.identifiers.first.id unless entity.identifiers.empty?
+
+          entity.short
         end
 
         # Check if an entity has been manually verified (has a special flag)
-        def manually_verified?(entity)
-          return false unless entity.respond_to?(:references) && entity.references
-
-          entity.references.any? do |ref|
-            ref.authority == QUDT_AUTHORITY && ref.respond_to?(:verified) && ref.verified
-          end
+        # Unitsdb::ExternalReference carries no `verified` flag in the
+        # 2.0 schema, so nothing is ever manually verified. Kept as a
+        # stub for callers; returns false unconditionally.
+        def manually_verified?(_entity)
+          false
         end
       end
     end

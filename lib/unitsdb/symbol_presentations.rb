@@ -2,8 +2,6 @@
 
 module Unitsdb
   class SymbolPresentations < Lutaml::Model::Serializable
-    # model Config.model_for(:symbol_presentations)
-
     attribute :id, :string
     attribute :ascii, :string
     attribute :html, :string

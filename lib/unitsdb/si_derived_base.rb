@@ -12,7 +12,6 @@
 
 module Unitsdb
   class SiDerivedBase < RootUnitReference
-    # model Config.model_for(:si_derived_base)
   end
 
   Config.register_model(SiDerivedBase, id: :si_derived_base)

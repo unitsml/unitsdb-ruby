@@ -90,17 +90,15 @@ unmatched_qudt)
             details = "DIMENSION VECTOR: #{entity.label || 'No label'}"
             details += "\n   URI: #{entity.uri}"
             details += "\n   Description: #{entity.description}" if entity.description
-            if entity.respond_to?(:dimension_exponent_for_length)
-              exponents = []
-              exponents << "L:#{entity.dimension_exponent_for_length}" if entity.dimension_exponent_for_length != 0
-              exponents << "M:#{entity.dimension_exponent_for_mass}" if entity.dimension_exponent_for_mass != 0
-              exponents << "T:#{entity.dimension_exponent_for_time}" if entity.dimension_exponent_for_time != 0
-              exponents << "I:#{entity.dimension_exponent_for_electric_current}" if entity.dimension_exponent_for_electric_current != 0
-              exponents << "Θ:#{entity.dimension_exponent_for_thermodynamic_temperature}" if entity.dimension_exponent_for_thermodynamic_temperature != 0
-              exponents << "N:#{entity.dimension_exponent_for_amount_of_substance}" if entity.dimension_exponent_for_amount_of_substance != 0
-              exponents << "J:#{entity.dimension_exponent_for_luminous_intensity}" if entity.dimension_exponent_for_luminous_intensity != 0
-              details += "\n   Exponents: #{exponents.join(', ')}" unless exponents.empty?
-            end
+            exponents = []
+            exponents << "L:#{entity.dimension_exponent_for_length}" if entity.dimension_exponent_for_length != 0
+            exponents << "M:#{entity.dimension_exponent_for_mass}" if entity.dimension_exponent_for_mass != 0
+            exponents << "T:#{entity.dimension_exponent_for_time}" if entity.dimension_exponent_for_time != 0
+            exponents << "I:#{entity.dimension_exponent_for_electric_current}" if entity.dimension_exponent_for_electric_current != 0
+            exponents << "Θ:#{entity.dimension_exponent_for_thermodynamic_temperature}" if entity.dimension_exponent_for_thermodynamic_temperature != 0
+            exponents << "N:#{entity.dimension_exponent_for_amount_of_substance}" if entity.dimension_exponent_for_amount_of_substance != 0
+            exponents << "J:#{entity.dimension_exponent_for_luminous_intensity}" if entity.dimension_exponent_for_luminous_intensity != 0
+            details += "\n   Exponents: #{exponents.join(', ')}" unless exponents.empty?
             details
           when Unitsdb::QudtSystemOfUnits
             details = "SYSTEM OF UNITS: #{entity.label || 'No label'}"
@@ -157,26 +155,17 @@ unmatched_qudt)
 
         # Helper to get db entity id
         def get_db_entity_id(entity)
-          if entity.respond_to?(:identifiers) && entity.identifiers && !entity.identifiers.empty?
-            entity.identifiers.first.id
-          elsif entity.respond_to?(:id)
-            entity.id
-          else
-            "unknown-id"
-          end
+          return entity.identifiers.first.id unless entity.identifiers.empty?
+
+          entity.short || "unknown-id"
         end
 
         # Helper to get db entity name
         def get_db_entity_name(entity)
-          if entity.respond_to?(:names) && entity.names && !entity.names.empty?
-            entity.names.first.value
-          elsif entity.respond_to?(:short) && entity.short
-            entity.short
-          elsif entity.respond_to?(:name)
-            entity.name
-          else
-            "unknown-name"
-          end
+          return entity.names.first.value unless entity.names.empty?
+          return entity.short if entity.short
+
+          "unknown-name"
         end
 
         # Helper to get qudt entity name

@@ -3,16 +3,16 @@
 module Unitsdb
   module Commands
     module Validate
+      # `unitsdb validate ucum_references`. Checks that no UCUM
+      # reference code is used by more than one Unit or Prefix.
       class UcumReferences < Unitsdb::Commands::Base
+        AUTHORITY = "ucum"
+        ENTITY_COLLECTIONS = %i[units prefixes].freeze
+
         def run
-          # Load the database
           db = load_database(@options[:database])
-
-          # Check for duplicate UCUM references
-          duplicates = check_ucum_references(db)
-
-          # Display results
-          display_duplicate_results(duplicates)
+          duplicates = scan(db)
+          display(duplicates)
         rescue Unitsdb::Errors::DatabaseError => e
           raise Unitsdb::Errors::ValidationError,
                 "Failed to validate UCUM references: #{e.message}"
@@ -20,84 +20,50 @@ module Unitsdb
 
         private
 
-        def check_ucum_references(db)
-          duplicates = {}
-
-          # Check units
-          check_entity_ucum_references(db.units, "units", duplicates)
-
-          # Check prefixes
-          check_entity_ucum_references(db.prefixes, "prefixes", duplicates)
-
-          duplicates
+        def scan(db)
+          {}.tap do |duplicates|
+            ENTITY_COLLECTIONS.each do |name|
+              collection = db.collection(name) || []
+              dup = scan_collection(collection)
+              duplicates[name.to_s] = dup unless dup.empty?
+            end
+          end
         end
 
-        def check_entity_ucum_references(entities, entity_type, duplicates)
-          # Track UCUM references by code
-          ucum_refs = {}
-
+        def scan_collection(entities)
+          by_code = {}
           entities.each_with_index do |entity, index|
-            # Skip if no external references
-            next unless entity.respond_to?(:external_references) && entity.external_references
+            refs = entity.references || []
+            refs.each do |ref|
+              next unless ref.authority == AUTHORITY
 
-            # Check each external reference
-            entity.external_references.each do |ref|
-              # Only interested in ucum references
-              next unless ref.authority == "ucum"
-
-              # Get entity info for display
-              entity_id = entity.respond_to?(:id) ? entity.id : entity.short
-              entity_name = if entity.respond_to?(:names) && entity.names&.first
-                              entity.names.first.respond_to?(:name) ? entity.names.first.name : entity.names.first
-                            else
-                              entity.short
-                            end
-
-              # Track this reference
-              ucum_refs[ref.code] ||= []
-              ucum_refs[ref.code] << {
-                entity_id: entity_id,
-                entity_name: entity_name,
+              (by_code[ref.uri] ||= []) << {
+                entity_id: entity.identifiers.first&.id || entity.short,
+                entity_name: entity.names.first&.value || entity.short,
                 index: index,
               }
             end
           end
-
-          # Find duplicates (codes with more than one entity)
-          ucum_refs.each do |code, entities|
-            next unless entities.size > 1
-
-            # Record this duplicate
-            duplicates[entity_type] ||= {}
-            duplicates[entity_type][code] = entities
-          end
+          by_code.reject { |_, refs| refs.size == 1 }
         end
 
-        def display_duplicate_results(duplicates)
+        def display(duplicates)
           if duplicates.empty?
-            puts "No duplicate UCUM references found! Each UCUM reference code is used by at most one entity of each type."
+            puts "No duplicate UCUM references found! " \
+                 "Each UCUM reference code is used by at most one entity of each type."
             return
           end
 
           puts "Found duplicate UCUM references:"
-
           duplicates.each do |entity_type, code_duplicates|
             puts "\n  #{entity_type.capitalize}:"
-
-            code_duplicates.each do |code, entities|
+            code_duplicates.each do |code, refs|
               puts "    UCUM Code: #{code}"
-              puts "    Used by #{entities.size} entities:"
-
-              entities.each do |entity|
-                puts "      - #{entity[:entity_id]} (#{entity[:entity_name]}) at index #{entity[:index]}"
-              end
+              puts "    Used by #{refs.size} entities:"
+              refs.each { |r| puts "      - #{r[:entity_id]} (#{r[:entity_name]}) at index #{r[:index]}" }
               puts ""
             end
           end
-
-          puts "\nEach UCUM reference should be used by at most one entity of each type."
-          puts "Please fix the duplicates by either removing the reference from all but one entity,"
-          puts "or by updating the references to use different codes appropriate for each entity."
         end
       end
     end

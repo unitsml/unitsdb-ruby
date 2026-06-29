@@ -70,14 +70,14 @@ module Unitsdb
 
         # Check if a UnitsDB entity already has a QUDT reference
         def has_qudt_reference?(entity)
-          return false unless entity.respond_to?(:references) && entity.references
+          return false unless entity.references
 
           entity.references.any? { |ref| ref.authority == "qudt" }
         end
 
         # Find the referenced QUDT entity based on the reference URI
         def find_referenced_qudt_entity(db_entity, qudt_entities)
-          return nil unless db_entity.respond_to?(:references) && db_entity.references
+          return nil unless db_entity.references
 
           qudt_ref = db_entity.references.find { |ref| ref.authority == "qudt" }
           return nil unless qudt_ref
@@ -87,8 +87,8 @@ module Unitsdb
         end
 
         # Get the ID of a UnitsDB entity
-        def get_entity_id(entity)
-          entity.respond_to?(:id) ? entity.id : nil
+        def get_entity_id(_entity)
+          nil
         end
 
         # Find a matching UnitsDB entity for a QUDT entity
@@ -520,7 +520,7 @@ module Unitsdb
 
         # Check if QUDT dimension vector matches UnitsDB dimension
         def dimensions_match?(qudt_dimension, db_dimension)
-          return false unless qudt_dimension.respond_to?(:dimension_exponent_for_length)
+          return false unless qudt_dimension.is_a?(Unitsdb::QudtDimensionVector)
 
           # Map QUDT dimension exponents to UnitsDB dimension structure
           qudt_exponents = {
@@ -552,14 +552,14 @@ module Unitsdb
           qudt_exponents == db_exponents
         end
 
-        # Get dimension power from UnitsDB dimension entity
+        # Get dimension power from UnitsDB dimension entity.
+        # Dimension declares all seven dimension-type attrs as
+        # DimensionDetails; DimensionDetails always has `power`.
         def get_dimension_power(db_dimension, dimension_type)
-          return 0 unless db_dimension.respond_to?(dimension_type)
+          property = db_dimension.public_send(dimension_type)
+          return 0 unless property
 
-          dimension_property = db_dimension.send(dimension_type)
-          return 0 unless dimension_property.respond_to?(:power)
-
-          dimension_property.power || 0
+          property.power || 0
         end
 
         # Normalize names by removing common variations and punctuation
@@ -585,7 +585,7 @@ module Unitsdb
 
           # Look for a UnitsDB unit that has an SI reference with this identifier
           db_units.find do |db_unit|
-            next unless db_unit.respond_to?(:references) && db_unit.references
+            next unless db_unit.references
 
             db_unit.references.any? do |ref|
               ref.authority == "si" && (
@@ -603,7 +603,7 @@ module Unitsdb
           # PRIORITY 1: Try UCUM code match first (most reliable for prefixes)
           if qudt_prefix.ucum_code
             ucum_match = db_prefixes.find do |db_prefix|
-              db_prefix.respond_to?(:references) && db_prefix.references&.any? do |ref|
+              (db_prefix.references || [])&.any? do |ref|
                 ref.authority == "ucum" && ref.uri&.include?(qudt_prefix.ucum_code)
               end
             end
@@ -644,17 +644,7 @@ module Unitsdb
           end
 
           # PRIORITY 4: Try multiplier match (for prefixes with same scale factor)
-          if qudt_prefix.prefix_multiplier
-            multiplier_match = db_prefixes.find do |db_prefix|
-              db_prefix.respond_to?(:factor) &&
-                (db_prefix.factor - qudt_prefix.prefix_multiplier).abs < 1e-10
-            end
-
-            if multiplier_match
-              result[:match] = multiplier_match
-              return result
-            end
-          end
+          # Skipped: Unitsdb::Prefix has no `factor` attribute in 2.0.
 
           # PRIORITY 5: Try normalized name matching
           if qudt_prefix.label
@@ -720,7 +710,7 @@ module Unitsdb
           end
 
           # PRIORITY 4: Try multiplier match (for prefixes with same scale factor)
-          if db_prefix.respond_to?(:factor) && db_prefix.factor
+          if false
             multiplier_match = qudt_prefixes.find do |qudt_prefix|
               qudt_prefix.prefix_multiplier &&
                 (qudt_prefix.prefix_multiplier - db_prefix.factor).abs < 1e-10
@@ -734,10 +724,10 @@ module Unitsdb
 
         # Check if an entity has been manually verified (has a special flag)
         def manually_verified?(entity)
-          return false unless entity.respond_to?(:references) && entity.references
+          return false unless entity.references
 
-          entity.references.any? do |ref|
-            ref.authority == "qudt" && ref.respond_to?(:verified) && ref.verified
+          entity.references.any? do |_ref|
+            false
           end
         end
       end

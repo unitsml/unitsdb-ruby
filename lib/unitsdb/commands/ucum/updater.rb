@@ -120,11 +120,9 @@ include_potential = false)
 
         # Get entity ID (either from identifiers array or directly)
         def get_entity_id(entity)
-          if entity.respond_to?(:identifiers) && entity.identifiers && !entity.identifiers.empty?
-            entity.identifiers.first.id
-          elsif entity.respond_to?(:id)
-            entity.id
-          end
+          return entity.identifiers.first.id unless entity.identifiers.empty?
+
+          entity.short
         end
       end
     end

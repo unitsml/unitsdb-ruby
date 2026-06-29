@@ -1,20 +1,9 @@
 # frozen_string_literal: true
 
 require "thor"
-require "fileutils"
 
 module Unitsdb
-  class Cli < Thor
-    # Enable --trace globally for all subcommands
-    # When enabled, Thor shows full backtraces on error
-    class_option :trace, type: :boolean, default: false,
-                         desc: "Show full backtrace on error"
-
-    # Fix Thor deprecation warning
-    def self.exit_on_failure?
-      true
-    end
-
+  class Cli < Unitsdb::Commands::Thor
     desc "ucum SUBCOMMAND", "UCUM-related commands"
     subcommand "ucum", Commands::UcumCommand
 
@@ -41,7 +30,7 @@ module Unitsdb
                       desc: "Path to UnitsDB database (required)"
 
     def search(query)
-      run_command(Commands::Search, :run, query)
+      run_command(Commands::Search, options, query, method: :run)
     end
 
     desc "get ID", "Get detailed information about an entity by ID"
@@ -52,7 +41,7 @@ module Unitsdb
     option :database, type: :string, required: true, aliases: "-d",
                       desc: "Path to UnitsDB database (required)"
     def get(id)
-      run_command(Commands::Get, :get, id)
+      run_command(Commands::Get, options, id, method: :get)
     end
 
     desc "check_si",
@@ -71,7 +60,7 @@ module Unitsdb
                       desc: "Path to UnitsDB database (required)"
 
     def check_si
-      run_command(Commands::CheckSiCommand, :run)
+      run_command(Commands::CheckSiCommand, options)
     end
 
     desc "release", "Create release files (unified YAML and/or ZIP archive)"
@@ -84,32 +73,7 @@ module Unitsdb
     option :database, type: :string, required: true, aliases: "-d",
                       desc: "Path to UnitsDB database (required)"
     def release
-      run_command(Commands::Release, :run)
-    end
-
-    private
-
-    def run_command(command_class, method, *args)
-      command = command_class.new(options)
-      command.send(method, *args)
-    rescue Unitsdb::Errors::CLIRuntimeError => e
-      handle_cli_error(e)
-    rescue StandardError => e
-      handle_error(e)
-    end
-
-    def handle_cli_error(error)
-      raise error if debugging?
-
-      warn "Error: #{error.message}"
-      exit 1
-    end
-
-    def handle_error(error)
-      raise error if debugging?
-
-      warn "Error: #{error.message}"
-      exit 1
+      run_command(Commands::Release, options)
     end
   end
 end

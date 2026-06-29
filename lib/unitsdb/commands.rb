@@ -2,10 +2,12 @@
 
 module Unitsdb
   module Commands
+    autoload :Thor, "unitsdb/commands/thor"
     autoload :ModifyCommand, "unitsdb/commands/_modify"
     autoload :Base, "unitsdb/commands/base"
     autoload :CheckSi, "unitsdb/commands/check_si"
     autoload :CheckSiCommand, "unitsdb/commands/check_si"
+    autoload :EntityPresenter, "unitsdb/commands/entity_presenter"
     autoload :Get, "unitsdb/commands/get"
     autoload :Normalize, "unitsdb/commands/normalize"
     autoload :Qudt, "unitsdb/commands/qudt"

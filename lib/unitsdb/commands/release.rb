@@ -51,7 +51,7 @@ module Unitsdb
         output_path = File.join(@options[:output_dir],
                                 "unitsdb-#{@options[:version]}.zip")
 
-        Zip::File.open(output_path, Zip::File::CREATE) do |zipfile|
+        Zip::File.open(output_path, create: true) do |zipfile|
           {
             dimensions: Unitsdb::Dimensions,
             unit_systems: Unitsdb::UnitSystems,

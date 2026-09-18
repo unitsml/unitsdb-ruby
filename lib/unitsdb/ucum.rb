@@ -11,7 +11,7 @@ module Unitsdb
     attribute :code, :string
     attribute :dimension, :string
     attribute :name, :string
-    attribute :print_symbol, :string, raw: true
+    attribute :print_symbol, :string
     attribute :property, :string
 
     xml do
@@ -20,7 +20,7 @@ module Unitsdb
       map_attribute "CODE", to: :code
       map_attribute "dim", to: :dimension
       map_element "name", to: :name
-      map_element "printSymbol", to: :print_symbol
+      map_element "printSymbol", to: :print_symbol, raw: :content
       map_element "property", to: :property
     end
 
@@ -53,7 +53,7 @@ module Unitsdb
     attribute :code_sensitive, :string
     attribute :code, :string
     attribute :name, :string
-    attribute :print_symbol, :string, raw: true
+    attribute :print_symbol, :string
     attribute :value, UcumPrefixValue
 
     xml do
@@ -61,7 +61,7 @@ module Unitsdb
       map_attribute "Code", to: :code_sensitive
       map_attribute "CODE", to: :code
       map_element "name", to: :name
-      map_element "printSymbol", to: :print_symbol
+      map_element "printSymbol", to: :print_symbol, raw: :content
       map_element "value", to: :value
     end
 
@@ -145,7 +145,7 @@ module Unitsdb
     attribute :is_special, :string
     attribute :klass, :string
     attribute :name, :string, collection: true
-    attribute :print_symbol, :string, raw: true
+    attribute :print_symbol, :string
     attribute :property, :string
     attribute :value, UcumUnitValue
 
@@ -159,7 +159,7 @@ module Unitsdb
       map_attribute "class", to: :klass
 
       map_element "name", to: :name
-      map_element "printSymbol", to: :print_symbol
+      map_element "printSymbol", to: :print_symbol, raw: :content
       map_element "property", to: :property
       map_element "value", to: :value
     end

@@ -11,6 +11,7 @@ module Unitsdb
     # Collections whose entities carry a `symbols` attribute.
     # Used by symbol-based search/match to narrow iteration.
     SYMBOL_COLLECTIONS = %i[units prefixes].freeze
+    SYMBOL_SEARCH_COLLECTIONS = (SYMBOL_COLLECTIONS + %i[currencies]).freeze
 
     attribute :schema_version, :string
     attribute :version, :string
@@ -19,6 +20,7 @@ module Unitsdb
     attribute :quantities, Quantity, collection: true
     attribute :dimensions, Dimension, collection: true
     attribute :unit_systems, UnitSystem, collection: true
+    attribute :currencies, Currency, collection: true
 
     # Resolve a collection name (String or Symbol) to its typed Array.
     # Validates against COLLECTIONS so caller-supplied names can never
@@ -54,7 +56,7 @@ module Unitsdb
       end
     end
 
-    # Find an entity by its specific identifier and type
+    # Find an entity by its identifier and type
     # @param id [String] the identifier value to search for
     # @param type [String, Symbol] the entity type (units, prefixes, quantities, etc.)
     # @return [Object, nil] the first entity with matching identifier or nil if not found
@@ -62,6 +64,34 @@ module Unitsdb
       collection(type).find do |entity|
         entity.identifiers.any? { |identifier| identifier.id == id }
       end
+    end
+
+    # Find a currency by its ISO 4217 alpha code (case-insensitive)
+    # @param code [String, Symbol] the alpha code (e.g. "EUR", :eur)
+    # @return [Currency, nil]
+    def find_by_code(code)
+      needle = code.to_s.upcase
+      currencies.find do |currency|
+        currency.identifiers.any? do |identifier|
+          identifier.type == "iso4217" && identifier.id == needle
+        end
+      end
+    end
+
+    # Find a currency by its ISO 4217 numeric identifier
+    # @param numeric [Integer, String] the numeric code (e.g. 978, "978")
+    # @return [Currency, nil]
+    def find_by_numeric(numeric)
+      # Base 10 explicitly: leading-zero codes ("036") are decimals, not
+      # octal.
+      needle = format("%03d", Integer(numeric.to_s, 10))
+      currencies.find do |currency|
+        currency.identifiers.any? do |identifier|
+          identifier.type == "iso4217_numeric" && identifier.id == needle
+        end
+      end
+    rescue ArgumentError
+      nil
     end
 
     # Find an entity by its identifier id across all entity types
@@ -103,20 +133,31 @@ module Unitsdb
 
     # Find entities by symbol
     # @param symbol [String] the symbol to search for (exact match, case-insensitive)
-    # @param entity_type [String, Symbol, nil] the entity type to search (units or prefixes)
+    # @param entity_type [String, Symbol, nil] the entity type to search
+    #   (units, prefixes, currencies)
     # @return [Array] entities with matching symbol
     def find_by_symbol(symbol, entity_type = nil)
       return [] unless symbol
 
       needle = symbol.downcase
-      scope = scope_for(entity_type, SYMBOL_COLLECTIONS)
+      scope = scope_for(entity_type, SYMBOL_SEARCH_COLLECTIONS)
 
       scope.each_with_object([]) do |name, results|
         collection(name).each do |entity|
-          results << entity if entity.symbols.any? do |sym|
-            sym.ascii.to_s.downcase == needle
+          results << entity if entity.symbols.to_a.any? do |sym|
+            symbol_match?(name, sym, symbol, needle)
           end
         end
+      end
+    end
+
+    # Currency symbols carry the sign in `unicode` (€, A$) and the alpha
+    # code in `ascii` (EUR, AUD); units and prefixes match on ascii only.
+    def symbol_match?(collection_name, sym, symbol, needle)
+      if collection_name == :currencies
+        sym.unicode.to_s == symbol || sym.ascii.to_s.downcase == needle
+      else
+        sym.ascii.to_s.downcase == needle
       end
     end
 
@@ -175,11 +216,11 @@ module Unitsdb
     def matches_text?(entity, needle)
       entity.identifiers.any? { |i| i.id.to_s.downcase.include?(needle) } ||
         entity.names.any? { |n| n.value.to_s.downcase.include?(needle) } ||
-        entity.short.to_s.downcase.include?(needle)
+        (entity.respond_to?(:short) && entity.short.to_s.downcase.include?(needle))
     end
 
     def match_exact(entity, value, result)
-      if entity.short && entity.short.downcase == value.downcase
+      if entity.respond_to?(:short) && entity.short && entity.short.downcase == value.downcase
         result[:exact] << {
           entity: entity,
           match_desc: "short_to_name",

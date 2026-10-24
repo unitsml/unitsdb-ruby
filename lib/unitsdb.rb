@@ -34,6 +34,7 @@ module Unitsdb
   # Entity models
   autoload :Dimension, "unitsdb/dimension"
   autoload :Prefix, "unitsdb/prefix"
+  autoload :Currency, "unitsdb/currency"
   autoload :UnitSystem, "unitsdb/unit_system"
   autoload :Quantity, "unitsdb/quantity"
   autoload :Scale, "unitsdb/scale"

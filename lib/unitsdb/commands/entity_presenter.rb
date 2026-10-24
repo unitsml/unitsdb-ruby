@@ -26,9 +26,9 @@ module Unitsdb
 
       # Best-effort display name: first localized name value → short → "N/A".
       def display_name
-        name = @entity.names.first
+        name = @entity.names&.first
         return name.value.to_s if name&.value
-        return @entity.short.to_s if @entity.short
+        return entity_short.to_s if entity_short
 
         "N/A"
       end
@@ -38,7 +38,7 @@ module Unitsdb
         puts "Entity details:"
         puts "  - Type: #{type_name}"
         puts "  - Name: #{display_name}"
-        puts "  - Description: #{@entity.short}" if show_short?
+        puts "  - Description: #{entity_short}" if show_short?
         print_identifiers(header: "  - Identifiers:", item_indent: "      ")
         print_extras
         print_references
@@ -48,14 +48,20 @@ module Unitsdb
       def print_summary
         puts "  - #{type_name}: #{display_name}"
         print_identifiers(header: "    IDs:", item_indent: "      ")
-        puts "    Description: #{@entity.short}" if show_short?
+        puts "    Description: #{entity_short}" if show_short?
         puts ""
       end
 
       private
 
       def show_short?
-        @entity.short && @entity.short != display_name
+        entity_short && entity_short != display_name
+      end
+
+      # `short` is a UnitsDB description field some entities (Currency)
+      # do not carry.
+      def entity_short
+        @entity.short if @entity.respond_to?(:short)
       end
 
       def print_identifiers(header:, item_indent:)
@@ -79,19 +85,23 @@ module Unitsdb
       end
 
       def print_unit_symbols
-        return unless @entity.symbols.any?
+        return unless @entity.symbols.to_a.any?
 
         puts "  - Symbols:"
         @entity.symbols.each { |s| puts "      - #{s}" }
       end
 
       def print_references
-        return unless @entity.references.any?
+        return unless entity_references.to_a.any?
 
         puts "  - References:"
-        @entity.references.each do |ref|
+        entity_references.each do |ref|
           puts "      - #{ref.type}: #{ref.uri}"
         end
+      end
+
+      def entity_references
+        @entity.references if @entity.respond_to?(:references)
       end
     end
   end

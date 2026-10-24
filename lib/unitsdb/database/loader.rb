@@ -10,13 +10,22 @@ module Unitsdb
     # Lutaml::Model deserialization. Knows nothing about contexts or
     # registers — that's `Database.from_db`'s job.
     class Loader
-      DATABASE_FILES = {
+      REQUIRED_DATABASE_FILES = {
         "prefixes" => "prefixes.yaml",
         "dimensions" => "dimensions.yaml",
         "units" => "units.yaml",
         "quantities" => "quantities.yaml",
         "unit_systems" => "unit_systems.yaml",
       }.freeze
+
+      # Present in 2.0-era data onward; absent in older bundled data
+      # directories, which must keep loading. When present, the file
+      # participates in all validation like a required file.
+      OPTIONAL_DATABASE_FILES = {
+        "currencies" => "currencies.yaml",
+      }.freeze
+
+      DATABASE_FILES = REQUIRED_DATABASE_FILES.merge(OPTIONAL_DATABASE_FILES).freeze
 
       SUPPORTED_SCHEMA_VERSION = "2.0.0"
 
@@ -45,7 +54,7 @@ module Unitsdb
                 "Database directory not found: #{@dir_path}"
         end
 
-        missing = DATABASE_FILES.values.reject do |filename|
+        missing = REQUIRED_DATABASE_FILES.values.reject do |filename|
           File.exist?(File.join(@dir_path, filename))
         end
         return if missing.empty?
@@ -58,11 +67,13 @@ module Unitsdb
         if ENV["UNITSDB_DEBUG"]
           puts "[UnitsDB] Loading YAML files from directory: #{@dir_path}"
         end
-        DATABASE_FILES.transform_values do |filename|
+        DATABASE_FILES.filter_map do |collection_key, filename|
           path = File.join(@dir_path, filename)
+          next unless File.exist?(path)
+
           puts "  - #{path}" if ENV["UNITSDB_DEBUG"]
-          read_yaml(path, filename)
-        end
+          [collection_key, read_yaml(path, filename)]
+        end.to_h
       end
 
       def read_yaml(path, filename)
@@ -87,8 +98,8 @@ module Unitsdb
       end
 
       def validate_schema_versions!(documents)
-        versions = DATABASE_FILES.each_with_object({}) do |(collection_key, filename), result|
-          document = documents.fetch(collection_key)
+        versions = documents.each_with_object({}) do |(collection_key, document), result|
+          filename = DATABASE_FILES.fetch(collection_key)
           result[filename] = document.fetch("schema_version")
         rescue KeyError
           raise Errors::DatabaseFileInvalidError,
@@ -109,14 +120,17 @@ module Unitsdb
       end
 
       def build_database_hash(documents, schema_version)
-        {
+        hash = {
           "schema_version" => schema_version,
         }.merge(
-          DATABASE_FILES.keys.to_h do |collection_key|
-            document = documents.fetch(collection_key)
+          documents.to_h do |collection_key, document|
             [collection_key, fetch_collection!(document, collection_key)]
           end,
         )
+        # Absent optional collections normalize to empty arrays so
+        # Database accessors never return nil for legacy data dirs.
+        OPTIONAL_DATABASE_FILES.each_key { |key| hash[key] ||= [] }
+        hash
       end
 
       def fetch_collection!(document, collection_key)

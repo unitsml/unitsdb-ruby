@@ -1,4 +1,4 @@
 [submodule "data"]
 	path = data
 	url = https://github.com/unitsml/unitsdb.git
-	branch = refs/tags/v2.0.0
+	branch = refs/tags/v2.0.1

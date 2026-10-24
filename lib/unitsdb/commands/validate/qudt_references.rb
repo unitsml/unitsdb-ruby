@@ -32,6 +32,8 @@ module Unitsdb
         def scan_collection(entities)
           by_uri = {}
           entities.each_with_index do |entity, index|
+            next unless entity.respond_to?(:references)
+
             refs = entity.references || []
             refs.each do |ref|
               next unless ref.authority == AUTHORITY

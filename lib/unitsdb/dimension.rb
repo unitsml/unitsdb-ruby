@@ -12,6 +12,7 @@ module Unitsdb
     attribute :amount_of_substance, DimensionDetails
     attribute :luminous_intensity, DimensionDetails
     attribute :plane_angle, DimensionDetails
+    attribute :currency, DimensionDetails
     attribute :short, :string
     attribute :names, LocalizedString, collection: true
     attribute :references, ExternalReference, collection: true

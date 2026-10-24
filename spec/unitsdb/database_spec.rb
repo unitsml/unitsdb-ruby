@@ -31,6 +31,8 @@ RSpec.describe Unitsdb::Database do
                                                     "quantities.yaml"))
     unit_systems_hash = YAML.safe_load_file(File.join(dir_path,
                                                       "unit_systems.yaml"))
+    currencies_hash = YAML.safe_load_file(File.join(dir_path,
+                                                    "currencies.yaml"))
 
     prefixes_version = prefixes_hash["schema_version"]
 
@@ -41,6 +43,7 @@ RSpec.describe Unitsdb::Database do
       "units" => units_hash["units"],
       "quantities" => quantities_hash["quantities"],
       "unit_systems" => unit_systems_hash["unit_systems"],
+      "currencies" => currencies_hash["currencies"],
     }.to_yaml
 
     # puts generated

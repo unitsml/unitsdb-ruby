@@ -28,6 +28,7 @@ module Unitsdb
   autoload :ScaleReference, "unitsdb/scale_reference"
   autoload :ExternalReference, "unitsdb/external_reference"
   autoload :RootUnitReference, "unitsdb/root_unit_reference"
+  autoload :CanonicalConversion, "unitsdb/canonical_conversion"
   autoload :SiDerivedBase, "unitsdb/si_derived_base"
   autoload :DimensionDetails, "unitsdb/dimension_details"
 

@@ -27,7 +27,11 @@ module Unitsdb
 
       DATABASE_FILES = REQUIRED_DATABASE_FILES.merge(OPTIONAL_DATABASE_FILES).freeze
 
-      SUPPORTED_SCHEMA_VERSION = "2.0.0"
+      SUPPORTED_SCHEMA_VERSIONS = %w[2.0.0 2.1.0].freeze
+
+      # Transitional: 2.1.0 adds optional canonical_conversion/operations
+      # fields only — 2.0.0 data remains valid.
+      SUPPORTED_SCHEMA_VERSION = SUPPORTED_SCHEMA_VERSIONS.last
 
       def self.load(dir_path)
         new(dir_path).load
@@ -112,11 +116,11 @@ module Unitsdb
         end
 
         version = versions.values.first
-        return version if version == SUPPORTED_SCHEMA_VERSION
+        return version if SUPPORTED_SCHEMA_VERSIONS.include?(version)
 
         raise Errors::UnsupportedVersionError,
               "Unsupported database version: #{version}. " \
-              "Only version #{SUPPORTED_SCHEMA_VERSION} is supported."
+              "Supported versions: #{SUPPORTED_SCHEMA_VERSIONS.join(', ')}."
       end
 
       def build_database_hash(documents, schema_version)

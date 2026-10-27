@@ -1102,3 +1102,12 @@ without any additional setup.
 == License
 
 Copyright Ribose. BSD 2-clause license.
+
+== JavaScript / TypeScript
+
+The native JavaScript implementation of UnitsDB is the `unitsdb` package
+on npm (https://github.com/unitsml/unitsdb-ts[unitsml/unitsdb-ts]) —
+typed access to the same dataset, rebuilt from unitsdb releases. The
+former Opal-compiled `@unitsml/unitsdb` package is deprecated; its
+repository (unitsml/unitsdb-js) is archived.
+

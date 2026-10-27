@@ -14,6 +14,7 @@ module Unitsdb
     attribute :si_derived_bases, SiDerivedBase, collection: true
     attribute :root_units, RootUnitReference, collection: true
     attribute :references, ExternalReference, collection: true
+    attribute :canonical_conversion, CanonicalConversion
     attribute :scale_reference, ScaleReference
   end
 

@@ -7,6 +7,7 @@ module Unitsdb
     attribute :description, LocalizedString, collection: true
     attribute :short, :string
     attribute :properties, ScaleProperties
+    attribute :operations, :string, collection: true
   end
 
   Config.register_model(Scale, id: :scale)

@@ -19,7 +19,7 @@ RSpec.describe Unitsdb::Database::Loader do
   it "loads a directory without currencies.yaml with an empty collection" do
     database = described_class.load(legacy_dir)
 
-    expect(database["schema_version"]).to eq("2.0.0")
+    expect(database["schema_version"]).to eq("2.1.0")
     expect(database["currencies"]).to eq([])
   end
 
@@ -44,7 +44,7 @@ RSpec.describe Unitsdb::Database::Loader do
   it "accepts a present currencies.yaml at the supported version" do
     File.write(File.join(legacy_dir, "currencies.yaml"),
                <<~YAML)
-                 schema_version: "2.0.0"
+                 schema_version: "2.1.0"
                  currencies: []
                YAML
 

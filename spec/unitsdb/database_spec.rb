@@ -164,7 +164,7 @@ RSpec.describe Unitsdb::Database do
         described_class.from_db(tmpdir)
       end.to raise_error(
         Unitsdb::Errors::UnsupportedVersionError,
-        /Unsupported database version: 3\.0\.0\. Only version 2\.0\.0 is supported\./,
+        /Unsupported database version: 3\.0\.0\. Supported versions: 2.0.0, 2.1.0./,
       )
     end
   end

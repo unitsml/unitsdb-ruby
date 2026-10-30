@@ -21,7 +21,7 @@ RSpec.describe Unitsdb::Database do
   end
   let(:fixture_currencies) do
     <<~YAML
-      schema_version: "2.1.0"
+      schema_version: "2.2.0"
       currencies:
       - identifiers:
         - type: iso4217

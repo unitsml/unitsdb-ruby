@@ -6,6 +6,7 @@ module Unitsdb
     attribute :quantity_type, :string
     attribute :names, LocalizedString, collection: true
     attribute :short, :string
+    attribute :equivalence_class, :string
     attribute :unit_references, UnitReference, collection: true
     attribute :dimension_reference, DimensionReference
     attribute :references, ExternalReference, collection: true

@@ -27,7 +27,7 @@ module Unitsdb
 
       DATABASE_FILES = REQUIRED_DATABASE_FILES.merge(OPTIONAL_DATABASE_FILES).freeze
 
-      SUPPORTED_SCHEMA_VERSIONS = %w[2.0.0 2.1.0].freeze
+      SUPPORTED_SCHEMA_VERSIONS = %w[2.0.0 2.1.0 2.2.0].freeze
 
       # Transitional: 2.1.0 adds optional canonical_conversion/operations
       # fields only — 2.0.0 data remains valid.

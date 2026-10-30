@@ -46,7 +46,7 @@ RSpec.describe Unitsdb do
       db = described_class.database
 
       expect(db).to be_a(Unitsdb::Database)
-      expect(db.schema_version).to eq("2.1.0")
+      expect(db.schema_version).to eq("2.2.0")
       expect(described_class.database).to equal(db)
     end
 
@@ -70,7 +70,7 @@ RSpec.describe Unitsdb do
       %w[prefixes dimensions units quantities unit_systems].each do |entity|
         file_path = File.join(data_dir, "#{entity}.yaml")
         hash = YAML.safe_load_file(file_path)
-        expect(hash["schema_version"]).to eq("2.1.0"),
+        expect(hash["schema_version"]).to eq("2.2.0"),
                                           "Expected #{entity}.yaml to have schema_version 2.0.0, got #{hash['schema_version']}"
       end
     end

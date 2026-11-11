@@ -21,6 +21,7 @@ module Unitsdb
     attribute :dimensions, Dimension, collection: true
     attribute :unit_systems, UnitSystem, collection: true
     attribute :currencies, Currency, collection: true
+    attribute :scales, Scale, collection: true
 
     # Resolve a collection name (String or Symbol) to its typed Array.
     # Validates against COLLECTIONS so caller-supplied names can never

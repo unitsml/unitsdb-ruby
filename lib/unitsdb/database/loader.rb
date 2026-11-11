@@ -23,6 +23,7 @@ module Unitsdb
       # participates in all validation like a required file.
       OPTIONAL_DATABASE_FILES = {
         "currencies" => "currencies.yaml",
+        "scales" => "scales.yaml",
       }.freeze
 
       DATABASE_FILES = REQUIRED_DATABASE_FILES.merge(OPTIONAL_DATABASE_FILES).freeze

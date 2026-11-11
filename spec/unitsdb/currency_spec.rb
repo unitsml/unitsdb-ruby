@@ -42,6 +42,33 @@ RSpec.describe Unitsdb::Currency do
         .to contain_exactly("iso4217", "iso4217_numeric", "unitsml")
     end
 
+    it "carries ambiguous symbol presentations for shared symbols" do
+      usd = database.currencies.find do |currency|
+        currency.identifiers.any? { |identifier| identifier.type == "iso4217" && identifier.id == "USD" }
+      end
+      jpy = database.currencies.find do |currency|
+        currency.identifiers.any? { |identifier| identifier.type == "iso4217" && identifier.id == "JPY" }
+      end
+      cny = database.currencies.find do |currency|
+        currency.identifiers.any? { |identifier| identifier.type == "iso4217" && identifier.id == "CNY" }
+      end
+      chf = database.currencies.find do |currency|
+        currency.identifiers.any? { |identifier| identifier.type == "iso4217" && identifier.id == "CHF" }
+      end
+
+      bare_dollar = usd.symbols.find { |symbol| symbol.unicode == "$" }
+      expect(bare_dollar.ambiguous).to be(true)
+      expect(usd.symbols.find { |symbol| symbol.unicode == "US$" }.ambiguous).to be_nil
+
+      expect(jpy.symbols.first.ambiguous).to be(true)
+
+      expect(cny.symbols.map(&:unicode)).to contain_exactly("CN\u00a5", "\u00a5")
+      expect(cny.symbols.map(&:ambiguous)).to contain_exactly(nil, true)
+
+      expect(chf.symbols.map(&:unicode)).to eq(["Fr."])
+      expect(chf.symbols.first.ambiguous).to be(true)
+    end
+
     it "carries provenance notes on special codes" do
       xag = database.currencies.find do |currency|
         currency.identifiers.any? { |identifier| identifier.type == "iso4217" && identifier.id == "XAG" }

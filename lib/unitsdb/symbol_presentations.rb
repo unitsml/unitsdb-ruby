@@ -8,6 +8,7 @@ module Unitsdb
     attribute :latex, :string
     attribute :mathml, :string
     attribute :unicode, :string
+    attribute :ambiguous, :boolean
   end
 
   Config.register_model(SymbolPresentations, id: :symbol_presentations)

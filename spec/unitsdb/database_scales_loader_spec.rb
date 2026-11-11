@@ -4,23 +4,23 @@ require "spec_helper"
 require "tmpdir"
 
 RSpec.describe Unitsdb::Database do
-  around do |example|
-    Dir.mktmpdir("unitsdb-scale-loader") do |directory|
-      @directory = directory
-      described_class::Loader::REQUIRED_DATABASE_FILES.each do |collection, filename|
-        File.write(File.join(directory, filename), { "schema_version" => "2.2.0", collection => [] }.to_yaml)
-      end
-      example.run
+  let(:directory) { Dir.mktmpdir("unitsdb-scale-loader") }
+
+  before do
+    described_class::Loader::REQUIRED_DATABASE_FILES.each do |collection, filename|
+      File.write(File.join(directory, filename), { "schema_version" => "2.2.0", collection => [] }.to_yaml)
     end
   end
 
+  after { FileUtils.remove_entry(directory) }
+
   def write_collection(collection, values, version: "2.2.0")
-    File.write(File.join(@directory, "#{collection}.yaml"),
+    File.write(File.join(directory, "#{collection}.yaml"),
                { "schema_version" => version, collection => values }.to_yaml)
   end
 
   it "keeps scale files optional for older data directories" do
-    database = described_class.from_db(@directory)
+    database = described_class.from_db(directory)
 
     expect(database.scales).to eq([])
     expect(database.schema_version).to eq("2.2.0")
@@ -41,7 +41,7 @@ RSpec.describe Unitsdb::Database do
                                  "scale_reference" => { "id" => "test-scale-b", "type" => "test" },
                                  "quantity_references" => [{ "id" => "test-q", "type" => "test", "primary" => false }],
                                  "canonical_conversion" => { "factor" => "1/3", "offset" => "0.0000000000000000001" } }])
-    database = described_class.from_db(@directory)
+    database = described_class.from_db(directory)
 
     expect(database.scales.map { |scale| scale.identifiers.first.id }).to eq(%w[test-scale-b test-scale-a])
     expect(database.scales.first.properties.continuous).to be(false)
@@ -58,6 +58,6 @@ RSpec.describe Unitsdb::Database do
   it "checks the schema version of an optional scales file" do
     write_collection("scales", [], version: "2.0.0")
 
-    expect { described_class.from_db(@directory) }.to raise_error(Unitsdb::Errors::VersionMismatchError)
+    expect { described_class.from_db(directory) }.to raise_error(Unitsdb::Errors::VersionMismatchError)
   end
 end

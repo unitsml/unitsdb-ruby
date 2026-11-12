@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Unitsdb
-  VERSION = "3.0.2"
+  VERSION = "2.2.14"
 
   # The version of the bundled UnitsDB data (from the data/ submodule).
   # This version corresponds to a tag/commit in https://github.com/unitsml/unitsdb.
